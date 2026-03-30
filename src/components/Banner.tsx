@@ -1,5 +1,4 @@
 import { X } from "lucide-react";
-import bannerBg from "@/assets/banner-bg.jpg";
 
 interface BannerProps {
   onClose: () => void;
@@ -8,10 +7,13 @@ interface BannerProps {
 const Banner = ({ onClose }: BannerProps) => {
   return (
     <div className="relative w-full rounded-[32px] overflow-hidden" style={{ height: 324 }}>
-      {/* Background image */}
-      <img
-        src={bannerBg}
-        alt=""
+      {/* Background video */}
+      <video
+        src="/banner-video.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
         className="absolute inset-0 w-full h-full object-cover"
       />
 
