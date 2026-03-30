@@ -74,7 +74,7 @@ const Sidebar = ({ activePage }: SidebarProps) => {
                   className="w-[18px] h-[18px]"
                   style={{
                     filter: isActive
-                      ? "brightness(0) saturate(100%) invert(85%) sepia(30%) saturate(1000%) hue-rotate(140deg) brightness(1.1)"
+                      ? "brightness(0) invert(1)"
                       : "none",
                   }}
                 />
