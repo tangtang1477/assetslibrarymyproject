@@ -11,6 +11,8 @@ import assetChar8 from "@/assets/asset-char-8.jpg";
 import assetChar9 from "@/assets/asset-char-9.jpg";
 import assetChar10 from "@/assets/asset-char-10.jpg";
 
+const TYPE_OPTIONS = ["All", "Characters", "Other Assets"];
+
 const REGION_OPTIONS = [
   "All",
   "Western & Oceania",
@@ -55,24 +57,24 @@ const ASSETS: AssetItem[] = [
   { id: 10, src: assetChar10, title: "Mystical Water Dragon Spirit", tags: ["dragon", "water", "mystical"] },
 ];
 
-interface AssetLibraryProps {
-  activeAssetButton: string;
-}
-
-const AssetLibrary = ({ activeAssetButton }: AssetLibraryProps) => {
+const AssetLibrary = () => {
   const [periodTab, setPeriodTab] = useState<"my" | "public">("public");
+  const [assetType, setAssetType] = useState("All");
   const [region, setRegion] = useState("All");
   const [subject, setSubject] = useState("All");
   const [style, setStyle] = useState("All");
   const [selectedAssetId, setSelectedAssetId] = useState<number | null>(null);
 
-  const showFilters = activeAssetButton === "characters";
+  const showFilters = assetType === "Characters";
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Filters row */}
+      {/* Filters row — all in one line */}
       <div className="flex items-center gap-4 flex-wrap">
-        {/* Filter dropdowns — only for Characters */}
+        {/* Asset type dropdown */}
+        <FilterDropdown label="Type" options={TYPE_OPTIONS} value={assetType} onChange={setAssetType} />
+
+        {/* Conditional filter dropdowns */}
         {showFilters && (
           <>
             <FilterDropdown label="Region" options={REGION_OPTIONS} value={region} onChange={setRegion} />
@@ -86,14 +88,23 @@ const AssetLibrary = ({ activeAssetButton }: AssetLibraryProps) => {
 
         {/* My / Public toggle */}
         <div
-          className="flex items-center rounded-full border border-foreground/20 overflow-hidden"
+          className="relative flex items-center rounded-full border border-foreground/20 overflow-hidden"
           style={{ padding: "4px 4px 4px 36px", gap: 32, background: "hsl(var(--background))" }}
         >
+          {/* Sliding highlight */}
+          <div
+            className="absolute h-10 rounded-full bg-primary transition-all duration-300 ease-in-out"
+            style={{
+              width: periodTab === "my" ? 80 : 111,
+              left: periodTab === "my" ? 4 : "calc(100% - 111px - 4px)",
+              top: 4,
+            }}
+          />
           <button
             onClick={() => setPeriodTab("my")}
-            className={`text-[16px] leading-6 rounded-full transition-all ${
+            className={`relative z-10 text-[16px] leading-6 px-8 py-2 rounded-full transition-colors ${
               periodTab === "my"
-                ? "bg-primary text-primary-foreground px-8 py-2"
+                ? "text-primary-foreground"
                 : "text-foreground/70 hover:text-foreground/90"
             }`}
             style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
@@ -102,9 +113,9 @@ const AssetLibrary = ({ activeAssetButton }: AssetLibraryProps) => {
           </button>
           <button
             onClick={() => setPeriodTab("public")}
-            className={`flex items-center justify-center px-8 py-2 rounded-full text-[16px] leading-6 transition-all ${
+            className={`relative z-10 flex items-center justify-center px-8 py-2 rounded-full text-[16px] leading-6 transition-colors ${
               periodTab === "public"
-                ? "bg-primary text-primary-foreground"
+                ? "text-primary-foreground"
                 : "text-foreground/70 hover:text-foreground/90"
             }`}
             style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
@@ -144,9 +155,10 @@ const AssetCard = ({
   return (
     <div
       onClick={onClick}
-      className={`group rounded-2xl overflow-hidden bg-card-surface cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-primary/40 ${
+      className={`group rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-primary/40 ${
         isSelected ? "ring-2 ring-primary" : ""
       }`}
+      style={{ background: "#141414" }}
     >
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
@@ -211,7 +223,7 @@ const FilterDropdown = ({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-2xl border-[1.5px] transition-colors
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-[1.5px] transition-colors
           hover:border-foreground/40 active:border-foreground/60
           ${value !== "All"
             ? "border-primary text-foreground"
