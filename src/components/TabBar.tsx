@@ -5,8 +5,8 @@ interface TabBarProps {
   onTabChange: (tab: string) => void;
   activeProjectButton: "aidea" | "toolkit";
   onProjectButtonChange: (v: "aidea" | "toolkit") => void;
-  activeAssetButton: "all" | "characters" | "other";
-  onAssetButtonChange: (v: "all" | "characters" | "other") => void;
+  activeAssetButton: string;
+  onAssetButtonChange: (v: string) => void;
 }
 
 const TabBar = ({
@@ -22,13 +22,20 @@ const TabBar = ({
   const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0 });
 
   useEffect(() => {
-    const ref = activeTab === "my-project" ? myProjectRef : assetLibraryRef;
-    if (ref.current) {
-      setUnderlineStyle({
-        left: ref.current.offsetLeft,
-        width: ref.current.offsetWidth,
-      });
-    }
+    const updateUnderline = () => {
+      const ref = activeTab === "my-project" ? myProjectRef : assetLibraryRef;
+      if (ref.current) {
+        const parentLeft = ref.current.parentElement?.getBoundingClientRect().left || 0;
+        const rect = ref.current.getBoundingClientRect();
+        setUnderlineStyle({
+          left: rect.left - parentLeft,
+          width: rect.width,
+        });
+      }
+    };
+    updateUnderline();
+    window.addEventListener("resize", updateUnderline);
+    return () => window.removeEventListener("resize", updateUnderline);
   }, [activeTab]);
 
   return (
@@ -39,7 +46,7 @@ const TabBar = ({
           ref={myProjectRef}
           onClick={() => onTabChange("my-project")}
           className={`text-[20px] font-bold leading-7 transition-colors ${
-            activeTab === "my-project" ? "text-foreground" : "text-text-dim"
+            activeTab === "my-project" ? "text-foreground" : "text-foreground/50"
           }`}
         >
           My Project
@@ -48,7 +55,7 @@ const TabBar = ({
           ref={assetLibraryRef}
           onClick={() => onTabChange("asset-library")}
           className={`text-[20px] font-bold leading-7 transition-colors ${
-            activeTab === "asset-library" ? "text-foreground" : "text-text-dim"
+            activeTab === "asset-library" ? "text-foreground" : "text-foreground/50"
           }`}
         >
           Asset Library
@@ -80,27 +87,7 @@ const TabBar = ({
               onClick={() => onProjectButtonChange("toolkit")}
             />
           </>
-        ) : (
-          <>
-            <TabButton
-              label="All"
-              isActive={activeAssetButton === "all"}
-              onClick={() => onAssetButtonChange("all")}
-              glow
-            />
-            <TabButton
-              label="Characters"
-              isActive={activeAssetButton === "characters"}
-              onClick={() => onAssetButtonChange("characters")}
-              glow
-            />
-            <TabButton
-              label="Other Assets"
-              isActive={activeAssetButton === "other"}
-              onClick={() => onAssetButtonChange("other")}
-            />
-          </>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -119,10 +106,10 @@ const TabButton = ({
 }) => (
   <button
     onClick={onClick}
-    className={`relative flex items-center justify-center px-4 py-2 rounded-2xl overflow-hidden transition-all duration-200
+    className={`relative flex items-center justify-center px-4 py-2 rounded-lg overflow-hidden transition-all duration-200
       ${isActive
         ? "bg-primary hover:brightness-110 active:brightness-90"
-        : "bg-card-surface hover:bg-card-surface-hover active:brightness-75"
+        : "bg-foreground/10 hover:bg-foreground/15 active:brightness-75"
       }`}
   >
     {isActive && glow && (
