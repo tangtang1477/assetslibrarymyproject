@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, ReactNode } from "react";
 
 interface TabBarProps {
   activeTab: string;
@@ -7,6 +7,7 @@ interface TabBarProps {
   onProjectButtonChange: (v: "aidea" | "toolkit") => void;
   activeAssetButton: string;
   onAssetButtonChange: (v: string) => void;
+  children?: ReactNode;
 }
 
 const TabBar = ({
@@ -14,8 +15,7 @@ const TabBar = ({
   onTabChange,
   activeProjectButton,
   onProjectButtonChange,
-  activeAssetButton,
-  onAssetButtonChange,
+  children,
 }: TabBarProps) => {
   const myProjectRef = useRef<HTMLButtonElement>(null);
   const assetLibraryRef = useRef<HTMLButtonElement>(null);
@@ -71,10 +71,10 @@ const TabBar = ({
         />
       </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-4 mt-8">
+      {/* Action buttons — 32px below underline */}
+      <div className="mt-8">
         {activeTab === "my-project" ? (
-          <>
+          <div className="flex gap-4">
             <TabButton
               label="AIdeo"
               isActive={activeProjectButton === "aidea"}
@@ -86,8 +86,10 @@ const TabBar = ({
               isActive={activeProjectButton === "toolkit"}
               onClick={() => onProjectButtonChange("toolkit")}
             />
-          </>
-        ) : null}
+          </div>
+        ) : (
+          children
+        )}
       </div>
     </div>
   );

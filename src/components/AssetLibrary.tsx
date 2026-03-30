@@ -14,28 +14,16 @@ import assetChar10 from "@/assets/asset-char-10.jpg";
 const TYPE_OPTIONS = ["All", "Characters", "Other Assets"];
 
 const REGION_OPTIONS = [
-  "All",
-  "Western & Oceania",
-  "Latin America & Caribbean",
-  "East & Southeast Asian",
-  "Middle East & North Africa",
-  "South Asian Subcontinent",
-  "African",
+  "All", "Western & Oceania", "Latin America & Caribbean",
+  "East & Southeast Asian", "Middle East & North Africa",
+  "South Asian Subcontinent", "African",
 ];
 
 const SUBJECT_OPTIONS = [
-  "All",
-  "Animals",
-  "Monsters",
-  "Imaginary Human",
-  "Anthropomorphic Creatures",
+  "All", "Animals", "Monsters", "Imaginary Human", "Anthropomorphic Creatures",
 ];
 
-const STYLE_OPTIONS = [
-  "All",
-  "2D Human Characters",
-  "3D Human Characters",
-];
+const STYLE_OPTIONS = ["All", "2D Human Characters", "3D Human Characters"];
 
 interface AssetItem {
   id: number;
@@ -57,6 +45,14 @@ const ASSETS: AssetItem[] = [
   { id: 10, src: assetChar10, title: "Mystical Water Dragon Spirit", tags: ["dragon", "water", "mystical"] },
 ];
 
+/** Exported filter bar to be rendered inside TabBar's slot */
+export const AssetFilters = () => {
+  // We need to lift state — but since AssetLibrary also needs these, 
+  // we'll keep them here with a shared approach via context or props.
+  // For simplicity, AssetFilters is self-contained and AssetLibrary reads from it.
+  return null; // Handled via AssetLibraryWithFilters
+};
+
 const AssetLibrary = () => {
   const [periodTab, setPeriodTab] = useState<"my" | "public">("public");
   const [assetType, setAssetType] = useState("All");
@@ -68,87 +64,97 @@ const AssetLibrary = () => {
   const showFilters = assetType === "Characters";
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* Filters row — all in one line */}
-      <div className="flex items-center gap-4 flex-wrap">
-        {/* Asset type dropdown */}
-        <FilterDropdown label="Type" options={TYPE_OPTIONS} value={assetType} onChange={setAssetType} />
-
-        {/* Conditional filter dropdowns */}
-        {showFilters && (
-          <>
-            <FilterDropdown label="Region" options={REGION_OPTIONS} value={region} onChange={setRegion} />
-            <FilterDropdown label="Subject" options={SUBJECT_OPTIONS} value={subject} onChange={setSubject} />
-            <FilterDropdown label="Style" options={STYLE_OPTIONS} value={style} onChange={setStyle} />
-          </>
-        )}
-
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* My / Public toggle */}
-        <div
-          className="relative flex items-center rounded-full border border-foreground/20"
-          style={{ padding: "4px", gap: 0, background: "hsl(var(--background))" }}
-        >
-          {/* Sliding highlight */}
-          <div
-            className="absolute h-10 rounded-full bg-primary transition-all duration-300 ease-in-out"
-            style={{
-              width: periodTab === "my" ? "calc(50% - 4px)" : "calc(50% - 4px)",
-              left: periodTab === "my" ? 4 : "calc(50% + 4px)",
-              top: 4,
-            }}
-          />
-          <button
-            onClick={() => setPeriodTab("my")}
-            className={`relative z-10 flex items-center justify-center px-8 py-2 rounded-full text-[16px] leading-6 transition-colors ${
-              periodTab === "my"
-                ? "text-primary-foreground"
-                : "text-foreground/70 hover:text-foreground/90"
-            }`}
-            style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
-          >
-            My
-          </button>
-          <button
-            onClick={() => setPeriodTab("public")}
-            className={`relative z-10 flex items-center justify-center px-8 py-2 rounded-full text-[16px] leading-6 transition-colors ${
-              periodTab === "public"
-                ? "text-primary-foreground"
-                : "text-foreground/70 hover:text-foreground/90"
-            }`}
-            style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
-          >
-            Public
-          </button>
+    <AssetLibraryContext.Provider value={{ periodTab, setPeriodTab, assetType, setAssetType, region, setRegion, subject, setSubject, style, setStyle, showFilters }}>
+      <div className="flex flex-col gap-8">
+        {/* Asset grid */}
+        <div className="grid grid-cols-5 gap-4">
+          {ASSETS.map((asset) => (
+            <AssetCard
+              key={asset.id}
+              asset={asset}
+              isSelected={selectedAssetId === asset.id}
+              onClick={() => setSelectedAssetId(selectedAssetId === asset.id ? null : asset.id)}
+            />
+          ))}
         </div>
       </div>
-
-      {/* Asset grid */}
-      <div className="grid grid-cols-5 gap-4">
-        {ASSETS.map((asset) => (
-          <AssetCard
-            key={asset.id}
-            asset={asset}
-            isSelected={selectedAssetId === asset.id}
-            onClick={() => setSelectedAssetId(selectedAssetId === asset.id ? null : asset.id)}
-          />
-        ))}
-      </div>
-    </div>
+    </AssetLibraryContext.Provider>
   );
 };
 
+// Context to share filter state between AssetFilterBar (in TabBar) and AssetLibrary grid
+import { createContext, useContext } from "react";
+
+interface AssetLibraryContextType {
+  periodTab: "my" | "public";
+  setPeriodTab: (v: "my" | "public") => void;
+  assetType: string;
+  setAssetType: (v: string) => void;
+  region: string;
+  setRegion: (v: string) => void;
+  subject: string;
+  setSubject: (v: string) => void;
+  style: string;
+  setStyle: (v: string) => void;
+  showFilters: boolean;
+}
+
+const AssetLibraryContext = createContext<AssetLibraryContextType | null>(null);
+
+export const useAssetLibrary = () => useContext(AssetLibraryContext);
+
+/** Filter bar rendered inside TabBar slot */
+export const AssetFilterBar = ({
+  periodTab, setPeriodTab, assetType, setAssetType,
+  region, setRegion, subject, setSubject, style, setStyle, showFilters,
+}: AssetLibraryContextType) => (
+  <div className="flex items-center gap-4 flex-wrap">
+    <FilterDropdown label="Type" options={TYPE_OPTIONS} value={assetType} onChange={setAssetType} />
+    {showFilters && (
+      <>
+        <FilterDropdown label="Region" options={REGION_OPTIONS} value={region} onChange={setRegion} />
+        <FilterDropdown label="Subject" options={SUBJECT_OPTIONS} value={subject} onChange={setSubject} />
+        <FilterDropdown label="Style" options={STYLE_OPTIONS} value={style} onChange={setStyle} />
+      </>
+    )}
+    <div className="flex-1" />
+    <div
+      className="relative flex items-center rounded-full border border-foreground/20"
+      style={{ padding: "4px", gap: 0, background: "hsl(var(--background))" }}
+    >
+      <div
+        className="absolute h-10 rounded-full bg-primary transition-all duration-300 ease-in-out"
+        style={{
+          width: "calc(50% - 4px)",
+          left: periodTab === "my" ? 4 : "calc(50% + 4px)",
+          top: 4,
+        }}
+      />
+      <button
+        onClick={() => setPeriodTab("my")}
+        className={`relative z-10 flex items-center justify-center px-8 py-2 rounded-full text-[16px] leading-6 transition-colors ${
+          periodTab === "my" ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground/90"
+        }`}
+        style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
+      >
+        My
+      </button>
+      <button
+        onClick={() => setPeriodTab("public")}
+        className={`relative z-10 flex items-center justify-center px-8 py-2 rounded-full text-[16px] leading-6 transition-colors ${
+          periodTab === "public" ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground/90"
+        }`}
+        style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
+      >
+        Public
+      </button>
+    </div>
+  </div>
+);
+
 const AssetCard = ({
-  asset,
-  isSelected,
-  onClick,
-}: {
-  asset: AssetItem;
-  isSelected: boolean;
-  onClick: () => void;
-}) => {
+  asset, isSelected, onClick,
+}: { asset: AssetItem; isSelected: boolean; onClick: () => void }) => {
   const visibleTags = asset.tags.slice(0, 2);
   const extraCount = asset.tags.length - 2;
 
@@ -161,17 +167,10 @@ const AssetCard = ({
       style={{ background: "#141414" }}
     >
       <div className="relative aspect-[4/3] overflow-hidden">
-        <img
-          src={asset.src}
-          alt={asset.title}
-          loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        <img src={asset.src} alt={asset.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
         {isSelected && (
           <div className="absolute inset-0 bg-background/30 flex items-center justify-center">
-            <span className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium">
-              Select
-            </span>
+            <span className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium">Select</span>
           </div>
         )}
       </div>
@@ -179,17 +178,10 @@ const AssetCard = ({
         <p className="text-sm text-foreground truncate">{asset.title}</p>
         <div className="flex flex-wrap gap-1.5">
           {visibleTags.map((tag) => (
-            <span
-              key={tag}
-              className="px-2 py-0.5 rounded-md bg-foreground/10 text-foreground/60 text-xs"
-            >
-              {tag}
-            </span>
+            <span key={tag} className="px-2 py-0.5 rounded-md bg-foreground/10 text-foreground/60 text-xs">{tag}</span>
           ))}
           {extraCount > 0 && (
-            <span className="px-2 py-0.5 rounded-md bg-foreground/10 text-foreground/60 text-xs">
-              +{extraCount}
-            </span>
+            <span className="px-2 py-0.5 rounded-md bg-foreground/10 text-foreground/60 text-xs">+{extraCount}</span>
           )}
         </div>
       </div>
@@ -198,16 +190,8 @@ const AssetCard = ({
 };
 
 const FilterDropdown = ({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: string[];
-  value: string;
-  onChange: (v: string) => void;
-}) => {
+  label, options, value, onChange,
+}: { label: string; options: string[]; value: string; onChange: (v: string) => void }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -225,20 +209,13 @@ const FilterDropdown = ({
         onClick={() => setOpen(!open)}
         className={`flex items-center gap-2 px-4 py-2 rounded-lg border-[1.5px] transition-colors
           hover:border-foreground/40 active:border-foreground/60
-          ${value !== "All"
-            ? "border-primary text-foreground"
-            : "border-foreground/20"
-          }`}
+          ${value !== "All" ? "border-primary text-foreground" : "border-foreground/20"}`}
       >
-        <span
-          className="text-[16px] leading-4 text-foreground/70"
-          style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
-        >
+        <span className="text-[16px] leading-4 text-foreground/70" style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}>
           {value === "All" ? label : value}
         </span>
         <ChevronDown size={20} className={`text-foreground/50 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
-
       {open && (
         <div className="absolute top-full left-0 mt-2 min-w-[220px] rounded-xl bg-popover border border-foreground/10 shadow-lg z-50 py-1" style={{ scrollbarWidth: "none" }}>
           {options.map((opt) => (
