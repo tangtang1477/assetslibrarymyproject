@@ -2,6 +2,7 @@ import { useState } from "react";
 import Banner from "@/components/Banner";
 import TabBar from "@/components/TabBar";
 import ProjectGrid from "@/components/ProjectGrid";
+import AssetLibrary from "@/components/AssetLibrary";
 
 const Index = () => {
   const [showBanner, setShowBanner] = useState(true);
@@ -18,8 +19,12 @@ const Index = () => {
         {/* Tab section */}
         <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* Project grid */}
-        <ProjectGrid />
+        {/* Content based on active tab */}
+        {activeTab === "my-project" ? (
+          <ProjectGrid />
+        ) : (
+          <AssetLibrary />
+        )}
       </div>
     </div>
   );
