@@ -68,7 +68,7 @@ const AssetLibrary = () => {
   const showFilters = assetType === "Characters";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* Filters row — all in one line */}
       <div className="flex items-center gap-4 flex-wrap">
         {/* Asset type dropdown */}

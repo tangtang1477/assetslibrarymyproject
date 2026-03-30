@@ -1,11 +1,14 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
-import { Diamond, User, Bell, MoreHorizontal } from "lucide-react";
 import logoM from "@/assets/logo-m.png";
 import iconHome from "@/assets/icon-home.svg";
 import iconAideo from "@/assets/icon-aideo.svg";
 import iconTool from "@/assets/icon-tool.svg";
 import iconAssets from "@/assets/icon-assets.svg";
+import iconSubscribe from "@/assets/icon-subscribe.svg";
+import iconProfile from "@/assets/icon-profile.svg";
+import iconNotice from "@/assets/icon-notice.svg";
+import iconMore from "@/assets/icon-more.svg";
 
 interface SidebarProps {
   activePage?: string;
@@ -87,16 +90,16 @@ const Sidebar = ({ activePage }: SidebarProps) => {
       {/* Bottom icons */}
       <div className="flex flex-col items-center gap-4 mb-8">
         <button className="hover:opacity-80 transition-opacity">
-          <Diamond size={24} className="text-primary" />
+          <img src={iconSubscribe} alt="Subscribe" className="w-6 h-6" />
         </button>
         <button className="hover:opacity-80 transition-opacity">
-          <User size={28} className="text-foreground/30" />
+          <img src={iconProfile} alt="Profile" className="w-7 h-7" />
         </button>
         <button className="hover:opacity-80 transition-opacity">
-          <Bell size={20} className="text-foreground/70" />
+          <img src={iconNotice} alt="Notifications" className="w-5 h-5" />
         </button>
         <button className="hover:opacity-80 transition-opacity">
-          <MoreHorizontal size={20} className="text-foreground/70" />
+          <img src={iconMore} alt="More" className="w-5 h-5" />
         </button>
       </div>
     </div>

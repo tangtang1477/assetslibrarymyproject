@@ -72,7 +72,7 @@ const TabBar = ({
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-4 mt-6">
+      <div className="flex gap-4 mt-8">
         {activeTab === "my-project" ? (
           <>
             <TabButton
