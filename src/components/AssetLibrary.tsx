@@ -74,11 +74,11 @@ const AssetLibrary = ({ activeAssetButton }: AssetLibraryProps) => {
       <div className="flex items-center gap-4 flex-wrap">
         {/* Filter dropdowns — only for Characters */}
         {showFilters && (
-          <div className="flex items-center gap-4">
+          <>
             <FilterDropdown label="Region" options={REGION_OPTIONS} value={region} onChange={setRegion} />
             <FilterDropdown label="Subject" options={SUBJECT_OPTIONS} value={subject} onChange={setSubject} />
             <FilterDropdown label="Style" options={STYLE_OPTIONS} value={style} onChange={setStyle} />
-          </div>
+          </>
         )}
 
         {/* Spacer */}
@@ -91,9 +91,9 @@ const AssetLibrary = ({ activeAssetButton }: AssetLibraryProps) => {
         >
           <button
             onClick={() => setPeriodTab("my")}
-            className={`text-[16px] leading-6 transition-colors ${
+            className={`text-[16px] leading-6 rounded-full transition-all ${
               periodTab === "my"
-                ? "text-foreground"
+                ? "bg-primary text-primary-foreground px-8 py-2"
                 : "text-foreground/70 hover:text-foreground/90"
             }`}
             style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
@@ -105,7 +105,7 @@ const AssetLibrary = ({ activeAssetButton }: AssetLibraryProps) => {
             className={`flex items-center justify-center px-8 py-2 rounded-full text-[16px] leading-6 transition-all ${
               periodTab === "public"
                 ? "bg-primary text-primary-foreground"
-                : "text-foreground/70 hover:text-foreground/90 hover:bg-foreground/5"
+                : "text-foreground/70 hover:text-foreground/90"
             }`}
             style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
           >
@@ -148,7 +148,6 @@ const AssetCard = ({
         isSelected ? "ring-2 ring-primary" : ""
       }`}
     >
-      {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
           src={asset.src}
@@ -164,8 +163,6 @@ const AssetCard = ({
           </div>
         )}
       </div>
-
-      {/* Info */}
       <div className="p-3 flex flex-col gap-2">
         <p className="text-sm text-foreground truncate">{asset.title}</p>
         <div className="flex flex-wrap gap-1.5">
@@ -214,11 +211,12 @@ const FilterDropdown = ({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-2 px-8 py-4 rounded-2xl border-[1.5px] transition-colors ${
-          value !== "All"
+        className={`flex items-center gap-2 px-4 py-2 rounded-2xl border-[1.5px] transition-colors
+          hover:border-foreground/40 active:border-foreground/60
+          ${value !== "All"
             ? "border-primary text-foreground"
-            : "border-foreground/20 hover:border-foreground/40 active:border-foreground/60"
-        }`}
+            : "border-foreground/20"
+          }`}
       >
         <span
           className="text-[16px] leading-4 text-foreground/70"

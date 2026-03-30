@@ -1,3 +1,5 @@
+import { useRef, useEffect, useState } from "react";
+
 interface TabBarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -15,11 +17,26 @@ const TabBar = ({
   activeAssetButton,
   onAssetButtonChange,
 }: TabBarProps) => {
+  const myProjectRef = useRef<HTMLButtonElement>(null);
+  const assetLibraryRef = useRef<HTMLButtonElement>(null);
+  const [underlineStyle, setUnderlineStyle] = useState({ left: 0, width: 0 });
+
+  useEffect(() => {
+    const ref = activeTab === "my-project" ? myProjectRef : assetLibraryRef;
+    if (ref.current) {
+      setUnderlineStyle({
+        left: ref.current.offsetLeft,
+        width: ref.current.offsetWidth,
+      });
+    }
+  }, [activeTab]);
+
   return (
     <div className="w-full">
       {/* Tab headers */}
       <div className="flex gap-4 pb-4">
         <button
+          ref={myProjectRef}
           onClick={() => onTabChange("my-project")}
           className={`text-[20px] font-bold leading-7 transition-colors ${
             activeTab === "my-project" ? "text-foreground" : "text-text-dim"
@@ -28,6 +45,7 @@ const TabBar = ({
           My Project
         </button>
         <button
+          ref={assetLibraryRef}
           onClick={() => onTabChange("asset-library")}
           className={`text-[20px] font-bold leading-7 transition-colors ${
             activeTab === "asset-library" ? "text-foreground" : "text-text-dim"
@@ -40,11 +58,10 @@ const TabBar = ({
       {/* Divider with underline */}
       <div className="relative">
         <div className="w-full h-[2px] bg-foreground/10" />
-        {activeTab === "my-project" ? (
-          <div className="absolute top-0 left-0 h-[2px] bg-primary transition-all duration-300" style={{ width: "88px" }} />
-        ) : (
-          <div className="absolute top-0 h-[2px] bg-primary transition-all duration-300" style={{ left: "104px", width: "108px" }} />
-        )}
+        <div
+          className="absolute top-0 h-[2px] bg-primary transition-all duration-300"
+          style={{ left: underlineStyle.left, width: underlineStyle.width }}
+        />
       </div>
 
       {/* Action buttons */}
@@ -78,7 +95,7 @@ const TabBar = ({
               glow
             />
             <TabButton
-              label="Other"
+              label="Other Assets"
               isActive={activeAssetButton === "other"}
               onClick={() => onAssetButtonChange("other")}
             />
@@ -102,7 +119,7 @@ const TabButton = ({
 }) => (
   <button
     onClick={onClick}
-    className={`relative flex items-center justify-center px-8 py-4 rounded-2xl overflow-hidden transition-all duration-200
+    className={`relative flex items-center justify-center px-4 py-2 rounded-2xl overflow-hidden transition-all duration-200
       ${isActive
         ? "bg-primary hover:brightness-110 active:brightness-90"
         : "bg-card-surface hover:bg-card-surface-hover active:brightness-75"
