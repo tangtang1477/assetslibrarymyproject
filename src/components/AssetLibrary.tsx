@@ -240,7 +240,7 @@ const FilterDropdown = ({
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-2 min-w-[220px] rounded-xl bg-popover border border-foreground/10 shadow-lg z-50 py-1 max-h-64 overflow-y-auto">
+        <div className="absolute top-full left-0 mt-2 min-w-[220px] rounded-xl bg-popover border border-foreground/10 shadow-lg z-50 py-1" style={{ scrollbarWidth: "none" }}>
           {options.map((opt) => (
             <button
               key={opt}
