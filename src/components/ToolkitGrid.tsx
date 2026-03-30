@@ -1,53 +1,129 @@
-import { Plus } from "lucide-react";
+import { Plus, Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import tool1 from "@/assets/tool-1.jpg";
-import tool2 from "@/assets/tool-2.jpg";
-import tool3 from "@/assets/tool-3.jpg";
-import tool4 from "@/assets/tool-4.jpg";
-import tool5 from "@/assets/tool-5.jpg";
-import tool6 from "@/assets/tool-6.jpg";
-import tool7 from "@/assets/tool-7.jpg";
-import tool8 from "@/assets/tool-8.jpg";
-import tool9 from "@/assets/tool-9.jpg";
-import tool10 from "@/assets/tool-10.jpg";
+import { useRef, useState } from "react";
+import toolkitWide1 from "@/assets/toolkit-wide-1.jpg";
+import toolkitWide2 from "@/assets/toolkit-wide-2.jpg";
+import toolkitWide3 from "@/assets/toolkit-wide-3.jpg";
+import toolkitTall1 from "@/assets/toolkit-tall-1.jpg";
+import toolkitTall2 from "@/assets/toolkit-tall-2.jpg";
+import toolkitTall3 from "@/assets/toolkit-tall-3.jpg";
+import project1 from "@/assets/project-1.jpg";
+import project2 from "@/assets/project-2.jpg";
+import project3 from "@/assets/project-3.jpg";
+import project4 from "@/assets/project-4.jpg";
+import project5 from "@/assets/project-5.jpg";
+import project6 from "@/assets/project-6.jpg";
+import projectTall1 from "@/assets/project-tall-1.jpg";
+import projectTall2 from "@/assets/project-tall-2.jpg";
+import projectTall3 from "@/assets/project-tall-3.jpg";
+import projectTall4 from "@/assets/project-tall-4.jpg";
+import projectTall5 from "@/assets/project-tall-5.jpg";
 
-const IMAGE_GEN_TOOLS = [
-  { src: tool6, title: "MovieFlow: Fast, stylized image generation with strong prompt control." },
-  { src: tool7, title: "MovieFlow: Seamlessly blend images, styles, and concepts into one." },
-  { src: tool8, title: "Nano Banana Pro: Official image generation and blending with high visual consistency." },
-  { src: tool9, title: "Grok: Creative image generation with bold, expressive visual ideas." },
-];
+type MediaItem = {
+  type: "image" | "video";
+  src: string;
+  poster?: string;
+  aspect: "16:9" | "9:16";
+};
 
-const VIDEO_GEN_TOOLS = [
-  { src: tool1, title: "MovieFlow: High-quality text-to-video with cinematic motion and realism." },
-  { src: tool4, title: "MovieFlow: Generate video motion from a single starting frame." },
-  { src: tool3, title: "MovieFlow: Enhance video resolution while preserving fine details." },
-  { src: tool10, title: "MovieFlow: Generate videos from defined start and end frames." },
-  { src: tool5, title: "Veo 3: Text, start-frame, and end-frame video generation with cinematic quality." },
-  { src: tool1, title: "Kling O1: AI video editing with precise control and smooth results." },
-  { src: tool2, title: "Grok 3: Dynamic video generation driven by imaginative, high-energy motion." },
-  { src: tool4, title: "Sora 2: Animate a single image into smooth, realistic video motion." },
-  { src: tool5, title: "Sora 2: Generate high-quality videos from text with coherent motion." },
-  { src: tool10, title: "Kling 2.6: Precise start-to-end frame video generation with smooth transitions." },
+const ITEMS: MediaItem[] = [
+  { type: "image", src: toolkitWide1, aspect: "16:9" },
+  { type: "video", src: "/banner-video.mp4", poster: project1, aspect: "16:9" },
+  { type: "image", src: toolkitTall1, aspect: "9:16" },
+  { type: "image", src: project2, aspect: "16:9" },
+  { type: "image", src: toolkitWide2, aspect: "16:9" },
+  { type: "video", src: "/banner-video.mp4", poster: project3, aspect: "9:16" },
+  { type: "image", src: toolkitTall2, aspect: "9:16" },
+  { type: "image", src: project4, aspect: "16:9" },
+  { type: "image", src: toolkitWide3, aspect: "16:9" },
+  { type: "image", src: toolkitTall3, aspect: "9:16" },
+  { type: "video", src: "/banner-video.mp4", poster: project5, aspect: "16:9" },
+  { type: "image", src: project6, aspect: "16:9" },
+  { type: "image", src: projectTall1, aspect: "9:16" },
+  { type: "video", src: "/banner-video.mp4", poster: projectTall2, aspect: "9:16" },
+  { type: "image", src: projectTall3, aspect: "9:16" },
+  { type: "image", src: projectTall4, aspect: "9:16" },
 ];
 
 const ToolkitGrid = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="relative w-full" style={{ columnCount: 5, columnGap: 8 }}>
       {/* New Project card */}
       <div
         onClick={() => navigate("/toolkit")}
-        className="bg-card-surface rounded-[10px] flex flex-col items-center justify-center cursor-pointer
-          hover:bg-card-surface-hover active:brightness-75 transition-all duration-200"
-        style={{ width: 320, height: 200 }}
+        className="bg-foreground/5 rounded-lg flex flex-col items-center justify-center mb-2 break-inside-avoid
+          cursor-pointer hover:bg-foreground/10 active:brightness-75 transition-all duration-200"
+        style={{ height: 200 }}
       >
-        <div className="w-16 h-16 rounded-full bg-card-surface-hover flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-full bg-foreground/10 flex items-center justify-center mb-4">
           <Plus size={24} className="text-foreground" />
         </div>
-        <span className="text-text-bright text-base">New Project</span>
+        <span className="text-foreground/80 text-base">New Project</span>
       </div>
+
+      {ITEMS.map((item, i) => (
+        <MediaCard key={i} item={item} />
+      ))}
+    </div>
+  );
+};
+
+const MediaCard = ({ item }: { item: MediaItem }) => {
+  const h = item.aspect === "16:9" ? 200 : 628;
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [hovering, setHovering] = useState(false);
+
+  const handleMouseEnter = () => {
+    setHovering(true);
+    if (item.type === "video" && videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setHovering(false);
+    if (item.type === "video" && videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
+
+  return (
+    <div
+      className="rounded-lg overflow-hidden mb-2 break-inside-avoid cursor-pointer relative group
+        hover:ring-2 hover:ring-primary/40 active:brightness-75 transition-all duration-200"
+      style={{ height: h }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {item.type === "video" ? (
+        <>
+          <video
+            ref={videoRef}
+            src={item.src}
+            poster={item.poster}
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+          />
+          {/* Play icon — visible when not hovering */}
+          {!hovering && (
+            <div className="absolute top-2 left-2 w-4 h-4 rounded-full bg-background/60 flex items-center justify-center">
+              <Play size={10} className="text-foreground" fill="currentColor" />
+            </div>
+          )}
+        </>
+      ) : (
+        <img
+          src={item.src}
+          alt=""
+          loading="lazy"
+          className="w-full h-full object-cover"
+        />
+      )}
     </div>
   );
 };
