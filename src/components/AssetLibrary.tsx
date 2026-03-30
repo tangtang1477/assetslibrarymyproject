@@ -120,19 +120,20 @@ export const AssetFilterBar = ({
     <div className="flex-1" />
     <div
       className="relative flex items-center rounded-full border border-foreground/20"
-      style={{ padding: "4px", gap: 0, background: "hsl(var(--background))" }}
+      style={{ padding: "4px", background: "hsl(var(--background))" }}
     >
       <div
-        className="absolute h-10 rounded-full bg-primary transition-all duration-300 ease-in-out"
+        className="absolute rounded-full bg-primary transition-all duration-300 ease-in-out"
         style={{
           width: "calc(50% - 4px)",
+          height: "calc(100% - 8px)",
           left: periodTab === "my" ? 4 : "calc(50% + 4px)",
           top: 4,
         }}
       />
       <button
         onClick={() => setPeriodTab("my")}
-        className={`relative z-10 flex items-center justify-center px-8 py-2 rounded-full text-[16px] leading-6 transition-colors ${
+        className={`relative z-10 flex items-center justify-center px-4 py-2 rounded-full text-[16px] leading-6 transition-colors ${
           periodTab === "my" ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground/90"
         }`}
         style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
@@ -141,7 +142,7 @@ export const AssetFilterBar = ({
       </button>
       <button
         onClick={() => setPeriodTab("public")}
-        className={`relative z-10 flex items-center justify-center px-8 py-2 rounded-full text-[16px] leading-6 transition-colors ${
+        className={`relative z-10 flex items-center justify-center px-4 py-2 rounded-full text-[16px] leading-6 transition-colors ${
           periodTab === "public" ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground/90"
         }`}
         style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
