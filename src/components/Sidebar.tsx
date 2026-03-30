@@ -9,10 +9,6 @@ import iconSubscribe from "@/assets/icon-subscribe.svg";
 import iconProfile from "@/assets/icon-profile.svg";
 import iconNotice from "@/assets/icon-notice.svg";
 import iconMore from "@/assets/icon-more.svg";
-import iconHome from "@/assets/icon-home.svg";
-import iconAideo from "@/assets/icon-aideo.svg";
-import iconTool from "@/assets/icon-tool.svg";
-import iconAssets from "@/assets/icon-assets.svg";
 
 interface SidebarProps {
   activePage?: string;
