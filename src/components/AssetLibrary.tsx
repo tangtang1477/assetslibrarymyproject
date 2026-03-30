@@ -88,21 +88,21 @@ const AssetLibrary = () => {
 
         {/* My / Public toggle */}
         <div
-          className="relative flex items-center rounded-full border border-foreground/20 overflow-hidden"
-          style={{ padding: "4px 4px 4px 36px", gap: 32, background: "hsl(var(--background))" }}
+          className="relative flex items-center rounded-full border border-foreground/20"
+          style={{ padding: "4px", gap: 0, background: "hsl(var(--background))" }}
         >
           {/* Sliding highlight */}
           <div
             className="absolute h-10 rounded-full bg-primary transition-all duration-300 ease-in-out"
             style={{
-              width: periodTab === "my" ? 80 : 111,
-              left: periodTab === "my" ? 4 : "calc(100% - 111px - 4px)",
+              width: periodTab === "my" ? "calc(50% - 4px)" : "calc(50% - 4px)",
+              left: periodTab === "my" ? 4 : "calc(50% + 4px)",
               top: 4,
             }}
           />
           <button
             onClick={() => setPeriodTab("my")}
-            className={`relative z-10 text-[16px] leading-6 px-8 py-2 rounded-full transition-colors ${
+            className={`relative z-10 flex items-center justify-center px-8 py-2 rounded-full text-[16px] leading-6 transition-colors ${
               periodTab === "my"
                 ? "text-primary-foreground"
                 : "text-foreground/70 hover:text-foreground/90"
@@ -240,7 +240,7 @@ const FilterDropdown = ({
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-2 min-w-[220px] rounded-xl bg-popover border border-foreground/10 shadow-lg z-50 py-1 max-h-64 overflow-y-auto">
+        <div className="absolute top-full left-0 mt-2 min-w-[220px] rounded-xl bg-popover border border-foreground/10 shadow-lg z-50 py-1" style={{ scrollbarWidth: "none" }}>
           {options.map((opt) => (
             <button
               key={opt}
