@@ -1,7 +1,14 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
-import { Diamond, User, Bell, MoreHorizontal } from "lucide-react";
 import logoM from "@/assets/logo-m.png";
+import iconHome from "@/assets/icon-home.svg";
+import iconAideo from "@/assets/icon-aideo.svg";
+import iconTool from "@/assets/icon-tool.svg";
+import iconAssets from "@/assets/icon-assets.svg";
+import iconSubscribe from "@/assets/icon-subscribe.svg";
+import iconProfile from "@/assets/icon-profile.svg";
+import iconNotice from "@/assets/icon-notice.svg";
+import iconMore from "@/assets/icon-more.svg";
 import iconHome from "@/assets/icon-home.svg";
 import iconAideo from "@/assets/icon-aideo.svg";
 import iconTool from "@/assets/icon-tool.svg";
