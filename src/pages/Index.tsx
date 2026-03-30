@@ -4,7 +4,7 @@ import Banner from "@/components/Banner";
 import TabBar from "@/components/TabBar";
 import ProjectGrid from "@/components/ProjectGrid";
 import ToolkitGrid from "@/components/ToolkitGrid";
-import AssetLibrary from "@/components/AssetLibrary";
+import AssetLibrary, { AssetFilterBar } from "@/components/AssetLibrary";
 import Sidebar from "@/components/Sidebar";
 
 const Index = () => {
@@ -15,6 +15,14 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [activeProjectButton, setActiveProjectButton] = useState<"aidea" | "toolkit">("aidea");
   const [activeAssetButton, setActiveAssetButton] = useState<string>("All");
+
+  // Asset library filter state (lifted here so TabBar filter bar & AssetLibrary grid share state)
+  const [periodTab, setPeriodTab] = useState<"my" | "public">("public");
+  const [assetType, setAssetType] = useState("All");
+  const [region, setRegion] = useState("All");
+  const [subject, setSubject] = useState("All");
+  const [style, setStyle] = useState("All");
+  const showFilters = assetType === "Characters";
 
   useEffect(() => {
     const tab = searchParams.get("tab");
@@ -46,7 +54,21 @@ const Index = () => {
             onProjectButtonChange={setActiveProjectButton}
             activeAssetButton={activeAssetButton}
             onAssetButtonChange={setActiveAssetButton}
-          />
+          >
+            <AssetFilterBar
+              periodTab={periodTab}
+              setPeriodTab={setPeriodTab}
+              assetType={assetType}
+              setAssetType={setAssetType}
+              region={region}
+              setRegion={setRegion}
+              subject={subject}
+              setSubject={setSubject}
+              style={style}
+              setStyle={setStyle}
+              showFilters={showFilters}
+            />
+          </TabBar>
           {renderContent()}
         </div>
       </div>
