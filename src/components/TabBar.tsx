@@ -1,14 +1,20 @@
-import { useState } from "react";
-
 interface TabBarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  activeProjectButton: "aidea" | "toolkit";
+  onProjectButtonChange: (v: "aidea" | "toolkit") => void;
+  activeAssetButton: "all" | "characters" | "other";
+  onAssetButtonChange: (v: "all" | "characters" | "other") => void;
 }
 
-const TabBar = ({ activeTab, onTabChange }: TabBarProps) => {
-  const [activeProjectButton, setActiveProjectButton] = useState<"aidea" | "toolkit">("aidea");
-  const [activeAssetButton, setActiveAssetButton] = useState<"all" | "characters" | "other">("characters");
-
+const TabBar = ({
+  activeTab,
+  onTabChange,
+  activeProjectButton,
+  onProjectButtonChange,
+  activeAssetButton,
+  onAssetButtonChange,
+}: TabBarProps) => {
   return (
     <div className="w-full">
       {/* Tab headers */}
@@ -48,13 +54,13 @@ const TabBar = ({ activeTab, onTabChange }: TabBarProps) => {
             <TabButton
               label="AIdeo"
               isActive={activeProjectButton === "aidea"}
-              onClick={() => setActiveProjectButton("aidea")}
+              onClick={() => onProjectButtonChange("aidea")}
               glow
             />
             <TabButton
               label="Toolkit"
               isActive={activeProjectButton === "toolkit"}
-              onClick={() => setActiveProjectButton("toolkit")}
+              onClick={() => onProjectButtonChange("toolkit")}
             />
           </>
         ) : (
@@ -62,19 +68,19 @@ const TabBar = ({ activeTab, onTabChange }: TabBarProps) => {
             <TabButton
               label="All"
               isActive={activeAssetButton === "all"}
-              onClick={() => setActiveAssetButton("all")}
+              onClick={() => onAssetButtonChange("all")}
               glow
             />
             <TabButton
               label="Characters"
               isActive={activeAssetButton === "characters"}
-              onClick={() => setActiveAssetButton("characters")}
+              onClick={() => onAssetButtonChange("characters")}
               glow
             />
             <TabButton
               label="Other"
               isActive={activeAssetButton === "other"}
-              onClick={() => setActiveAssetButton("other")}
+              onClick={() => onAssetButtonChange("other")}
             />
           </>
         )}
