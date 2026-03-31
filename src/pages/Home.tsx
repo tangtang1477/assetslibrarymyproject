@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
@@ -27,13 +27,14 @@ import iconEnhance from "@/assets/icon-enhance.svg";
 import iconTime from "@/assets/icon-time.svg";
 import iconNewBadge from "@/assets/icon-new-badge.svg";
 
+/* ───── Quick‑link data ───── */
 const QUICK_LINKS = [
-  { label: "All", icon: iconAll, bg: "hsl(var(--quick-link-all))", path: "/home" },
-  { label: "Toolkit", icon: iconTool, bg: "hsl(var(--quick-link-toolkit))", path: "/toolkit" },
-  { label: "Lab", icon: iconAideo, bg: "hsl(var(--quick-link-lab))", path: "/" },
-  { label: "Assets", icon: iconAssets, bg: "hsl(var(--primary))", path: "/?tab=asset-library" },
-  { label: "AIdeo World", icon: iconAideo, bg: "hsl(var(--quick-link-aideo))", path: "/" },
-  { label: "Fun", icon: iconTool, bg: "hsl(var(--quick-link-fun))", path: "/" },
+  { label: "All", icon: iconAll, bg: "hsl(var(--quick-link-all))", section: "all" },
+  { label: "Toolkit", icon: iconTool, bg: "hsl(var(--quick-link-toolkit))", section: "toolkits" },
+  { label: "Lab", icon: iconAideo, bg: "hsl(var(--quick-link-lab))", section: "labs" },
+  { label: "Assets", icon: iconAssets, bg: "hsl(var(--primary))", section: "assets" },
+  { label: "AIdeo World", icon: iconAideo, bg: "hsl(var(--quick-link-aideo))", section: "aideo" },
+  { label: "Fun", icon: iconTool, bg: "hsl(var(--quick-link-fun))", section: "fun" },
 ];
 
 const LABS = [
@@ -46,11 +47,7 @@ const LABS = [
 
 const FUN_ITEMS = [assetChar1, assetChar2, assetChar3, assetChar4, assetChar5, assetChar6, assetChar7];
 
-const TOOLKIT_ITEMS = [
-  { src: tool1 },
-  { src: tool2 },
-  { src: tool3 },
-];
+const TOOLKIT_ITEMS = [{ src: tool1 }, { src: tool2 }, { src: tool3 }];
 
 const MODEL_OPTIONS = [
   { label: "Seedance", value: "seedance" },
@@ -82,6 +79,14 @@ const RATIO_OPTIONS = [
   { label: "9:16", value: "9:16" },
 ];
 
+/* ───── For‑You showcase images ───── */
+const SHOWCASE_SETS = [
+  [project1, project2, tool2, project3, project4],
+  [project3, project5, tool1, project1, project2],
+  [project4, project1, tool3, project5, project3],
+];
+
+/* ───── Main page ───── */
 const Home = () => {
   const navigate = useNavigate();
   const [selectedModel, setSelectedModel] = useState("seedance");
@@ -89,52 +94,71 @@ const Home = () => {
   const [selectedEnhance, setSelectedEnhance] = useState("on");
   const [selectedTime, setSelectedTime] = useState("6min");
   const [selectedRatio, setSelectedRatio] = useState("16:9");
+  const [activeQuickLink, setActiveQuickLink] = useState("all");
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollToSection = useCallback((section: string) => {
+    setActiveQuickLink(section);
+    if (section === "all") {
+      scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    const el = document.getElementById(`section-${section}`);
+    if (el && scrollRef.current) {
+      const containerTop = scrollRef.current.getBoundingClientRect().top;
+      const elTop = el.getBoundingClientRect().top;
+      scrollRef.current.scrollBy({ top: elTop - containerTop - 24, behavior: "smooth" });
+    }
+  }, []);
 
   return (
     <div className="h-screen bg-background flex overflow-hidden">
       <Sidebar activePage="home" />
 
-      <div className="flex-1 ml-[88px] overflow-y-auto hide-scrollbar">
+      <div ref={scrollRef} className="flex-1 ml-[88px] overflow-y-auto hide-scrollbar">
+        {/* ── Hero section with video banner behind input ── */}
         <div className="relative overflow-hidden px-9 pt-6" style={{ minHeight: 800 }}>
+          {/* Video banner background */}
+          <video
+            src="/banner-video.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute left-9 right-9 top-0 w-[calc(100%-72px)] object-cover rounded-[12px]"
+            style={{ height: 343 }}
+          />
+          {/* Dark overlay on video */}
           <div
             className="absolute left-9 right-9 top-0 rounded-[12px]"
-            style={{
-              height: 343,
-              backgroundImage: `url(${bannerBg})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              filter: "blur(22.8px)",
-            }}
+            style={{ height: 343, background: "hsl(var(--background) / 0.45)" }}
           />
 
+          {/* Blue glow layers */}
           <div
             className="absolute"
             style={{
-              width: "66%",
-              height: 296,
-              left: "15%",
-              top: 45,
-              background: "hsl(223 70% 65% / 0.5)",
-              filter: "blur(112px)",
+              width: "66%", height: 296, left: "15%", top: 45,
+              background: "hsl(223 70% 65% / 0.5)", filter: "blur(112px)",
             }}
           />
           <div
             className="absolute"
             style={{
-              width: "38%",
-              height: 150,
-              left: "30%",
-              top: 62,
-              background: "hsl(195 92% 36% / 0.5)",
-              filter: "blur(70px)",
+              width: "38%", height: 150, left: "30%", top: 62,
+              background: "hsl(195 92% 36% / 0.5)", filter: "blur(70px)",
             }}
           />
 
           <TopRightHeader />
 
           <div className="relative z-10 flex flex-col items-center" style={{ paddingTop: 64 }}>
+            {/* Title */}
             <div className="flex flex-col items-center gap-2">
-              <h1 className="text-foreground font-bold text-center" style={{ fontFamily: "Arial, sans-serif", fontSize: 36, lineHeight: "44px" }}>
+              <h1
+                className="text-foreground font-bold text-center"
+                style={{ fontFamily: "Arial, sans-serif", fontSize: 36, lineHeight: "44px" }}
+              >
                 Your idea. A movie. In minutes.
               </h1>
               <p
@@ -145,6 +169,7 @@ const Home = () => {
               </p>
             </div>
 
+            {/* Input box */}
             <div className="mt-14 flex w-full justify-center">
               <div
                 className="relative w-[990px] rounded-[25px]"
@@ -175,18 +200,15 @@ const Home = () => {
                   <span
                     className="pt-2"
                     style={{
-                      fontFamily: "Arial, sans-serif",
-                      fontSize: 16,
-                      lineHeight: "24px",
-                      color: "hsl(var(--foreground) / 0.6)",
-                      letterSpacing: "0.015em",
+                      fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
+                      color: "hsl(var(--foreground) / 0.6)", letterSpacing: "0.015em",
                     }}
                   >
                     Describe the story you want to make...
                   </span>
                 </div>
 
-                {/* Input options inside the box, 8px from bottom, 8px gap */}
+                {/* Input options bar */}
                 <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8 }}>
                   <OptionPillDropdown
                     icon={undefined}
@@ -224,23 +246,40 @@ const Home = () => {
               </div>
             </div>
 
-            {/* For You showcase - 32px below input */}
+            {/* For You showcase – 32px below input */}
             <div style={{ marginTop: 32 }} className="w-full max-w-[1794px]">
               <ForYouShowcase />
             </div>
 
-            {/* Quick navigation - 32px below For You */}
+            {/* Quick navigation – 32px below For You */}
             <div className="flex flex-wrap justify-center" style={{ marginTop: 32, gap: 64 }}>
               {QUICK_LINKS.map((link) => (
                 <button
                   key={link.label}
-                  className="flex flex-col items-center gap-2 transition-opacity hover:opacity-80"
-                  onClick={() => navigate(link.path)}
+                  className="flex flex-col items-center gap-2 transition-all hover:opacity-80"
+                  onClick={() => scrollToSection(link.section)}
                 >
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full" style={{ background: link.bg }}>
-                    <img src={link.icon} alt={link.label} className="h-6 w-6" style={{ filter: "brightness(0) invert(1)" }} />
+                  <div
+                    className="flex h-16 w-16 items-center justify-center rounded-full transition-all"
+                    style={{
+                      background: link.bg,
+                      boxShadow: activeQuickLink === link.section ? "0 0 0 3px hsl(var(--foreground))" : "none",
+                    }}
+                  >
+                    <img
+                      src={link.icon}
+                      alt={link.label}
+                      style={{
+                        width: link.label === "All" ? 18 : 24,
+                        height: link.label === "All" ? 18 : 24,
+                        filter: "brightness(0) invert(1)",
+                      }}
+                    />
                   </div>
-                  <span className="text-center text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px" }}>
+                  <span
+                    className="text-center text-foreground"
+                    style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px" }}
+                  >
                     {link.label}
                   </span>
                 </button>
@@ -249,85 +288,100 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Scrollable lower content */}
+        {/* ── Scrollable sections ── */}
         <div className="px-9 pb-16">
-          <SectionHeader title="Inspiration Labs" />
-          <div className="mt-12 flex gap-[22px] overflow-x-auto hide-scrollbar">
-            {LABS.map((lab, index) => (
-              <div key={index} className="group relative flex-shrink-0 cursor-pointer overflow-hidden rounded-[10px]" style={{ width: 350, height: 384 }}>
-                <img src={lab.src} alt={lab.desc} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                <div
-                  className="absolute bottom-0 left-0 right-0"
-                  style={{
-                    height: 136,
-                    background: "hsl(var(--background) / 0.05)",
-                    boxShadow: "inset 0px 0px 7.1px hsl(var(--foreground) / 0.25), inset 0px 7.1px 14.2px hsl(var(--foreground) / 0.15)",
-                    backdropFilter: "blur(12px)",
-                    borderRadius: "0 0 10px 10px",
-                  }}
-                />
-                <div className="absolute bottom-3 left-3 right-3">
-                  <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 15.6, lineHeight: "18px" }}>
-                    {lab.desc}
-                  </p>
+          {/* Inspiration Labs */}
+          <div id="section-labs">
+            <SectionHeader title="Inspiration Labs" />
+            <div className="flex gap-[22px] overflow-x-auto hide-scrollbar" style={{ marginTop: 24 }}>
+              {LABS.map((lab, index) => (
+                <div key={index} className="group relative flex-shrink-0 cursor-pointer overflow-hidden rounded-[10px]" style={{ width: 350, height: 384 }}>
+                  <img src={lab.src} alt={lab.desc} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                  <div
+                    className="absolute bottom-0 left-0 right-0"
+                    style={{
+                      height: 136,
+                      background: "hsl(var(--background) / 0.05)",
+                      boxShadow: "inset 0px 0px 7.1px hsl(var(--foreground) / 0.25), inset 0px 7.1px 14.2px hsl(var(--foreground) / 0.15)",
+                      backdropFilter: "blur(12px)",
+                      borderRadius: "0 0 10px 10px",
+                    }}
+                  />
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 15.6, lineHeight: "18px" }}>
+                      {lab.desc}
+                    </p>
+                  </div>
+                  <div
+                    className="absolute flex items-center justify-center"
+                    style={{ left: 18, top: 14, width: 41, height: 21, background: "hsl(var(--primary))", borderRadius: 5, transform: "matrix(1, 0, -0.17, 0.98, 0, 0)" }}
+                  >
+                    <span className="font-bold" style={{ fontSize: 14, lineHeight: "16px", color: "hsl(var(--foreground))", transform: "matrix(1, 0, -0.17, 0.98, 0, 0)" }}>
+                      {lab.badge}
+                    </span>
+                  </div>
                 </div>
-                <div
-                  className="absolute flex items-center justify-center"
-                  style={{ left: 18, top: 14, width: 41, height: 21, background: "hsl(var(--primary))", borderRadius: 5, transform: "matrix(1, 0, -0.17, 0.98, 0, 0)" }}
-                >
-                  <span className="font-bold" style={{ fontSize: 14, lineHeight: "16px", color: "hsl(var(--foreground))", transform: "matrix(1, 0, -0.17, 0.98, 0, 0)" }}>
-                    {lab.badge}
-                  </span>
+              ))}
+            </div>
+          </div>
+
+          {/* AIdeo World banner – 64px gap */}
+          <div id="section-aideo" style={{ marginTop: 64 }}>
+            <div className="relative overflow-hidden rounded-[20px]" style={{ height: 412 }}>
+              <img src={bannerBg} alt="AIdeo World" className="h-full w-full object-cover" />
+              <div className="absolute left-0 top-0 h-full" style={{ width: 693, background: "hsl(211 34% 34% / 0.69)", filter: "blur(30px)" }} />
+              <div className="absolute left-[34px] top-[76px]">
+                <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 20, lineHeight: "23px" }}>
+                  ✨New! Welcome to AIdeo World. Come and explore.
+                </p>
+              </div>
+              <h2 className="absolute font-bold text-foreground" style={{ left: 40, top: 129, fontFamily: "Arial, sans-serif", fontSize: 100, lineHeight: "16px" }}>
+                AIdeo World
+              </h2>
+              <GlassButton className="absolute" style={{ left: 25, top: 299, width: 179, height: 41 }}>
+                Check It Out
+              </GlassButton>
+            </div>
+          </div>
+
+          {/* Fun – 64px gap */}
+          <div id="section-fun" style={{ marginTop: 64 }}>
+            <SectionHeader title="Fun" />
+            <div className="flex gap-[26px] overflow-x-auto hide-scrollbar" style={{ marginTop: 24 }}>
+              {FUN_ITEMS.map((src, index) => (
+                <div key={index} className="group relative h-[240px] w-[240px] flex-shrink-0 cursor-pointer overflow-hidden rounded-[5px]">
+                  <img src={src} alt="Fun asset" className="h-full w-full object-cover" />
+                  <div className="absolute bottom-0 left-0 right-0 h-[50px]" style={{ background: "hsl(var(--foreground) / 0.28)", filter: "blur(19px)" }} />
                 </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="relative mt-16 overflow-hidden rounded-[20px]" style={{ height: 412 }}>
-            <img src={bannerBg} alt="AIdeo World" className="h-full w-full object-cover" />
-            <div className="absolute left-0 top-0 h-full" style={{ width: 693, background: "hsl(211 34% 34% / 0.69)", filter: "blur(30px)" }} />
-            <div className="absolute left-[34px] top-[76px]">
-              <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 20, lineHeight: "23px" }}>
-                ✨New! Welcome to AIdeo World. Come and explore.
-              </p>
+              ))}
             </div>
-            <h2 className="absolute font-bold text-foreground" style={{ left: 40, top: 129, fontFamily: "Arial, sans-serif", fontSize: 100, lineHeight: "16px" }}>
-              AIdeo World
-            </h2>
-            <GlassButton className="absolute" style={{ left: 25, top: 299, width: 179, height: 41 }}>
-              Check It Out
-            </GlassButton>
           </div>
 
-          <SectionHeader title="Fun" />
-          <div className="mt-[74px] flex gap-[26px] overflow-x-auto hide-scrollbar">
-            {FUN_ITEMS.map((src, index) => (
-              <div key={index} className="group relative h-[240px] w-[240px] flex-shrink-0 cursor-pointer overflow-hidden rounded-[5px]">
-                <img src={src} alt="Fun asset" className="h-full w-full object-cover" />
-                <div className="absolute bottom-0 left-0 right-0 h-[50px]" style={{ background: "hsl(var(--foreground) / 0.28)", filter: "blur(19px)" }} />
-              </div>
-            ))}
-          </div>
-
-          <SectionHeader title="Toolkits" />
-          <div className="mt-[67px] flex gap-3">
-            {TOOLKIT_ITEMS.map((item, index) => (
-              <div key={index} className="h-[340px] flex-1 cursor-pointer overflow-hidden rounded-[5px]">
-                <img src={item.src} alt="Toolkit preview" className="h-full w-full object-cover" />
-              </div>
-            ))}
-          </div>
-
-          <div className="relative mt-16 overflow-hidden rounded-[5px]" style={{ height: 297 }}>
-            <img src={bannerBg} alt="Assets Library" className="h-full w-full object-cover" />
-            <div className="absolute left-[28px] top-[62px]">
-              <h3 className="font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 28, lineHeight: "32px" }}>
-                Assets Library
-              </h3>
+          {/* Toolkits – 64px gap */}
+          <div id="section-toolkits" style={{ marginTop: 64 }}>
+            <SectionHeader title="Toolkits" />
+            <div className="flex gap-3" style={{ marginTop: 24 }}>
+              {TOOLKIT_ITEMS.map((item, index) => (
+                <div key={index} className="h-[340px] flex-1 cursor-pointer overflow-hidden rounded-[5px]">
+                  <img src={item.src} alt="Toolkit preview" className="h-full w-full object-cover" />
+                </div>
+              ))}
             </div>
-            <GlassButton className="absolute" style={{ left: 38, top: 182, width: 215, height: 43 }}>
-              Check It Out
-            </GlassButton>
+          </div>
+
+          {/* Assets banner – 64px gap */}
+          <div id="section-assets" style={{ marginTop: 64 }}>
+            <div className="relative overflow-hidden rounded-[5px]" style={{ height: 297 }}>
+              <img src={bannerBg} alt="Assets Library" className="h-full w-full object-cover" />
+              <div className="absolute left-[28px] top-[62px]">
+                <h3 className="font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 28, lineHeight: "32px" }}>
+                  Assets Library
+                </h3>
+              </div>
+              <GlassButton className="absolute" style={{ left: 38, top: 182, width: 215, height: 43 }}>
+                Check It Out
+              </GlassButton>
+            </div>
           </div>
         </div>
       </div>
@@ -335,6 +389,7 @@ const Home = () => {
   );
 };
 
+/* ───── Top‑right header ───── */
 const TopRightHeader = () => (
   <div className="fixed right-0 top-0 z-50 flex items-center gap-4" style={{ padding: "24px 32px" }}>
     <button className="flex items-center gap-2 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
@@ -347,40 +402,68 @@ const TopRightHeader = () => (
   </div>
 );
 
-const ForYouShowcase = () => (
-  <div className="relative mx-auto h-[518px] w-full max-w-[1794px] overflow-hidden">
-    <button className="absolute left-0 top-1/2 z-10 -translate-y-1/2 transition-opacity hover:opacity-80" aria-label="Previous showcase item">
-      <ChevronLeft size={18} className="text-foreground" />
+/* ───── For‑You showcase with carousel ───── */
+const ForYouShowcase = () => {
+  const [currentSet, setCurrentSet] = useState(0);
+  const imgs = SHOWCASE_SETS[currentSet];
+
+  const prev = () => setCurrentSet((c) => (c - 1 + SHOWCASE_SETS.length) % SHOWCASE_SETS.length);
+  const next = () => setCurrentSet((c) => (c + 1) % SHOWCASE_SETS.length);
+
+  return (
+    <div className="relative mx-auto h-[518px] w-full max-w-[1794px] overflow-hidden">
+      {/* Left arrow */}
+      <CarouselArrow direction="left" onClick={prev} />
+
+      {/* Images */}
+      <div className="absolute bottom-0 left-[5.2%] h-[24.8%] w-[10.7%] overflow-hidden rounded-[6px] blur-[1.16px]">
+        <img src={imgs[0]} alt="" className="h-full w-full object-cover transition-all duration-500" />
+      </div>
+      <div className="absolute left-[10.9%] top-0 h-[98.7%] w-[32.5%] overflow-hidden rounded-[10px]">
+        <img src={imgs[1]} alt="" className="h-full w-full object-cover transition-all duration-500" />
+      </div>
+      <div
+        className="absolute left-1/2 top-[39.2%] h-[46.3%] w-[28.8%] -translate-x-1/2 overflow-hidden rounded-[14px] border"
+        style={{ borderColor: "hsl(var(--foreground) / 0.1)" }}
+      >
+        <img src={imgs[2]} alt="" className="h-full w-full object-cover transition-all duration-500" />
+      </div>
+      <div className="absolute right-[10.9%] top-0 h-[98.7%] w-[32.5%] overflow-hidden rounded-[10px]">
+        <img src={imgs[3]} alt="" className="h-full w-full object-cover transition-all duration-500 scale-x-[-1]" />
+      </div>
+      <div className="absolute bottom-0 right-[5.2%] h-[24.8%] w-[10.7%] overflow-hidden rounded-[6px] blur-[1.16px]">
+        <img src={imgs[4]} alt="" className="h-full w-full object-cover transition-all duration-500 scale-x-[-1]" />
+      </div>
+
+      {/* Right arrow */}
+      <CarouselArrow direction="right" onClick={next} />
+    </div>
+  );
+};
+
+/* ───── Carousel arrow with 3 states ───── */
+const CarouselArrow = ({ direction, onClick }: { direction: "left" | "right"; onClick: () => void }) => {
+  const Icon = direction === "left" ? ChevronLeft : ChevronRight;
+  const posClass = direction === "left" ? "left-2" : "right-2";
+
+  return (
+    <button
+      onClick={onClick}
+      className={`absolute ${posClass} top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full
+        bg-foreground/10 text-foreground/70
+        hover:bg-foreground/20 hover:text-foreground
+        active:bg-foreground/30 active:scale-95
+        transition-all duration-200`}
+      aria-label={direction === "left" ? "Previous" : "Next"}
+    >
+      <Icon size={20} />
     </button>
+  );
+};
 
-    <div className="absolute bottom-0 left-[5.2%] h-[24.8%] w-[10.7%] overflow-hidden rounded-[6px] blur-[1.16px]">
-      <img src={project1} alt="Featured preview left" className="h-full w-full object-cover" />
-    </div>
-
-    <div className="absolute left-[10.9%] top-0 h-[98.7%] w-[32.5%] overflow-hidden rounded-[10px]">
-      <img src={project2} alt="Featured preview" className="h-full w-full object-cover" />
-    </div>
-
-    <div className="absolute left-1/2 top-[39.2%] h-[46.3%] w-[28.8%] -translate-x-1/2 overflow-hidden rounded-[14px] border" style={{ borderColor: "hsl(var(--foreground) / 0.1)" }}>
-      <img src={tool2} alt="Featured center card" className="h-full w-full object-cover" />
-    </div>
-
-    <div className="absolute right-[10.9%] top-0 h-[98.7%] w-[32.5%] overflow-hidden rounded-[10px]">
-      <img src={project3} alt="Featured preview right" className="h-full w-full object-cover scale-x-[-1]" />
-    </div>
-
-    <div className="absolute bottom-0 right-[5.2%] h-[24.8%] w-[10.7%] overflow-hidden rounded-[6px] blur-[1.16px]">
-      <img src={project4} alt="Featured preview far right" className="h-full w-full object-cover scale-x-[-1]" />
-    </div>
-
-    <button className="absolute right-0 top-1/2 z-10 -translate-y-1/2 transition-opacity hover:opacity-80" aria-label="Next showcase item">
-      <ChevronRight size={18} className="text-foreground" />
-    </button>
-  </div>
-);
-
+/* ───── Section header ───── */
 const SectionHeader = ({ title }: { title: string }) => (
-  <div className="mt-16 flex items-center justify-between">
+  <div className="flex items-center justify-between">
     <h2 className="font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 20, lineHeight: "16px" }}>
       {title}
     </h2>
@@ -393,15 +476,9 @@ const SectionHeader = ({ title }: { title: string }) => (
   </div>
 );
 
-/** Reusable dropdown pill for input options */
+/* ───── Reusable dropdown pill ───── */
 const OptionPillDropdown = ({
-  icon,
-  label,
-  options,
-  value,
-  onChange,
-  badgeIcon,
-  badgeSize,
+  icon, label, options, value, onChange, badgeIcon, badgeSize,
 }: {
   icon?: string;
   label: string;
@@ -427,21 +504,10 @@ const OptionPillDropdown = ({
       <button
         onClick={() => setOpen(!open)}
         className="flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
-        style={{
-          padding: "0 16px",
-          border: "0.7px solid hsl(var(--foreground) / 0.25)",
-          gap: 8,
-        }}
+        style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
       >
         {icon && <img src={icon} alt="" className="w-4 h-4" style={{ opacity: 0.7 }} />}
-        <span
-          style={{
-            fontFamily: "Arial, sans-serif",
-            fontSize: 14,
-            lineHeight: "22px",
-            color: "hsl(var(--foreground) / 0.8)",
-          }}
-        >
+        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
           {label}
         </span>
         <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
@@ -454,10 +520,7 @@ const OptionPillDropdown = ({
       {open && (
         <div
           className="absolute bottom-full left-0 mb-2 rounded-xl border border-foreground/10 shadow-lg z-50 py-1"
-          style={{
-            minWidth: 160,
-            background: "#1a1a1a",
-          }}
+          style={{ minWidth: 160, background: "#1a1a1a" }}
         >
           {options.map((opt) => (
             <button
@@ -466,14 +529,7 @@ const OptionPillDropdown = ({
               className={`w-full flex items-center text-left transition-colors hover:bg-foreground/10 ${
                 value === opt.value ? "text-primary" : "text-foreground/70 hover:text-foreground"
               }`}
-              style={{
-                padding: "8px 16px",
-                gap: 8,
-                fontFamily: "Arial, sans-serif",
-                fontSize: 16,
-                lineHeight: "16px",
-                fontWeight: 400,
-              }}
+              style={{ padding: "8px 16px", gap: 8, fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "16px" }}
             >
               {icon && <img src={icon} alt="" className="w-4 h-4" style={{ opacity: value === opt.value ? 1 : 0.7 }} />}
               {opt.label}
@@ -485,13 +541,13 @@ const OptionPillDropdown = ({
   );
 };
 
+/* ───── Ratio icon & toggle ───── */
 const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) => {
   const dims = ratio === "16:9" ? { w: 16, h: 10 } : { w: 10, h: 16 };
   return (
     <div
       style={{
-        width: dims.w,
-        height: dims.h,
+        width: dims.w, height: dims.h,
         border: `1.5px solid ${selected ? "hsl(var(--primary))" : "hsl(var(--foreground) / 0.5)"}`,
         borderRadius: 2,
       }}
@@ -499,7 +555,6 @@ const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) =
   );
 };
 
-/** Ratio toggle: two side-by-side icon buttons like reference site */
 const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
   <div
     className="flex h-[31px] items-center rounded-full"
@@ -510,9 +565,7 @@ const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string)
         key={opt.value}
         onClick={() => onChange(opt.value)}
         className="flex h-[25px] w-[30px] items-center justify-center rounded-full transition-colors"
-        style={{
-          background: value === opt.value ? "hsl(var(--foreground) / 0.15)" : "transparent",
-        }}
+        style={{ background: value === opt.value ? "hsl(var(--foreground) / 0.15)" : "transparent" }}
       >
         <RatioIcon ratio={opt.value} selected={value === opt.value} />
       </button>
@@ -520,87 +573,91 @@ const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string)
   </div>
 );
 
-/** Reusable glass CTA button with Figma specs */
+/* ───── Glass CTA button (Figma spec) ───── */
 const GlassButton = ({
-  children,
-  style,
-  className,
-  onClick,
+  children, style, className, onClick,
 }: {
   children: React.ReactNode;
   style?: React.CSSProperties;
   className?: string;
   onClick?: () => void;
-}) => (
-  <button
-    onClick={onClick}
-    className={`group relative flex items-center justify-center rounded-full transition-all active:scale-[0.97] ${className || ""}`}
-    style={{
-      background: "rgba(69, 196, 246, 0.05)",
-      ...style,
-    }}
-  >
-    <div
-      className="absolute rounded-full transition-all"
-      style={{
-        left: 6,
-        right: 4,
-        top: 6,
-        bottom: 5,
-        background: "rgba(69, 196, 246, 0.6)",
-        filter: "blur(6.75px)",
-        borderRadius: 20,
-      }}
-    />
-    <span
-      className="relative font-bold"
-      style={{
-        fontFamily: "Arial, sans-serif",
-        fontSize: 15,
-        lineHeight: "23px",
-        color: "#71F0F6",
-      }}
-    >
-      {children}
-    </span>
-    <style>{`
-      .group:hover > div {
-        background: rgba(69, 196, 246, 0.85) !important;
-        filter: blur(10px) !important;
-      }
-    `}</style>
-  </button>
-);
+}) => {
+  const id = useRef(`glass-${Math.random().toString(36).slice(2, 8)}`).current;
 
-const MakePill = () => (
-  <button
-    className="group relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] transition-all active:scale-[0.97]"
-    style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45 }}
-  >
-    <div
-      className="absolute rounded-full transition-all group-hover:blur-[10px]"
-      style={{
-        left: 6,
-        right: 4,
-        top: 6,
-        bottom: 5,
-        background: "rgba(69, 196, 246, 0.6)",
-        filter: "blur(6.75px)",
-        borderRadius: 20.45,
-      }}
-    />
-    <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6" }}>
-      Make
-    </span>
-    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
-      <span style={{ background: "linear-gradient(90deg, #71F0F6 25%, #AEF5FB 84%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-        ✦
+  return (
+    <button
+      onClick={onClick}
+      data-glass={id}
+      className={`relative flex items-center justify-center rounded-full transition-all active:scale-[0.97] ${className || ""}`}
+      style={{ background: "rgba(69, 196, 246, 0.05)", ...style }}
+    >
+      <div
+        className="absolute rounded-full pointer-events-none"
+        data-glass-glow={id}
+        style={{
+          left: 6, right: 4, top: 6, bottom: 5,
+          background: "rgba(69, 196, 246, 0.6)",
+          filter: "blur(6.75px)",
+          borderRadius: 20,
+          transition: "background 0.2s, filter 0.2s",
+        }}
+      />
+      <span
+        className="relative font-bold"
+        style={{ fontFamily: "Arial, sans-serif", fontSize: 15, lineHeight: "23px", color: "#71F0F6" }}
+      >
+        {children}
       </span>
-    </span>
-    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6" }}>
-      10/s
-    </span>
-  </button>
-);
+      <style>{`
+        [data-glass="${id}"]:hover [data-glass-glow="${id}"] {
+          background: rgba(69, 196, 246, 0.85) !important;
+          filter: blur(10px) !important;
+        }
+      `}</style>
+    </button>
+  );
+};
+
+/* ───── Make pill button ───── */
+const MakePill = () => {
+  const id = useRef(`make-${Math.random().toString(36).slice(2, 8)}`).current;
+
+  return (
+    <button
+      data-make={id}
+      className="relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] transition-all active:scale-[0.97]"
+      style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45 }}
+    >
+      <div
+        className="absolute rounded-full pointer-events-none"
+        data-make-glow={id}
+        style={{
+          left: 6, right: 4, top: 6, bottom: 5,
+          background: "rgba(69, 196, 246, 0.6)",
+          filter: "blur(6.75px)",
+          borderRadius: 20.45,
+          transition: "background 0.2s, filter 0.2s",
+        }}
+      />
+      <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6" }}>
+        Make
+      </span>
+      <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
+        <span style={{ background: "linear-gradient(90deg, #71F0F6 25%, #AEF5FB 84%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          ✦
+        </span>
+      </span>
+      <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6" }}>
+        10/s
+      </span>
+      <style>{`
+        [data-make="${id}"]:hover [data-make-glow="${id}"] {
+          background: rgba(69, 196, 246, 0.85) !important;
+          filter: blur(10px) !important;
+        }
+      `}</style>
+    </button>
+  );
+};
 
 export default Home;
