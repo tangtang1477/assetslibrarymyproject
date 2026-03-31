@@ -136,7 +136,7 @@ export const AssetFilterBar = ({
         className={`relative z-10 flex items-center justify-center px-4 py-2 rounded-full text-[16px] leading-6 transition-colors ${
           periodTab === "my" ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground/90"
         }`}
-        style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
+        style={{ fontFamily: "'SF Pro', Arial, sans-serif", padding: "8px 16px", fontSize: 16, lineHeight: "24px" }}
       >
         My
       </button>
@@ -145,7 +145,7 @@ export const AssetFilterBar = ({
         className={`relative z-10 flex items-center justify-center px-4 py-2 rounded-full text-[16px] leading-6 transition-colors ${
           periodTab === "public" ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground/90"
         }`}
-        style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
+        style={{ fontFamily: "'SF Pro', Arial, sans-serif", padding: "8px 16px", fontSize: 16, lineHeight: "24px" }}
       >
         Public
       </button>
