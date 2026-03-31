@@ -343,16 +343,9 @@ const Home = () => {
                     style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
                     <video src="/banner-video.mp4" autoPlay loop muted playsInline
                       className="absolute inset-0 w-full h-full object-cover rounded-[25px] opacity-30" />
-                    <button
-                      className="glass-btn relative z-30 flex items-center justify-center rounded-full overflow-hidden px-6 py-3"
-                      style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45, animation: "pulse 2s infinite" }}
-                    >
-                      <div className="glass-btn-glow absolute pointer-events-none"
-                        style={{ left: 6, right: 4, top: 6, bottom: 5, background: "rgba(69, 196, 246, 0.6)", filter: "blur(6.75px)", borderRadius: 20.45 }} />
-                      <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, color: "#71F0F6", zIndex: 2 }}>
-                        🎟 Join Waitlist
-                      </span>
-                    </button>
+                    <GlassButton style={{ padding: "12px 28px", animation: "pulse 2s infinite", zIndex: 30 }}>
+                      🎟 Join Waitlist
+                    </GlassButton>
                   </div>
                 )}
 
