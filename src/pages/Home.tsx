@@ -294,7 +294,7 @@ const Home = () => {
             <h2 className="absolute font-bold text-foreground" style={{ left: 40, top: 129, fontFamily: "Arial, sans-serif", fontSize: 100, lineHeight: "16px" }}>
               AIdeo World
             </h2>
-            <GlassButton style={{ width: 179, height: 41 }}>
+            <GlassButton className="absolute" style={{ left: 25, top: 299, width: 179, height: 41 }}>
               Check It Out
             </GlassButton>
           </div>
