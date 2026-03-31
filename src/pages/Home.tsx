@@ -447,7 +447,7 @@ const OptionPillDropdown = ({
         <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
       </button>
       {badgeIcon && (
-        <div className="absolute -right-1 -top-1 w-[10px] h-[10px]">
+        <div className="absolute -right-2 -top-3" style={{ width: badgeSize || 10, height: badgeSize || 10 }}>
           <img src={badgeIcon} alt="new" className="w-full h-full" />
         </div>
       )}
