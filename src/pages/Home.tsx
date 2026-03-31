@@ -325,7 +325,7 @@ const Home = () => {
                 Assets Library
               </h3>
             </div>
-            <GlassButton style={{ width: 215, height: 43 }}>
+            <GlassButton className="absolute" style={{ left: 38, top: 182, width: 215, height: 43 }}>
               Check It Out
             </GlassButton>
           </div>
