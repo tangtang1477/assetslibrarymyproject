@@ -325,12 +325,9 @@ const Home = () => {
                 Assets Library
               </h3>
             </div>
-            <button className="absolute flex items-center justify-center" style={{ left: 38, top: 182, width: 215, height: 43, background: "hsl(var(--primary) / 0.05)", borderRadius: 29 }}>
-              <div className="absolute inset-0" style={{ background: "hsl(var(--primary) / 0.6)", filter: "blur(12px)", borderRadius: 29 }} />
-              <span className="relative font-bold text-primary" style={{ fontSize: 15, lineHeight: "23px" }}>
-                Check It Out
-              </span>
-            </button>
+            <GlassButton style={{ width: 215, height: 43 }}>
+              Check It Out
+            </GlassButton>
           </div>
         </div>
       </div>
