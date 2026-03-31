@@ -16,7 +16,7 @@ const Index = () => {
   const [activeProjectButton, setActiveProjectButton] = useState<"aidea" | "toolkit">("aidea");
   const [activeAssetButton, setActiveAssetButton] = useState<string>("All");
 
-  // Asset library filter state (lifted here so TabBar filter bar & AssetLibrary grid share state)
+  // Asset library filter state
   const [periodTab, setPeriodTab] = useState<"my" | "public">("public");
   const [assetType, setAssetType] = useState("All");
   const [region, setRegion] = useState("All");
@@ -39,37 +39,42 @@ const Index = () => {
     return <ProjectGrid />;
   };
 
-  const activePage = activeTab === "asset-library" ? "assets" : "home";
+  const activePage = activeTab === "asset-library" ? "assets" : "assets";
 
   return (
     <div className="min-h-screen bg-background flex">
       <Sidebar activePage={activePage} />
-      <div className="flex-1 ml-[76px] overflow-y-auto px-6 py-8">
-        <div className="max-w-[1796px] mx-auto flex flex-col gap-8">
+      <div className="flex-1 ml-[88px] overflow-y-auto px-6 py-8">
+        <div className="max-w-[1796px] mx-auto flex flex-col">
           {showBanner && <Banner onClose={() => setShowBanner(false)} />}
-          <TabBar
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            activeProjectButton={activeProjectButton}
-            onProjectButtonChange={setActiveProjectButton}
-            activeAssetButton={activeAssetButton}
-            onAssetButtonChange={setActiveAssetButton}
-          >
-            <AssetFilterBar
-              periodTab={periodTab}
-              setPeriodTab={setPeriodTab}
-              assetType={assetType}
-              setAssetType={setAssetType}
-              region={region}
-              setRegion={setRegion}
-              subject={subject}
-              setSubject={setSubject}
-              style={style}
-              setStyle={setStyle}
-              showFilters={showFilters}
-            />
-          </TabBar>
-          {renderContent()}
+          <div style={{ marginTop: showBanner ? 32 : 0 }}>
+            <TabBar
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              activeProjectButton={activeProjectButton}
+              onProjectButtonChange={setActiveProjectButton}
+              activeAssetButton={activeAssetButton}
+              onAssetButtonChange={setActiveAssetButton}
+            >
+              <AssetFilterBar
+                periodTab={periodTab}
+                setPeriodTab={setPeriodTab}
+                assetType={assetType}
+                setAssetType={setAssetType}
+                region={region}
+                setRegion={setRegion}
+                subject={subject}
+                setSubject={setSubject}
+                style={style}
+                setStyle={setStyle}
+                showFilters={showFilters}
+              />
+            </TabBar>
+          </div>
+          {/* 32px gap between filters and content */}
+          <div style={{ marginTop: 32 }}>
+            {renderContent()}
+          </div>
         </div>
       </div>
     </div>

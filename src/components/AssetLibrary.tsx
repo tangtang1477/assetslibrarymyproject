@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, createContext, useContext } from "react";
 import { ChevronDown } from "lucide-react";
 import assetChar1 from "@/assets/asset-char-1.jpg";
 import assetChar2 from "@/assets/asset-char-2.jpg";
@@ -45,13 +45,7 @@ const ASSETS: AssetItem[] = [
   { id: 10, src: assetChar10, title: "Mystical Water Dragon Spirit", tags: ["dragon", "water", "mystical"] },
 ];
 
-/** Exported filter bar to be rendered inside TabBar's slot */
-export const AssetFilters = () => {
-  // We need to lift state — but since AssetLibrary also needs these, 
-  // we'll keep them here with a shared approach via context or props.
-  // For simplicity, AssetFilters is self-contained and AssetLibrary reads from it.
-  return null; // Handled via AssetLibraryWithFilters
-};
+export const AssetFilters = () => null;
 
 const AssetLibrary = () => {
   const [periodTab, setPeriodTab] = useState<"my" | "public">("public");
@@ -65,7 +59,7 @@ const AssetLibrary = () => {
 
   return (
     <AssetLibraryContext.Provider value={{ periodTab, setPeriodTab, assetType, setAssetType, region, setRegion, subject, setSubject, style, setStyle, showFilters }}>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col">
         {/* Asset grid */}
         <div className="grid grid-cols-5 gap-4">
           {ASSETS.map((asset) => (
@@ -81,9 +75,6 @@ const AssetLibrary = () => {
     </AssetLibraryContext.Provider>
   );
 };
-
-// Context to share filter state between AssetFilterBar (in TabBar) and AssetLibrary grid
-import { createContext, useContext } from "react";
 
 interface AssetLibraryContextType {
   periodTab: "my" | "public";
@@ -133,7 +124,7 @@ export const AssetFilterBar = ({
       />
       <button
         onClick={() => setPeriodTab("my")}
-        className={`relative z-10 flex items-center justify-center px-4 py-2 rounded-full text-[16px] leading-6 transition-colors ${
+        className={`relative z-10 flex items-center justify-center rounded-full transition-colors ${
           periodTab === "my" ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground/90"
         }`}
         style={{ fontFamily: "'SF Pro', Arial, sans-serif", padding: "8px 16px", fontSize: 16, lineHeight: "24px" }}
@@ -142,7 +133,7 @@ export const AssetFilterBar = ({
       </button>
       <button
         onClick={() => setPeriodTab("public")}
-        className={`relative z-10 flex items-center justify-center px-4 py-2 rounded-full text-[16px] leading-6 transition-colors ${
+        className={`relative z-10 flex items-center justify-center rounded-full transition-colors ${
           periodTab === "public" ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground/90"
         }`}
         style={{ fontFamily: "'SF Pro', Arial, sans-serif", padding: "8px 16px", fontSize: 16, lineHeight: "24px" }}

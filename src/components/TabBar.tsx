@@ -72,7 +72,7 @@ const TabBar = ({
       </div>
 
       {/* Action buttons — 32px below underline */}
-      <div className="mt-8">
+      <div style={{ marginTop: 32 }}>
         {activeTab === "my-project" ? (
           <div className="flex gap-4">
             <TabButton
