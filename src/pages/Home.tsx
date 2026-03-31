@@ -794,15 +794,16 @@ const OptionPillDropdown = ({
         sideOffset={8}
         className="border-foreground/10 p-1 shadow-2xl z-[9999]"
         style={{
-          minWidth: narrow ? 120 : 160,
-          maxHeight: scrollable ? 280 : undefined,
-          overflowY: scrollable ? "auto" : undefined,
+          minWidth: narrow ? 90 : 140,
           background: "rgba(20, 20, 20, 0.95)",
           backdropFilter: "blur(20px)",
           borderRadius: 12,
         }}
       >
-        <div className={scrollable ? "hide-scrollbar" : ""}>
+        <div className={scrollable ? "hide-scrollbar" : ""} style={{
+          maxHeight: scrollable ? 280 : undefined,
+          overflowY: scrollable ? "auto" : undefined,
+        }}>
           {options.map((opt) => (
             <button
               key={opt.value}
