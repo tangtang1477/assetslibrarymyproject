@@ -78,9 +78,8 @@ const TIME_OPTIONS = [
 ];
 
 const RATIO_OPTIONS = [
-  { label: "Portrait", value: "portrait" },
-  { label: "Landscape", value: "landscape" },
-  { label: "Square", value: "square" },
+  { label: "16:9", value: "16:9" },
+  { label: "9:16", value: "9:16" },
 ];
 
 const Home = () => {
@@ -89,7 +88,7 @@ const Home = () => {
   const [selectedLang, setSelectedLang] = useState("en");
   const [selectedEnhance, setSelectedEnhance] = useState("on");
   const [selectedTime, setSelectedTime] = useState("6min");
-  const [selectedRatio, setSelectedRatio] = useState("portrait");
+  const [selectedRatio, setSelectedRatio] = useState("16:9");
 
   return (
     <div className="h-screen bg-background flex overflow-hidden">
@@ -136,7 +135,7 @@ const Home = () => {
           <div className="relative z-10 flex flex-col items-center" style={{ paddingTop: 64 }}>
             <div className="flex flex-col items-center gap-2">
               <h1 className="text-foreground font-bold text-center" style={{ fontFamily: "Arial, sans-serif", fontSize: 36, lineHeight: "44px" }}>
-                Ideas Spark Movies
+                Your idea. A movie. In minutes.
               </h1>
               <p
                 className="text-center"
@@ -218,10 +217,7 @@ const Home = () => {
                     onChange={setSelectedTime}
                     badgeIcon={iconNewBadge}
                   />
-                  <OptionPillDropdown
-                    icon={undefined}
-                    label={RATIO_OPTIONS.find(o => o.value === selectedRatio)?.label || "Portrait"}
-                    options={RATIO_OPTIONS}
+                  <RatioPillDropdown
                     value={selectedRatio}
                     onChange={setSelectedRatio}
                   />
@@ -493,6 +489,69 @@ const OptionPillDropdown = ({
               }}
             >
               {icon && <img src={icon} alt="" className="w-4 h-4" style={{ opacity: value === opt.value ? 1 : 0.7 }} />}
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) => {
+  const dims = ratio === "16:9" ? { w: 14, h: 8 } : { w: 8, h: 14 };
+  return (
+    <div
+      style={{
+        width: dims.w,
+        height: dims.h,
+        border: `1.5px solid ${selected ? "hsl(var(--primary))" : "hsl(var(--foreground) / 0.7)"}`,
+        borderRadius: 2,
+      }}
+    />
+  );
+};
+
+const RatioPillDropdown = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
+        style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
+      >
+        <RatioIcon ratio={value} />
+        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
+          {value}
+        </span>
+        <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
+      </button>
+      {open && (
+        <div
+          className="absolute bottom-full left-0 mb-2 rounded-xl border border-foreground/10 shadow-lg z-50 py-1"
+          style={{ minWidth: 160, background: "#1a1a1a" }}
+        >
+          {RATIO_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={`w-full flex items-center text-left transition-colors hover:bg-foreground/10 ${
+                value === opt.value ? "text-primary" : "text-foreground/70 hover:text-foreground"
+              }`}
+              style={{ padding: "8px 16px", gap: 8, fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "16px" }}
+            >
+              <RatioIcon ratio={opt.value} selected={value === opt.value} />
               {opt.label}
             </button>
           ))}
