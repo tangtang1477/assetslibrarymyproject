@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ChevronDown, X, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Check, Sparkles } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import bannerBg from "@/assets/banner-bg.jpg";
 import project1 from "@/assets/project-1.jpg";
@@ -28,6 +28,7 @@ import iconTime from "@/assets/icon-time.svg";
 import iconNewBadge from "@/assets/icon-new-badge.svg";
 import iconGift from "@/assets/icon-gift.svg";
 import iconCredit from "@/assets/icon-credit.svg";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 /* ───── Quick‑link data ───── */
 const QUICK_LINKS = [
@@ -51,10 +52,48 @@ const FUN_ITEMS = [assetChar1, assetChar2, assetChar3, assetChar4, assetChar5, a
 
 const TOOLKIT_ITEMS = [{ src: tool1 }, { src: tool2 }, { src: tool3 }];
 
+/* ───── Model options & config ───── */
 const MODEL_OPTIONS = [
-  { label: "Seedance", value: "seedance", badge: "Seedance 2.0", desc: "Full-featured Agent for images, clips & long videos", isNew: false },
-  { label: "Kling", value: "kling", badge: "Kling 1.6", desc: "High-quality video generation with cinematic style", isNew: true },
+  { label: "Seedance 2.0", value: "seedance", badge: "Seedance 2.0", desc: "Full-featured Agent for images, clips & long videos", isNew: false },
+  { label: "Kling 3.0", value: "kling", badge: "Kling 3.0", desc: "High-quality video generation with cinematic style", isNew: true },
+  { label: "Standard", value: "standard", badge: "Standard", desc: "Basic video generation with simple controls", isNew: false },
 ];
+
+type ModelConfigType = {
+  placeholder: string;
+  cta: string;
+  maxRefs: number;
+  styleCount: number;
+  lockCharacter: boolean;
+  agentThinking: boolean;
+};
+
+const MODEL_CONFIG: Record<string, ModelConfigType> = {
+  seedance: {
+    placeholder: "Describe the story you want to make...",
+    cta: "Make",
+    maxRefs: 5,
+    styleCount: 20,
+    lockCharacter: false,
+    agentThinking: false,
+  },
+  kling: {
+    placeholder: "Paste your script, let the Agent do the rest...",
+    cta: "Summon Agent",
+    maxRefs: 4,
+    styleCount: 12,
+    lockCharacter: true,
+    agentThinking: true,
+  },
+  standard: {
+    placeholder: "Describe what you want to generate...",
+    cta: "Generate",
+    maxRefs: 3,
+    styleCount: 8,
+    lockCharacter: false,
+    agentThinking: false,
+  },
+};
 
 const LANGUAGE_OPTIONS = [
   { label: "EN", value: "en" },
@@ -81,11 +120,15 @@ const RATIO_OPTIONS = [
   { label: "9:16", value: "9:16" },
 ];
 
-/* ───── For‑You showcase images ───── */
-const SHOWCASE_SETS = [
-  [project1, project2, project3],
-  [project3, project5, project1],
-  [project4, project1, project5],
+/* ───── For‑You showcase videos (5 items) ───── */
+const SHOWCASE_ITEMS = [
+  { poster: project1, title: "Cinematic Landscape" },
+  { poster: project2, title: "Urban Night" },
+  { poster: project3, title: "Nature Documentary" },
+  { poster: project4, title: "Abstract Art" },
+  { poster: project5, title: "Sci-Fi Scene" },
+  { poster: assetChar1, title: "Character Animation" },
+  { poster: assetChar2, title: "Fantasy World" },
 ];
 
 /* ───── Main page ───── */
@@ -99,6 +142,8 @@ const Home = () => {
   const [activeQuickLink, setActiveQuickLink] = useState("all");
   const [showAnnouncement, setShowAnnouncement] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.seedance;
 
   const scrollToSection = useCallback((section: string) => {
     setActiveQuickLink(section);
@@ -120,7 +165,7 @@ const Home = () => {
 
       <div ref={scrollRef} className="flex-1 ml-[88px] overflow-y-auto hide-scrollbar">
         {/* ── Hero section with video banner behind input ── */}
-        <div className="relative overflow-hidden px-9 pt-6" style={{ minHeight: 800 }}>
+        <div className="relative px-9 pt-6" style={{ minHeight: 800 }}>
           {/* Video banner background — fallback to image if video missing */}
           <div
             className="absolute left-9 right-9 top-0 rounded-[12px] overflow-hidden"
@@ -197,7 +242,7 @@ const Home = () => {
               >
                 <div className="flex items-start px-6 pt-4">
                   <div
-                    className="mr-3 flex h-[50px] w-10 flex-shrink-0 items-center justify-center"
+                    className="mr-3 flex h-[50px] w-10 flex-shrink-0 items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
                     style={{
                       background: "hsl(var(--foreground) / 0.05)",
                       boxShadow:
@@ -217,12 +262,20 @@ const Home = () => {
                       color: "hsl(var(--foreground) / 0.6)", letterSpacing: "0.015em",
                     }}
                   >
-                    Describe the story you want to make...
+                    {config.placeholder}
                   </span>
                 </div>
 
+                {/* Lock Character indicator for Kling */}
+                {config.lockCharacter && (
+                  <div className="absolute right-6 top-4 flex items-center gap-1.5 rounded-full px-3 py-1"
+                    style={{ background: "rgba(113, 240, 246, 0.1)", border: "1px solid rgba(113, 240, 246, 0.3)" }}>
+                    <span style={{ fontSize: 12, color: "#71F0F6", fontFamily: "Arial, sans-serif" }}>🔒 Lock Character</span>
+                  </div>
+                )}
+
                 {/* Input options bar */}
-                <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8 }}>
+                <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8, zIndex: 60 }}>
                   <ModelPillDropdown
                     value={selectedModel}
                     onChange={setSelectedModel}
@@ -249,13 +302,13 @@ const Home = () => {
                     onChange={setSelectedTime}
                   />
                   <RatioToggle value={selectedRatio} onChange={setSelectedRatio} />
-                  <MakePill />
+                  <MakePill ctaText={config.cta} />
                 </div>
               </div>
             </div>
 
-            {/* For You showcase – 32px below input */}
-            <div style={{ marginTop: 32 }} className="w-full max-w-[1794px]">
+            {/* For You showcase – 32px below input, NO title */}
+            <div style={{ marginTop: 32 }} className="w-full">
               <ForYouShowcase />
             </div>
 
@@ -315,7 +368,7 @@ const Home = () => {
                       borderRadius: "0 0 10px 10px",
                     }}
                   />
-                  <div className="absolute bottom-3 left-3 right-3">
+                  <div className="absolute bottom-3 left-3 right-3 z-10">
                     <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 15.6, lineHeight: "18px" }}>
                       {lab.desc}
                     </p>
@@ -328,6 +381,12 @@ const Home = () => {
                       {lab.badge}
                     </span>
                   </div>
+                  {/* Check It Out button */}
+                  <div className="absolute bottom-3 right-3 z-10">
+                    <GlassButton style={{ width: 120, height: 32 }}>
+                      Check It Out
+                    </GlassButton>
+                  </div>
                 </div>
               ))}
             </div>
@@ -338,17 +397,19 @@ const Home = () => {
             <div className="relative overflow-hidden rounded-[20px]" style={{ height: 412 }}>
               <img src={bannerBg} alt="AIdeo World" className="h-full w-full object-cover" />
               <div className="absolute left-0 top-0 h-full" style={{ width: 693, background: "hsl(211 34% 34% / 0.69)", filter: "blur(30px)" }} />
-              <div className="absolute left-[34px] top-[76px]">
+              <div className="absolute left-[34px] top-[76px] z-10">
                 <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 20, lineHeight: "23px" }}>
                   ✨New! Welcome to AIdeo World. Come and explore.
                 </p>
               </div>
-              <h2 className="absolute font-bold text-foreground" style={{ left: 40, top: 129, fontFamily: "Arial, sans-serif", fontSize: 100, lineHeight: "16px" }}>
+              <h2 className="absolute font-bold text-foreground z-10" style={{ left: 40, top: 129, fontFamily: "Arial, sans-serif", fontSize: 100, lineHeight: "16px" }}>
                 AIdeo World
               </h2>
-              <GlassButton className="absolute" style={{ left: 25, top: 299, width: 179, height: 41 }}>
-                Check It Out
-              </GlassButton>
+              <div className="absolute z-10" style={{ left: 25, top: 299 }}>
+                <GlassButton style={{ width: 179, height: 41 }}>
+                  Check It Out
+                </GlassButton>
+              </div>
             </div>
           </div>
 
@@ -381,14 +442,16 @@ const Home = () => {
           <div id="section-assets" style={{ marginTop: 64 }}>
             <div className="relative overflow-hidden rounded-[5px]" style={{ height: 297 }}>
               <img src={bannerBg} alt="Assets Library" className="h-full w-full object-cover" />
-              <div className="absolute left-[28px] top-[62px]">
+              <div className="absolute left-[28px] top-[62px] z-10">
                 <h3 className="font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 28, lineHeight: "32px" }}>
                   Assets Library
                 </h3>
               </div>
-              <GlassButton className="absolute" style={{ left: 38, top: 182, width: 215, height: 43 }}>
-                Check It Out
-              </GlassButton>
+              <div className="absolute z-10" style={{ left: 38, top: 182 }}>
+                <GlassButton style={{ width: 215, height: 43 }}>
+                  Check It Out
+                </GlassButton>
+              </div>
             </div>
           </div>
         </div>
@@ -420,69 +483,80 @@ const TopRightHeader = () => (
   </div>
 );
 
-/* ───── For‑You showcase with carousel (3 images, center focus) ───── */
+/* ───── For‑You showcase – 5 slots coverflow, no title ───── */
 const ForYouShowcase = () => {
-  const [currentSet, setCurrentSet] = useState(0);
-  const imgs = SHOWCASE_SETS[currentSet];
+  const [centerIndex, setCenterIndex] = useState(0);
+  const total = SHOWCASE_ITEMS.length;
 
-  const prev = () => setCurrentSet((c) => (c - 1 + SHOWCASE_SETS.length) % SHOWCASE_SETS.length);
-  const next = () => setCurrentSet((c) => (c + 1) % SHOWCASE_SETS.length);
+  const getSlotIndex = (offset: number) => ((centerIndex + offset) % total + total) % total;
+
+  const prev = () => setCenterIndex((c) => ((c - 1) % total + total) % total);
+  const next = () => setCenterIndex((c) => (c + 1) % total);
+
+  // 5 slots: -2, -1, 0, +1, +2
+  const slots = [-2, -1, 0, 1, 2].map((offset) => ({
+    ...SHOWCASE_ITEMS[getSlotIndex(offset)],
+    offset,
+  }));
+
+  const getSlotStyle = (offset: number): React.CSSProperties => {
+    const absOff = Math.abs(offset);
+    if (absOff === 0) {
+      return { width: "40%", height: 360, zIndex: 5, opacity: 1, transform: "scale(1)" };
+    }
+    if (absOff === 1) {
+      return { width: "26%", height: 300, zIndex: 3, opacity: 0.8, transform: `perspective(800px) rotateY(${offset < 0 ? 8 : -8}deg)` };
+    }
+    // absOff === 2
+    return { width: "18%", height: 240, zIndex: 1, opacity: 0.5, transform: `perspective(600px) rotateY(${offset < 0 ? 15 : -15}deg) scale(0.9)` };
+  };
 
   return (
-    <div>
-      {/* Title row */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 20, lineHeight: "16px" }}>
-          For You
-        </h2>
-        <div className="flex items-center gap-2">
-          <CarouselArrow direction="left" onClick={prev} />
-          <CarouselArrow direction="right" onClick={next} />
-        </div>
+    <div className="relative">
+      {/* Arrows */}
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10" style={{ left: -4 }}>
+        <CarouselArrow direction="left" onClick={prev} />
+      </div>
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10" style={{ right: -4 }}>
+        <CarouselArrow direction="right" onClick={next} />
       </div>
 
-      {/* 3-image carousel */}
-      <div className="relative flex items-center justify-center" style={{ height: 420, gap: 16 }}>
-        {/* Left image – smaller, dimmed */}
-        <div
-          className="flex-shrink-0 overflow-hidden rounded-[12px] transition-all duration-500"
-          style={{ width: "28%", height: "85%", opacity: 0.6, filter: "brightness(0.7)" }}
-        >
-          <img src={imgs[0]} alt="" className="h-full w-full object-cover" />
-        </div>
-
-        {/* Center image – largest, highlighted */}
-        <div
-          className="flex-shrink-0 overflow-hidden rounded-[14px] transition-all duration-500 border"
-          style={{
-            width: "40%", height: "100%", zIndex: 2,
-            borderColor: "hsl(var(--foreground) / 0.1)",
-            boxShadow: "0 8px 32px hsl(var(--background) / 0.5)",
-          }}
-        >
-          <img src={imgs[1]} alt="" className="h-full w-full object-cover" />
-        </div>
-
-        {/* Right image – smaller, dimmed */}
-        <div
-          className="flex-shrink-0 overflow-hidden rounded-[12px] transition-all duration-500"
-          style={{ width: "28%", height: "85%", opacity: 0.6, filter: "brightness(0.7)" }}
-        >
-          <img src={imgs[2]} alt="" className="h-full w-full object-cover" />
-        </div>
+      {/* 5-slot coverflow */}
+      <div className="flex items-center justify-center" style={{ height: 380, gap: 12 }}>
+        {slots.map((slot, i) => {
+          const slotStyle = getSlotStyle(slot.offset);
+          return (
+            <div
+              key={`${slot.offset}-${i}`}
+              className="flex-shrink-0 overflow-hidden rounded-[12px] transition-all duration-500"
+              style={{
+                ...slotStyle,
+                aspectRatio: "16/9",
+                height: "auto",
+              }}
+            >
+              <img
+                src={slot.poster}
+                alt={slot.title}
+                className="w-full h-full object-cover"
+                style={{ aspectRatio: "16/9" }}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Pagination dots */}
       <div className="flex items-center justify-center gap-2 mt-4">
-        {SHOWCASE_SETS.map((_, i) => (
+        {SHOWCASE_ITEMS.map((_, i) => (
           <button
             key={i}
-            onClick={() => setCurrentSet(i)}
+            onClick={() => setCenterIndex(i)}
             className="rounded-full transition-all"
             style={{
-              width: currentSet === i ? 24 : 8,
+              width: centerIndex === i ? 24 : 8,
               height: 8,
-              background: currentSet === i ? "#71F0F6" : "hsl(var(--foreground) / 0.3)",
+              background: centerIndex === i ? "#71F0F6" : "hsl(var(--foreground) / 0.3)",
             }}
           />
         ))}
@@ -525,7 +599,7 @@ const SectionHeader = ({ title }: { title: string }) => (
   </div>
 );
 
-/* ───── Reusable dropdown pill (opens downward) ───── */
+/* ───── Reusable dropdown pill (Popover-based, opens downward, top z-index) ───── */
 const OptionPillDropdown = ({
   icon, label, options, value, onChange,
 }: {
@@ -536,54 +610,48 @@ const OptionPillDropdown = ({
   onChange: (v: string) => void;
 }) => {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
 
   return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
-        style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
-      >
-        {icon && <img src={icon} alt="" className="w-4 h-4" style={{ opacity: 0.7 }} />}
-        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
-          {label}
-        </span>
-        <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
-      </button>
-      {open && (
-        <div
-          className="absolute top-full left-0 mt-2 rounded-xl border border-foreground/10 shadow-lg z-50 py-1"
-          style={{ minWidth: 160, background: "#1a1a1a" }}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className="flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
+          style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
         >
-          {options.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => { onChange(opt.value); setOpen(false); }}
-              className={`w-full flex items-center text-left transition-colors hover:bg-foreground/10 ${
-                value === opt.value ? "text-primary" : "text-foreground/70 hover:text-foreground"
-              }`}
-              style={{ padding: "8px 16px", gap: 8, fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "16px" }}
-            >
-              {icon && <img src={icon} alt="" className="w-4 h-4" style={{ opacity: value === opt.value ? 1 : 0.7 }} />}
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+          {icon && <img src={icon} alt="" className="w-4 h-4" style={{ opacity: 0.7 }} />}
+          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
+            {label}
+          </span>
+          <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        side="bottom"
+        align="start"
+        sideOffset={8}
+        className="border-foreground/10 p-1 shadow-2xl"
+        style={{ minWidth: 160, background: "rgba(20, 20, 20, 0.95)", backdropFilter: "blur(20px)", borderRadius: 12 }}
+      >
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => { onChange(opt.value); setOpen(false); }}
+            className={`w-full flex items-center text-left transition-colors rounded-lg hover:bg-foreground/10 ${
+              value === opt.value ? "text-primary" : "text-foreground/70 hover:text-foreground"
+            }`}
+            style={{ padding: "8px 16px", gap: 8, fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "16px" }}
+          >
+            {icon && <img src={icon} alt="" className="w-4 h-4" style={{ opacity: value === opt.value ? 1 : 0.7 }} />}
+            {opt.label}
+            {value === opt.value && <Check size={14} className="ml-auto" style={{ color: "#71F0F6" }} />}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
   );
 };
 
-/* ───── Model dropdown (redesigned with badge + desc) ───── */
+/* ───── Model dropdown (Popover-based, redesigned with badge + desc) ───── */
 const ModelPillDropdown = ({
   value, onChange,
 }: {
@@ -591,81 +659,77 @@ const ModelPillDropdown = ({
   onChange: (v: string) => void;
 }) => {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
   const selected = MODEL_OPTIONS.find(o => o.value === value);
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
   return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
-        style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
-      >
-        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
-          {selected?.label || "Seedance"}
-        </span>
-        <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
-      </button>
-      {/* NEW badge on model pill */}
-      {selected && MODEL_OPTIONS.some(o => o.isNew) && (
-        <div className="absolute -right-2 -top-3" style={{ width: 30, height: 30 }}>
-          <img src={iconNewBadge} alt="new" className="w-full h-full" />
-        </div>
-      )}
-      {open && (
-        <div
-          className="absolute top-full left-0 mt-2 rounded-2xl border border-foreground/10 shadow-2xl z-50 overflow-hidden"
-          style={{ width: 320, background: "rgba(26, 26, 26, 0.95)", backdropFilter: "blur(20px)" }}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className="relative flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
+          style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
         >
-          {/* Header */}
-          <div style={{ padding: "12px 16px 8px" }}>
-            <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, fontWeight: 700, color: "#71F0F6" }}>
-              Select Mode
-            </span>
-          </div>
-          {/* Options */}
-          {MODEL_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => { onChange(opt.value); setOpen(false); }}
-              className="w-full flex items-start text-left transition-colors hover:bg-foreground/8"
-              style={{ padding: "12px 16px", gap: 12 }}
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 15 }}>
-                    {opt.label}
-                  </span>
-                  <span
-                    className="rounded px-1.5 py-0.5"
-                    style={{ fontSize: 11, background: "hsl(var(--foreground) / 0.1)", color: "hsl(var(--foreground) / 0.6)" }}
-                  >
-                    {opt.badge}
-                  </span>
-                  {opt.isNew && (
-                    <img src={iconNewBadge} alt="new" style={{ width: 28, height: 12 }} />
-                  )}
-                </div>
-                <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, lineHeight: "18px", color: "hsl(var(--foreground) / 0.5)", marginTop: 4 }}>
-                  {opt.desc}
-                </p>
-              </div>
-              {value === opt.value && (
-                <Check size={16} className="flex-shrink-0 mt-1" style={{ color: "#71F0F6" }} />
-              )}
-            </button>
-          ))}
+          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
+            {selected?.label || "Seedance 2.0"}
+          </span>
+          <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
+          {/* NEW badge */}
+          {selected?.isNew && (
+            <div className="absolute -right-2 -top-3" style={{ width: 30, height: 30 }}>
+              <img src={iconNewBadge} alt="new" className="w-full h-full" />
+            </div>
+          )}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        side="bottom"
+        align="start"
+        sideOffset={8}
+        className="border-foreground/10 p-0 shadow-2xl overflow-hidden"
+        style={{ width: 340, background: "rgba(20, 20, 20, 0.95)", backdropFilter: "blur(20px)", borderRadius: 16 }}
+      >
+        {/* Header */}
+        <div style={{ padding: "12px 16px 8px" }}>
+          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, fontWeight: 700, color: "#71F0F6" }}>
+            Select Mode
+          </span>
         </div>
-      )}
-    </div>
+        {/* Options */}
+        {MODEL_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => { onChange(opt.value); setOpen(false); }}
+            className="w-full flex items-start text-left transition-colors hover:bg-foreground/8"
+            style={{
+              padding: "12px 16px", gap: 12,
+              background: value === opt.value ? "rgba(113, 240, 246, 0.06)" : "transparent",
+            }}
+          >
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 15 }}>
+                  {opt.label}
+                </span>
+                <span
+                  className="rounded px-1.5 py-0.5"
+                  style={{ fontSize: 11, background: "hsl(var(--foreground) / 0.1)", color: "hsl(var(--foreground) / 0.6)" }}
+                >
+                  {opt.badge}
+                </span>
+                {opt.isNew && (
+                  <img src={iconNewBadge} alt="new" style={{ width: 28, height: 12 }} />
+                )}
+              </div>
+              <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, lineHeight: "18px", color: "hsl(var(--foreground) / 0.5)", marginTop: 4 }}>
+                {opt.desc}
+              </p>
+            </div>
+            {value === opt.value && (
+              <Check size={16} className="flex-shrink-0 mt-1" style={{ color: "#71F0F6" }} />
+            )}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
   );
 };
 
@@ -701,111 +765,91 @@ const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string)
   </div>
 );
 
-/* ───── Glass CTA button (Figma spec) ───── */
-const GlassButton = ({
-  children, style, className, onClick,
-}: {
-  children: React.ReactNode;
-  style?: React.CSSProperties;
-  className?: string;
-  onClick?: () => void;
-}) => {
-  const id = useRef(`glass-${Math.random().toString(36).slice(2, 8)}`).current;
-
-  return (
-    <button
-      onClick={onClick}
-      data-glass={id}
-      className={`relative flex items-center justify-center rounded-full overflow-hidden transition-all active:scale-[0.97] ${className || ""}`}
-      style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45, ...style }}
+/* ───── Glass CTA button (Figma spec, forwardRef) ───── */
+const GlassButton = forwardRef<
+  HTMLButtonElement,
+  {
+    children: React.ReactNode;
+    style?: React.CSSProperties;
+    className?: string;
+    onClick?: () => void;
+  }
+>(({ children, style, className, onClick }, ref) => (
+  <button
+    ref={ref}
+    onClick={onClick}
+    className={`glass-btn relative flex items-center justify-center rounded-full overflow-hidden transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className || ""}`}
+    style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45, ...style }}
+  >
+    {/* Inner glow layer */}
+    <div
+      className="glass-btn-glow absolute pointer-events-none transition-all duration-200"
+      style={{
+        left: 6, right: 4, top: 6, bottom: 5,
+        background: "rgba(69, 196, 246, 0.6)",
+        filter: "blur(6.75px)",
+        borderRadius: 20.45,
+      }}
+    />
+    {/* Text layer – above glow */}
+    <span
+      className="relative font-bold"
+      style={{ fontFamily: "Arial, sans-serif", fontSize: 15, lineHeight: "23px", color: "#71F0F6", zIndex: 2 }}
     >
-      <div
-        className="absolute pointer-events-none"
-        data-glass-glow={id}
-        style={{
-          left: 6, right: 4, top: 6, bottom: 5,
-          background: "rgba(69, 196, 246, 0.6)",
-          filter: "blur(6.75px)",
-          borderRadius: 20.45,
-          transition: "background 0.2s, filter 0.2s",
-        }}
-      />
-      <span
-        className="relative font-bold"
-        style={{ fontFamily: "Arial, sans-serif", fontSize: 15, lineHeight: "23px", color: "#71F0F6" }}
-      >
-        {children}
-      </span>
-      <style>{`
-        [data-glass="${id}"]:hover [data-glass-glow="${id}"] {
-          background: rgba(69, 196, 246, 0.85) !important;
-          filter: blur(10px) !important;
-        }
-      `}</style>
-    </button>
-  );
-};
+      {children}
+    </span>
+  </button>
+));
+GlassButton.displayName = "GlassButton";
 
 /* ───── Make pill button ───── */
-const MakePill = () => {
-  const id = useRef(`make-${Math.random().toString(36).slice(2, 8)}`).current;
+const MakePill = ({ ctaText = "Make" }: { ctaText?: string }) => (
+  <button
+    className="glass-btn relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] overflow-hidden transition-all active:scale-[0.97]"
+    style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45 }}
+  >
+    <div
+      className="glass-btn-glow absolute pointer-events-none transition-all duration-200"
+      style={{
+        left: 6, right: 4, top: 6, bottom: 5,
+        background: "rgba(69, 196, 246, 0.6)",
+        filter: "blur(6.75px)",
+        borderRadius: 20.45,
+      }}
+    />
+    <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
+      {ctaText}
+    </span>
+    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", zIndex: 2 }}>
+      <span style={{ background: "linear-gradient(90deg, #71F0F6 25%, #AEF5FB 84%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+        ✦
+      </span>
+    </span>
+    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
+      10/s
+    </span>
+  </button>
+);
 
-  return (
-    <button
-      data-make={id}
-      className="relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] overflow-hidden transition-all active:scale-[0.97]"
-      style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45 }}
-    >
-      <div
-        className="absolute pointer-events-none"
-        data-make-glow={id}
-        style={{
-          left: 6, right: 4, top: 6, bottom: 5,
-          background: "rgba(69, 196, 246, 0.6)",
-          filter: "blur(6.75px)",
-          borderRadius: 20.45,
-          transition: "background 0.2s, filter 0.2s",
-        }}
-      />
-      <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6" }}>
-        Make
-      </span>
-      <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
-        <span style={{ background: "linear-gradient(90deg, #71F0F6 25%, #AEF5FB 84%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          ✦
-        </span>
-      </span>
-      <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6" }}>
-        10/s
-      </span>
-      <style>{`
-        [data-make="${id}"]:hover [data-make-glow="${id}"] {
-          background: rgba(69, 196, 246, 0.85) !important;
-          filter: blur(10px) !important;
-        }
-      `}</style>
-    </button>
-  );
-};
-
-/* ───── Announcement Modal (frosted glass) ───── */
+/* ───── Announcement Modal (lighter frosted glass) ───── */
 const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center"
-      style={{ background: "rgba(0, 0, 0, 0.6)" }}
+      style={{ background: "rgba(0, 0, 0, 0.5)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
         className="relative"
         style={{
           width: 480,
-          background: "rgba(26, 26, 26, 0.85)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
+          background: "rgba(10, 10, 10, 0.45)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
           borderRadius: 20,
           padding: 24,
-          border: "1px solid rgba(255, 255, 255, 0.08)",
+          border: "1px solid rgba(255, 255, 255, 0.06)",
+          boxShadow: "inset 0px 0px 7.3px rgba(255, 255, 255, 0.15), inset 0px 7.3px 14.6px rgba(255, 255, 255, 0.08), inset 0px 0.4px 0.49px rgba(255, 255, 255, 0.12), 0 24px 80px rgba(0,0,0,0.5)",
         }}
       >
         {/* Close button */}

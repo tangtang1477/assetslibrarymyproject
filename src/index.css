@@ -73,6 +73,16 @@
 }
 
 @layer utilities {
+  /* Glass button hover/active states */
+  .glass-btn:hover .glass-btn-glow {
+    background: rgba(69, 196, 246, 0.85) !important;
+    filter: blur(10px) !important;
+  }
+  .glass-btn:active .glass-btn-glow {
+    background: rgba(69, 196, 246, 0.5) !important;
+    filter: blur(5px) !important;
+  }
+
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
