@@ -78,9 +78,8 @@ const TIME_OPTIONS = [
 ];
 
 const RATIO_OPTIONS = [
-  { label: "Portrait", value: "portrait" },
-  { label: "Landscape", value: "landscape" },
-  { label: "Square", value: "square" },
+  { label: "16:9", value: "16:9" },
+  { label: "9:16", value: "9:16" },
 ];
 
 const Home = () => {
