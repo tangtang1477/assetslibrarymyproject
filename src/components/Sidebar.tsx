@@ -41,7 +41,10 @@ const Sidebar = ({ activePage }: SidebarProps) => {
   };
 
   return (
-    <div className="fixed left-0 top-0 w-[88px] h-screen flex flex-col items-center z-50">
+    <div
+      className="fixed left-0 top-0 h-screen flex flex-col items-center z-50"
+      style={{ width: 88, paddingLeft: 20 }}
+    >
       {/* Logo */}
       <div className="mt-6 mb-6 cursor-pointer" onClick={() => navigate("/home")}>
         <img src={logoM} alt="Logo" className="w-6 h-7 object-contain" />
@@ -57,35 +60,47 @@ const Sidebar = ({ activePage }: SidebarProps) => {
         <Plus size={18} className="text-foreground" />
       </button>
 
-      {/* Nav pill - glass effect, vertically centered relative to remaining space */}
+      {/* Spacer to push nav pill to vertical center */}
+      <div className="flex-1" />
+
+      {/* Nav pill - glass effect, vertically centered */}
       <div
-        className="flex flex-col items-center rounded-[100px] relative"
+        className="flex flex-col items-center"
         style={{
           background: "rgba(255,255,255,0.1)",
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
           width: 48,
+          borderRadius: 100,
           padding: "16px 12px",
-          gap: 12,
+          gap: 20,
         }}
       >
         {NAV_ITEMS.map((item) => {
           const isActive = activePage === item.id;
           const isHovered = hoveredId === item.id;
-          const showIcon = isActive ? item.iconSelect : (isHovered ? item.iconSelect : item.icon);
+          const showIcon = isActive || isHovered ? item.iconSelect : item.icon;
 
           return (
             <div
               key={item.id}
               className="relative flex items-center justify-center"
+              style={{ width: 24, height: 24 }}
               onMouseEnter={() => setHoveredId(item.id)}
               onMouseLeave={() => setHoveredId(null)}
             >
-              {/* Active/hover circle background */}
+              {/* Active/hover circle background - 40x40 centered on 24x24 icon */}
               {(isActive || isHovered) && (
                 <div
-                  className="absolute w-10 h-10 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.2)" }}
+                  className="absolute rounded-full"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    background: "rgba(255,255,255,0.2)",
+                  }}
                 />
               )}
               <button
@@ -95,16 +110,18 @@ const Sidebar = ({ activePage }: SidebarProps) => {
                 <img
                   src={showIcon}
                   alt={item.id}
-                  className="w-[18px] h-[18px]"
+                  className="w-6 h-6"
                 />
               </button>
 
-              {/* Hover tooltip - positioned to the right */}
+              {/* Hover tooltip - positioned to the right with 8px gap from pill edge */}
               {isHovered && !isActive && (
                 <div
-                  className="absolute left-full flex items-center justify-center whitespace-nowrap"
+                  className="absolute flex items-center justify-center whitespace-nowrap"
                   style={{
-                    marginLeft: 8,
+                    left: "calc(100% + 28px)",
+                    top: "50%",
+                    transform: "translateY(-50%)",
                     background: "rgba(255,255,255,0.4)",
                     borderRadius: 100,
                     padding: "8px 16px",
@@ -132,7 +149,7 @@ const Sidebar = ({ activePage }: SidebarProps) => {
       <div className="flex-1" />
 
       {/* Bottom icons */}
-      <div className="flex flex-col items-center gap-3 pb-2 mb-6">
+      <div className="flex flex-col items-center gap-4 mb-6">
         <button className="w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity">
           <img src={iconSubscribe} alt="Subscribe" className="w-6 h-6" />
         </button>
