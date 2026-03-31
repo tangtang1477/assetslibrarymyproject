@@ -99,7 +99,7 @@ export const AssetFilterBar = ({
   periodTab, setPeriodTab, assetType, setAssetType,
   region, setRegion, subject, setSubject, style, setStyle, showFilters,
 }: AssetLibraryContextType) => (
-  <div className="flex items-center gap-4 flex-wrap">
+  <div className="flex items-start gap-4 flex-wrap">
     <FilterDropdown label="Type" options={TYPE_OPTIONS} value={assetType} onChange={setAssetType} />
     {showFilters && (
       <>
@@ -111,46 +111,36 @@ export const AssetFilterBar = ({
     <div className="flex-1" />
     {/* My / Public toggle */}
     <div
-      className="relative flex items-center rounded-full"
+      className="flex items-center gap-1 rounded-full border p-1"
       style={{
-        padding: 4,
-        background: "rgba(255,255,255,0.08)",
-        border: "1px solid rgba(255,255,255,0.15)",
+        background: "hsl(var(--foreground) / 0.08)",
+        borderColor: "hsl(var(--foreground) / 0.15)",
       }}
     >
-      {/* Sliding indicator */}
-      <div
-        className="absolute rounded-full transition-all duration-300 ease-in-out"
-        style={{
-          width: periodTab === "my" ? 60 : 84,
-          height: "calc(100% - 8px)",
-          left: periodTab === "my" ? 4 : 64,
-          top: 4,
-          background: "hsl(var(--primary))",
-        }}
-      />
       <button
         onClick={() => setPeriodTab("my")}
-        className="relative z-10 flex items-center justify-center rounded-full transition-colors"
+        className="flex items-center justify-center rounded-full transition-colors"
         style={{
           fontFamily: "'SF Pro', Arial, sans-serif",
           padding: "8px 16px",
           fontSize: 16,
           lineHeight: "24px",
-          color: periodTab === "my" ? "hsl(var(--primary-foreground))" : "rgba(255,255,255,0.5)",
+          background: periodTab === "my" ? "hsl(var(--primary))" : "transparent",
+          color: periodTab === "my" ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground) / 0.5)",
         }}
       >
         My
       </button>
       <button
         onClick={() => setPeriodTab("public")}
-        className="relative z-10 flex items-center justify-center rounded-full transition-colors"
+        className="flex items-center justify-center rounded-full transition-colors"
         style={{
           fontFamily: "'SF Pro', Arial, sans-serif",
           padding: "8px 16px",
           fontSize: 16,
           lineHeight: "24px",
-          color: periodTab === "public" ? "hsl(var(--primary-foreground))" : "rgba(255,255,255,0.5)",
+          background: periodTab === "public" ? "hsl(var(--primary))" : "transparent",
+          color: periodTab === "public" ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground) / 0.5)",
         }}
       >
         Public

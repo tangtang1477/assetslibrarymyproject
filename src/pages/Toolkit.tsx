@@ -43,7 +43,7 @@ const Toolkit = () => {
   return (
     <div className="min-h-screen bg-background flex">
       <Sidebar activePage="toolkit" />
-      <div className="flex-1 ml-[88px] overflow-y-auto px-6 py-8">
+      <div className="flex-1 ml-[88px] overflow-y-auto hide-scrollbar px-6 py-8">
         <div className="max-w-[1720px] mx-auto flex flex-col gap-6">
           {/* Logo */}
           <h1
