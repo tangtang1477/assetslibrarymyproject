@@ -294,12 +294,9 @@ const Home = () => {
             <h2 className="absolute font-bold text-foreground" style={{ left: 40, top: 129, fontFamily: "Arial, sans-serif", fontSize: 100, lineHeight: "16px" }}>
               AIdeo World
             </h2>
-            <button className="absolute flex items-center justify-center" style={{ left: 25, top: 299, width: 179, height: 41, background: "hsl(var(--primary) / 0.05)", borderRadius: 29 }}>
-              <div className="absolute inset-0" style={{ background: "hsl(var(--primary) / 0.6)", filter: "blur(12px)", borderRadius: 29 }} />
-              <span className="relative font-bold text-primary" style={{ fontSize: 15, lineHeight: "23px" }}>
-                Check It Out
-              </span>
-            </button>
+            <GlassButton style={{ width: 179, height: 41 }}>
+              Check It Out
+            </GlassButton>
           </div>
 
           <SectionHeader title="Fun" />
