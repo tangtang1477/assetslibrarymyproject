@@ -341,16 +341,9 @@ const TopRightHeader = () => (
       <span className="text-foreground" style={{ fontSize: 16, lineHeight: "24px" }}>🎁</span>
       <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
     </button>
-    <div className="flex items-center gap-1">
-      <span className="text-primary" style={{ fontSize: 16, lineHeight: "24px" }}>💎</span>
-      <span className="text-primary" style={{ fontFamily: "'SF Pro', sans-serif", fontSize: 16, lineHeight: "24px" }}>500</span>
-    </div>
-    <button className="relative flex h-10 w-[180px] items-center justify-center rounded-full" style={{ background: "hsl(var(--primary) / 0.1)" }}>
-      <div className="absolute inset-0 rounded-full" style={{ background: "hsl(var(--primary) / 0.4)", filter: "blur(12.5px)" }} />
-      <span className="relative font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>
-        Subscribe Now
-      </span>
-    </button>
+    <GlassButton style={{ width: 180, height: 40 }}>
+      Subscribe Now
+    </GlassButton>
   </div>
 );
 
