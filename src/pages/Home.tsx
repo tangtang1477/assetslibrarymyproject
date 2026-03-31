@@ -194,6 +194,8 @@ const Home = () => {
                     options={MODEL_OPTIONS}
                     value={selectedModel}
                     onChange={setSelectedModel}
+                    badgeIcon={iconNewBadge}
+                    badgeSize={30}
                   />
                   <OptionPillDropdown
                     icon={iconLanguage}
@@ -215,12 +217,8 @@ const Home = () => {
                     options={TIME_OPTIONS}
                     value={selectedTime}
                     onChange={setSelectedTime}
-                    badgeIcon={iconNewBadge}
                   />
-                  <RatioPillDropdown
-                    value={selectedRatio}
-                    onChange={setSelectedRatio}
-                  />
+                  <RatioToggle value={selectedRatio} onChange={setSelectedRatio} />
                   <MakePill />
                 </div>
               </div>
@@ -296,12 +294,9 @@ const Home = () => {
             <h2 className="absolute font-bold text-foreground" style={{ left: 40, top: 129, fontFamily: "Arial, sans-serif", fontSize: 100, lineHeight: "16px" }}>
               AIdeo World
             </h2>
-            <button className="absolute flex items-center justify-center" style={{ left: 25, top: 299, width: 179, height: 41, background: "hsl(var(--primary) / 0.05)", borderRadius: 29 }}>
-              <div className="absolute inset-0" style={{ background: "hsl(var(--primary) / 0.6)", filter: "blur(12px)", borderRadius: 29 }} />
-              <span className="relative font-bold text-primary" style={{ fontSize: 15, lineHeight: "23px" }}>
-                Check It Out
-              </span>
-            </button>
+            <GlassButton className="absolute" style={{ left: 25, top: 299, width: 179, height: 41 }}>
+              Check It Out
+            </GlassButton>
           </div>
 
           <SectionHeader title="Fun" />
@@ -330,12 +325,9 @@ const Home = () => {
                 Assets Library
               </h3>
             </div>
-            <button className="absolute flex items-center justify-center" style={{ left: 38, top: 182, width: 215, height: 43, background: "hsl(var(--primary) / 0.05)", borderRadius: 29 }}>
-              <div className="absolute inset-0" style={{ background: "hsl(var(--primary) / 0.6)", filter: "blur(12px)", borderRadius: 29 }} />
-              <span className="relative font-bold text-primary" style={{ fontSize: 15, lineHeight: "23px" }}>
-                Check It Out
-              </span>
-            </button>
+            <GlassButton className="absolute" style={{ left: 38, top: 182, width: 215, height: 43 }}>
+              Check It Out
+            </GlassButton>
           </div>
         </div>
       </div>
@@ -349,16 +341,9 @@ const TopRightHeader = () => (
       <span className="text-foreground" style={{ fontSize: 16, lineHeight: "24px" }}>🎁</span>
       <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
     </button>
-    <div className="flex items-center gap-1">
-      <span className="text-primary" style={{ fontSize: 16, lineHeight: "24px" }}>💎</span>
-      <span className="text-primary" style={{ fontFamily: "'SF Pro', sans-serif", fontSize: 16, lineHeight: "24px" }}>500</span>
-    </div>
-    <button className="relative flex h-10 w-[180px] items-center justify-center rounded-full" style={{ background: "hsl(var(--primary) / 0.1)" }}>
-      <div className="absolute inset-0 rounded-full" style={{ background: "hsl(var(--primary) / 0.4)", filter: "blur(12.5px)" }} />
-      <span className="relative font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>
-        Subscribe Now
-      </span>
-    </button>
+    <GlassButton style={{ width: 180, height: 40 }}>
+      Subscribe Now
+    </GlassButton>
   </div>
 );
 
@@ -416,6 +401,7 @@ const OptionPillDropdown = ({
   value,
   onChange,
   badgeIcon,
+  badgeSize,
 }: {
   icon?: string;
   label: string;
@@ -423,6 +409,7 @@ const OptionPillDropdown = ({
   value: string;
   onChange: (v: string) => void;
   badgeIcon?: string;
+  badgeSize?: number;
 }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -460,7 +447,7 @@ const OptionPillDropdown = ({
         <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
       </button>
       {badgeIcon && (
-        <div className="absolute -right-1 -top-1 w-[10px] h-[10px]">
+        <div className="absolute -right-2 -top-3" style={{ width: badgeSize || 10, height: badgeSize || 10 }}>
           <img src={badgeIcon} alt="new" className="w-full h-full" />
         </div>
       )}
@@ -499,76 +486,119 @@ const OptionPillDropdown = ({
 };
 
 const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) => {
-  const dims = ratio === "16:9" ? { w: 14, h: 8 } : { w: 8, h: 14 };
+  const dims = ratio === "16:9" ? { w: 16, h: 10 } : { w: 10, h: 16 };
   return (
     <div
       style={{
         width: dims.w,
         height: dims.h,
-        border: `1.5px solid ${selected ? "hsl(var(--primary))" : "hsl(var(--foreground) / 0.7)"}`,
+        border: `1.5px solid ${selected ? "hsl(var(--primary))" : "hsl(var(--foreground) / 0.5)"}`,
         borderRadius: 2,
       }}
     />
   );
 };
 
-const RatioPillDropdown = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  return (
-    <div ref={ref} className="relative">
+/** Ratio toggle: two side-by-side icon buttons like reference site */
+const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
+  <div
+    className="flex h-[31px] items-center rounded-full"
+    style={{ border: "0.7px solid hsl(var(--foreground) / 0.25)", padding: "0 4px", gap: 2 }}
+  >
+    {RATIO_OPTIONS.map((opt) => (
       <button
-        onClick={() => setOpen(!open)}
-        className="flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
-        style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
+        key={opt.value}
+        onClick={() => onChange(opt.value)}
+        className="flex h-[25px] w-[30px] items-center justify-center rounded-full transition-colors"
+        style={{
+          background: value === opt.value ? "hsl(var(--foreground) / 0.15)" : "transparent",
+        }}
       >
-        <RatioIcon ratio={value} />
-        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
-          {value}
-        </span>
-        <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
+        <RatioIcon ratio={opt.value} selected={value === opt.value} />
       </button>
-      {open && (
-        <div
-          className="absolute bottom-full left-0 mb-2 rounded-xl border border-foreground/10 shadow-lg z-50 py-1"
-          style={{ minWidth: 160, background: "#1a1a1a" }}
-        >
-          {RATIO_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => { onChange(opt.value); setOpen(false); }}
-              className={`w-full flex items-center text-left transition-colors hover:bg-foreground/10 ${
-                value === opt.value ? "text-primary" : "text-foreground/70 hover:text-foreground"
-              }`}
-              style={{ padding: "8px 16px", gap: 8, fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "16px" }}
-            >
-              <RatioIcon ratio={opt.value} selected={value === opt.value} />
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
+    ))}
+  </div>
+);
+
+/** Reusable glass CTA button with Figma specs */
+const GlassButton = ({
+  children,
+  style,
+  className,
+  onClick,
+}: {
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+  className?: string;
+  onClick?: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className={`group relative flex items-center justify-center rounded-full transition-all active:scale-[0.97] ${className || ""}`}
+    style={{
+      background: "rgba(69, 196, 246, 0.05)",
+      ...style,
+    }}
+  >
+    <div
+      className="absolute rounded-full transition-all"
+      style={{
+        left: 6,
+        right: 4,
+        top: 6,
+        bottom: 5,
+        background: "rgba(69, 196, 246, 0.6)",
+        filter: "blur(6.75px)",
+        borderRadius: 20,
+      }}
+    />
+    <span
+      className="relative font-bold"
+      style={{
+        fontFamily: "Arial, sans-serif",
+        fontSize: 15,
+        lineHeight: "23px",
+        color: "#71F0F6",
+      }}
+    >
+      {children}
+    </span>
+    <style>{`
+      .group:hover > div {
+        background: rgba(69, 196, 246, 0.85) !important;
+        filter: blur(10px) !important;
+      }
+    `}</style>
+  </button>
+);
 
 const MakePill = () => (
-  <button className="relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px]" style={{ background: "hsl(var(--primary) / 0.05)" }}>
-    <div className="absolute inset-[4px] rounded-full" style={{ background: "hsl(var(--primary) / 0.6)", filter: "blur(6.75px)" }} />
-    <span className="relative font-bold text-primary" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
+  <button
+    className="group relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] transition-all active:scale-[0.97]"
+    style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45 }}
+  >
+    <div
+      className="absolute rounded-full transition-all group-hover:blur-[10px]"
+      style={{
+        left: 6,
+        right: 4,
+        top: 6,
+        bottom: 5,
+        background: "rgba(69, 196, 246, 0.6)",
+        filter: "blur(6.75px)",
+        borderRadius: 20.45,
+      }}
+    />
+    <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6" }}>
       Make
     </span>
-    <span className="relative ml-2 text-primary" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
-      ✦ 10/s
+    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
+      <span style={{ background: "linear-gradient(90deg, #71F0F6 25%, #AEF5FB 84%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+        ✦
+      </span>
+    </span>
+    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6" }}>
+      10/s
     </span>
   </button>
 );

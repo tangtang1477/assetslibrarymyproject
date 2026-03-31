@@ -47,13 +47,13 @@ const Sidebar = ({ activePage }: SidebarProps) => {
         <img src={logoM} alt="Logo" className="w-6 h-7 object-contain" />
       </div>
 
-      {/* Plus button */}
+      {/* Plus button - 20px above nav pill */}
       <button
         onClick={() => navigate("/home")}
         className="absolute left-5 flex h-12 w-12 items-center justify-center rounded-full
           hover:brightness-90 active:brightness-75 transition-all"
         style={{
-          top: "calc(50% - 146px)",
+          top: "calc(50% - 162px)",
           background: "hsl(var(--foreground) / 0.4)",
         }}
       >
