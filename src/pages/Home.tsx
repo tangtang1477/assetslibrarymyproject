@@ -498,6 +498,69 @@ const OptionPillDropdown = ({
   );
 };
 
+const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) => {
+  const dims = ratio === "16:9" ? { w: 14, h: 8 } : { w: 8, h: 14 };
+  return (
+    <div
+      style={{
+        width: dims.w,
+        height: dims.h,
+        border: `1.5px solid ${selected ? "hsl(var(--primary))" : "hsl(var(--foreground) / 0.7)"}`,
+        borderRadius: 2,
+      }}
+    />
+  );
+};
+
+const RatioPillDropdown = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
+        style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
+      >
+        <RatioIcon ratio={value} />
+        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
+          {value}
+        </span>
+        <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
+      </button>
+      {open && (
+        <div
+          className="absolute bottom-full left-0 mb-2 rounded-xl border border-foreground/10 shadow-lg z-50 py-1"
+          style={{ minWidth: 160, background: "#1a1a1a" }}
+        >
+          {RATIO_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={`w-full flex items-center text-left transition-colors hover:bg-foreground/10 ${
+                value === opt.value ? "text-primary" : "text-foreground/70 hover:text-foreground"
+              }`}
+              style={{ padding: "8px 16px", gap: 8, fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "16px" }}
+            >
+              <RatioIcon ratio={opt.value} selected={value === opt.value} />
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const MakePill = () => (
   <button className="relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px]" style={{ background: "hsl(var(--primary) / 0.05)" }}>
     <div className="absolute inset-[4px] rounded-full" style={{ background: "hsl(var(--primary) / 0.6)", filter: "blur(6.75px)" }} />
