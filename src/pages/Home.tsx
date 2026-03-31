@@ -291,27 +291,32 @@ const Home = () => {
               </p>
             </div>
 
-            {/* Character Cast List */}
-            <div className="flex items-center justify-center mt-8" style={{ gap: 35 }}>
+            {/* Character Cast List — 48px avatars, left-aligned with input */}
+            <div className="flex items-center mt-6" style={{ gap: 20, width: 990, marginLeft: "auto", marginRight: "auto" }}>
               {CHARACTERS.map((char) => (
                 <button
                   key={char.name}
-                  className="flex flex-col items-center transition-all"
-                  style={{ gap: 16, width: 96 }}
+                  className="flex flex-col items-center transition-all hover:opacity-90 active:scale-95"
+                  style={{ gap: 6 }}
                   onClick={() => setSelectedCharacter(selectedCharacter === char.name ? null : char.name)}
                 >
                   <div
-                    className="rounded-full flex-shrink-0"
+                    className="rounded-full flex-shrink-0 overflow-hidden"
                     style={{
-                      width: 100, height: 100,
-                      background: char.color,
-                      border: selectedCharacter === char.name ? "3px solid #71F0F6" : "3px solid #191E1F",
+                      width: 48, height: 48,
+                      border: selectedCharacter === char.name ? "2px solid #71F0F6" : "2px solid #191E1F",
                       transition: "border-color 0.2s ease",
                     }}
-                  />
+                  >
+                    <img src={char.avatar} alt={char.name} className="w-full h-full object-cover" loading="lazy" />
+                  </div>
                   <span
-                    className="text-center text-foreground"
-                    style={{ fontFamily: "Arial, sans-serif", fontSize: 20, lineHeight: "23px", width: 96 }}
+                    className="text-center"
+                    style={{
+                      fontFamily: "Arial, sans-serif", fontSize: 12, lineHeight: "14px",
+                      color: selectedCharacter === char.name ? "#71F0F6" : "hsl(var(--foreground) / 0.7)",
+                      transition: "color 0.2s ease",
+                    }}
                   >
                     {char.name}
                   </span>
