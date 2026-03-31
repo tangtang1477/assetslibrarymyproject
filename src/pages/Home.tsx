@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ChevronDown, X, Check, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Check, Sparkles, Lock } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import bannerBg from "@/assets/banner-bg.jpg";
 import project1 from "@/assets/project-1.jpg";
@@ -49,58 +49,82 @@ const LABS = [
 ];
 
 const FUN_ITEMS = [assetChar1, assetChar2, assetChar3, assetChar4, assetChar5, assetChar6, assetChar7];
-
 const TOOLKIT_ITEMS = [{ src: tool1 }, { src: tool2 }, { src: tool3 }];
 
-/* ───── Model options & config ───── */
+/* ───── 4-tier model system (from PDF doc) ───── */
 const MODEL_OPTIONS = [
-  { label: "Seedance 2.0", value: "seedance", badge: "Seedance 2.0", desc: "Full-featured Agent for images, clips & long videos", isNew: false },
-  { label: "Kling 3.0", value: "kling", badge: "Kling 3.0", desc: "High-quality video generation with cinematic style", isNew: true },
-  { label: "Standard", value: "standard", badge: "Standard", desc: "Basic video generation with simple controls", isNew: false },
+  { label: "⚡ Fast-Gen", value: "fastgen", badge: "Free", desc: "Instant text-to-video, daily free credits", isNew: false, badgeLabel: "Free" },
+  { label: "AI Director", value: "director", badge: "Standard", desc: "Character consistency, reference images, storyboarding", isNew: true, badgeLabel: "MF" },
+  { label: "🎬 Story Agent", value: "storyagent", badge: "✨ New", desc: "Script-driven Agent with character lock & auto scenes", isNew: true, badgeLabel: "New" },
+  { label: "🌪 Cinematic", value: "cinematic", badge: "Ultra", desc: "Cinema-grade physics, lighting & unlimited styles", isNew: false, badgeLabel: "Ultra" },
 ];
 
 type ModelConfigType = {
   placeholder: string;
   cta: string;
+  ctaIcon?: string;
   maxRefs: number;
   styleCount: number;
   lockCharacter: boolean;
   agentThinking: boolean;
+  hideUpload?: boolean;
+  locked?: boolean;
 };
 
 const MODEL_CONFIG: Record<string, ModelConfigType> = {
-  seedance: {
-    placeholder: "Describe the story you want to make...",
-    cta: "Make",
-    maxRefs: 5,
-    styleCount: 20,
+  fastgen: {
+    placeholder: "Describe your scene...",
+    cta: "Generate",
+    ctaIcon: "⚡",
+    maxRefs: 0,
+    styleCount: 0,
+    lockCharacter: false,
+    agentThinking: false,
+    hideUpload: true,
+  },
+  director: {
+    placeholder: "Describe your story...",
+    cta: "Generate",
+    maxRefs: 3,
+    styleCount: 5,
     lockCharacter: false,
     agentThinking: false,
   },
-  kling: {
+  storyagent: {
     placeholder: "Paste your script, let the Agent do the rest...",
     cta: "Summon Agent",
+    ctaIcon: "🚀",
     maxRefs: 4,
     styleCount: 12,
     lockCharacter: true,
     agentThinking: true,
   },
-  standard: {
-    placeholder: "Describe what you want to generate...",
-    cta: "Generate",
-    maxRefs: 3,
-    styleCount: 8,
+  cinematic: {
+    placeholder: "",
+    cta: "Join Waitlist",
+    ctaIcon: "🎟",
+    maxRefs: 5,
+    styleCount: 20,
     lockCharacter: false,
     agentThinking: false,
+    locked: true,
   },
 };
 
+/* ───── 36 languages (scrollable, no scrollbar) ───── */
 const LANGUAGE_OPTIONS = [
-  { label: "EN", value: "en" },
-  { label: "中文", value: "zh" },
-  { label: "日本語", value: "ja" },
-  { label: "한국어", value: "ko" },
-  { label: "Español", value: "es" },
+  { label: "EN", value: "en" }, { label: "中文", value: "zh" }, { label: "日本語", value: "ja" },
+  { label: "한국어", value: "ko" }, { label: "Español", value: "es" }, { label: "Français", value: "fr" },
+  { label: "Deutsch", value: "de" }, { label: "Italiano", value: "it" }, { label: "Português", value: "pt" },
+  { label: "Русский", value: "ru" }, { label: "العربية", value: "ar" }, { label: "हिन्दी", value: "hi" },
+  { label: "Türkçe", value: "tr" }, { label: "Polski", value: "pl" }, { label: "Nederlands", value: "nl" },
+  { label: "Svenska", value: "sv" }, { label: "Norsk", value: "no" }, { label: "Dansk", value: "da" },
+  { label: "Suomi", value: "fi" }, { label: "Ελληνικά", value: "el" }, { label: "Čeština", value: "cs" },
+  { label: "Română", value: "ro" }, { label: "Magyar", value: "hu" }, { label: "ภาษาไทย", value: "th" },
+  { label: "Tiếng Việt", value: "vi" }, { label: "Bahasa ID", value: "id" }, { label: "Bahasa MY", value: "ms" },
+  { label: "Filipino", value: "fil" }, { label: "Українська", value: "uk" }, { label: "עברית", value: "he" },
+  { label: "فارسی", value: "fa" }, { label: "বাংলা", value: "bn" }, { label: "தமிழ்", value: "ta" },
+  { label: "Kiswahili", value: "sw" }, { label: "Català", value: "ca" }, { label: "Slovenčina", value: "sk" },
 ];
 
 const ENHANCE_OPTIONS = [
@@ -120,7 +144,17 @@ const RATIO_OPTIONS = [
   { label: "9:16", value: "9:16" },
 ];
 
-/* ───── For‑You showcase videos (5 items) ───── */
+/* ───── Character cast list ───── */
+const CHARACTERS = [
+  { name: "Sara", color: "linear-gradient(135deg, #FF6B9D, #C45AB3)" },
+  { name: "Neko", color: "linear-gradient(135deg, #A78BFA, #7C3AED)" },
+  { name: "Cindy", color: "linear-gradient(135deg, #34D399, #059669)" },
+  { name: "Queen", color: "linear-gradient(135deg, #F59E0B, #D97706)" },
+  { name: "Sam", color: "linear-gradient(135deg, #3B82F6, #1D4ED8)" },
+  { name: "Jason", color: "linear-gradient(135deg, #EF4444, #B91C1C)" },
+];
+
+/* ───── For‑You showcase videos (7 items) ───── */
 const SHOWCASE_ITEMS = [
   { poster: project1, title: "Cinematic Landscape" },
   { poster: project2, title: "Urban Night" },
@@ -134,16 +168,21 @@ const SHOWCASE_ITEMS = [
 /* ───── Main page ───── */
 const Home = () => {
   const navigate = useNavigate();
-  const [selectedModel, setSelectedModel] = useState("seedance");
+  const [selectedModel, setSelectedModel] = useState("director");
   const [selectedLang, setSelectedLang] = useState("en");
   const [selectedEnhance, setSelectedEnhance] = useState("on");
   const [selectedTime, setSelectedTime] = useState("6min");
   const [selectedRatio, setSelectedRatio] = useState("16:9");
   const [activeQuickLink, setActiveQuickLink] = useState("all");
   const [showAnnouncement, setShowAnnouncement] = useState(true);
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const [inputText, setInputText] = useState("");
+  const [showAtMenu, setShowAtMenu] = useState(false);
+  const [agentThinking, setAgentThinking] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.seedance;
+  const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.director;
 
   const scrollToSection = useCallback((section: string) => {
     setActiveQuickLink(section);
@@ -159,6 +198,31 @@ const Home = () => {
     }
   }, []);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setInputText(val);
+    // Show @ menu when user types @
+    if (val.endsWith("@")) {
+      setShowAtMenu(true);
+    } else {
+      setShowAtMenu(false);
+    }
+  };
+
+  const handleSelectCharacterFromAt = (name: string) => {
+    setInputText(prev => prev.replace(/@$/, `@${name} `));
+    setShowAtMenu(false);
+    setSelectedCharacter(name);
+    textareaRef.current?.focus();
+  };
+
+  const handleCTA = () => {
+    if (config.agentThinking) {
+      setAgentThinking(true);
+      setTimeout(() => setAgentThinking(false), 3000);
+    }
+  };
+
   return (
     <div className="h-screen bg-background flex overflow-hidden">
       <Sidebar activePage="home" />
@@ -166,16 +230,11 @@ const Home = () => {
       <div ref={scrollRef} className="flex-1 ml-[88px] overflow-y-auto hide-scrollbar">
         {/* ── Hero section with video banner behind input ── */}
         <div className="relative px-9 pt-6" style={{ minHeight: 800 }}>
-          {/* Video banner background — fallback to image if video missing */}
+          {/* Video banner background */}
           <div
-            className="absolute left-9 right-9 top-0 rounded-[12px] overflow-hidden"
-            style={{ height: 343 }}
+            className="absolute left-9 right-9 top-0 overflow-hidden"
+            style={{ height: 400, borderRadius: 16 }}
           >
-            <img
-              src={bannerBg}
-              alt=""
-              className="absolute inset-0 w-full h-full object-cover"
-            />
             <video
               src="/banner-video.mp4"
               autoPlay
@@ -183,12 +242,11 @@ const Home = () => {
               muted
               playsInline
               className="absolute inset-0 w-full h-full object-cover"
-              style={{ zIndex: 1 }}
             />
-            {/* Dark overlay on video */}
+            {/* Bottom edge gradient fade — no full overlay */}
             <div
-              className="absolute inset-0"
-              style={{ background: "hsl(var(--background) / 0.55)", zIndex: 2 }}
+              className="absolute left-0 right-0 bottom-0 pointer-events-none"
+              style={{ height: 160, background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 60%, #000 100%)" }}
             />
           </div>
 
@@ -227,8 +285,36 @@ const Home = () => {
               </p>
             </div>
 
+            {/* Character Cast List */}
+            <div className="flex items-center justify-center mt-8" style={{ gap: 35 }}>
+              {CHARACTERS.map((char) => (
+                <button
+                  key={char.name}
+                  className="flex flex-col items-center transition-all"
+                  style={{ gap: 16, width: 96 }}
+                  onClick={() => setSelectedCharacter(selectedCharacter === char.name ? null : char.name)}
+                >
+                  <div
+                    className="rounded-full flex-shrink-0"
+                    style={{
+                      width: 100, height: 100,
+                      background: char.color,
+                      border: selectedCharacter === char.name ? "3px solid #71F0F6" : "3px solid #191E1F",
+                      transition: "border-color 0.2s ease",
+                    }}
+                  />
+                  <span
+                    className="text-center text-foreground"
+                    style={{ fontFamily: "Arial, sans-serif", fontSize: 20, lineHeight: "23px", width: 96 }}
+                  >
+                    {char.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+
             {/* Input box */}
-            <div className="mt-14 flex w-full justify-center">
+            <div className="mt-6 flex w-full justify-center">
               <div
                 className="relative w-[990px] rounded-[25px]"
                 style={{
@@ -240,69 +326,133 @@ const Home = () => {
                   WebkitBackdropFilter: "blur(12.6px)",
                 }}
               >
-                <div className="flex items-start px-6 pt-4">
-                  <div
-                    className="mr-3 flex h-[50px] w-10 flex-shrink-0 items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
-                    style={{
-                      background: "hsl(var(--foreground) / 0.05)",
-                      boxShadow:
-                        "inset 0px 0px 5.9px hsl(var(--foreground) / 0.25), inset 0px 5.9px 11.8px hsl(var(--primary) / 0.15), inset 0px 0.33px 0.39px hsl(var(--foreground) / 0.2), inset 0px 0px 0.73px hsl(var(--primary) / 0.12)",
-                      backdropFilter: "blur(10px)",
-                      borderRadius: 8,
-                      transform: "rotate(-5.76deg)",
-                    }}
-                  >
-                    <span className="text-2xl" style={{ color: "hsl(var(--foreground) / 0.37)" }}>+</span>
+                {/* Cinematic locked overlay */}
+                {config.locked && (
+                  <div className="absolute inset-0 z-20 flex items-center justify-center rounded-[25px]"
+                    style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
+                    <video src="/banner-video.mp4" autoPlay loop muted playsInline
+                      className="absolute inset-0 w-full h-full object-cover rounded-[25px] opacity-30" />
+                    <button
+                      className="glass-btn relative z-30 flex items-center justify-center rounded-full overflow-hidden px-6 py-3"
+                      style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45, animation: "pulse 2s infinite" }}
+                    >
+                      <div className="glass-btn-glow absolute pointer-events-none"
+                        style={{ left: 6, right: 4, top: 6, bottom: 5, background: "rgba(69, 196, 246, 0.6)", filter: "blur(6.75px)", borderRadius: 20.45 }} />
+                      <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, color: "#71F0F6", zIndex: 2 }}>
+                        🎟 Join Waitlist
+                      </span>
+                    </button>
                   </div>
+                )}
 
-                  <span
-                    className="pt-2"
-                    style={{
-                      fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
-                      color: "hsl(var(--foreground) / 0.6)", letterSpacing: "0.015em",
-                    }}
-                  >
-                    {config.placeholder}
-                  </span>
+                <div className="flex items-start px-6 pt-4">
+                  {/* Upload button — hidden for Fast-Gen */}
+                  {!config.hideUpload && (
+                    <div
+                      className="mr-3 flex h-[50px] w-10 flex-shrink-0 items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+                      style={{
+                        background: "hsl(var(--foreground) / 0.05)",
+                        boxShadow:
+                          "inset 0px 0px 5.9px hsl(var(--foreground) / 0.25), inset 0px 5.9px 11.8px hsl(var(--primary) / 0.15), inset 0px 0.33px 0.39px hsl(var(--foreground) / 0.2), inset 0px 0px 0.73px hsl(var(--primary) / 0.12)",
+                        backdropFilter: "blur(10px)",
+                        borderRadius: 8,
+                        transform: "rotate(-5.76deg)",
+                      }}
+                    >
+                      <span className="text-2xl" style={{ color: "hsl(var(--foreground) / 0.37)" }}>+</span>
+                    </div>
+                  )}
+
+                  {/* Real textarea input with @ support */}
+                  <div className="relative flex-1">
+                    <textarea
+                      ref={textareaRef}
+                      value={inputText}
+                      onChange={handleInputChange}
+                      placeholder={config.placeholder}
+                      disabled={config.locked}
+                      className="w-full bg-transparent border-none outline-none resize-none text-foreground"
+                      style={{
+                        fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
+                        letterSpacing: "0.015em", height: 72, paddingTop: 8,
+                        color: "hsl(var(--foreground) / 0.9)",
+                      }}
+                    />
+                    {/* @ mention popup */}
+                    {showAtMenu && (
+                      <div
+                        className="absolute left-0 z-50 rounded-xl overflow-hidden"
+                        style={{
+                          top: -8, transform: "translateY(-100%)",
+                          background: "rgba(20, 20, 20, 0.95)", backdropFilter: "blur(20px)",
+                          border: "1px solid rgba(255,255,255,0.1)", minWidth: 200,
+                        }}
+                      >
+                        {CHARACTERS.map((char) => (
+                          <button
+                            key={char.name}
+                            onClick={() => handleSelectCharacterFromAt(char.name)}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-foreground/10 transition-colors text-left"
+                          >
+                            <div className="rounded-full" style={{ width: 32, height: 32, background: char.color, flexShrink: 0 }} />
+                            <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 14 }}>{char.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Lock Character indicator for Kling */}
+                {/* Lock Character indicator for Story Agent */}
                 {config.lockCharacter && (
-                  <div className="absolute right-6 top-4 flex items-center gap-1.5 rounded-full px-3 py-1"
+                  <div className="absolute right-6 top-4 flex items-center gap-1.5 rounded-full px-3 py-1 cursor-pointer hover:opacity-80 transition-opacity"
                     style={{ background: "rgba(113, 240, 246, 0.1)", border: "1px solid rgba(113, 240, 246, 0.3)" }}>
-                    <span style={{ fontSize: 12, color: "#71F0F6", fontFamily: "Arial, sans-serif" }}>🔒 Lock Character</span>
+                    <Lock size={12} style={{ color: "#71F0F6" }} />
+                    <span style={{ fontSize: 12, color: "#71F0F6", fontFamily: "Arial, sans-serif", fontWeight: 700 }}>Lock Character</span>
+                  </div>
+                )}
+
+                {/* Agent thinking indicator */}
+                {agentThinking && (
+                  <div className="absolute left-6 right-6 top-16 flex items-center gap-2" style={{ zIndex: 30 }}>
+                    <div className="flex gap-1">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#71F0F6", animationDelay: "0ms" }} />
+                      <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#71F0F6", animationDelay: "300ms" }} />
+                      <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#71F0F6", animationDelay: "600ms" }} />
+                    </div>
+                    <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "#71F0F6" }}>
+                      Agent is analyzing your script...
+                    </span>
                   </div>
                 )}
 
                 {/* Input options bar */}
                 <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8, zIndex: 60 }}>
-                  <ModelPillDropdown
-                    value={selectedModel}
-                    onChange={setSelectedModel}
-                  />
+                  <ModelPillDropdown value={selectedModel} onChange={setSelectedModel} />
                   <OptionPillDropdown
-                    icon={iconLanguage}
                     label={LANGUAGE_OPTIONS.find(o => o.value === selectedLang)?.label || "EN"}
                     options={LANGUAGE_OPTIONS}
                     value={selectedLang}
                     onChange={setSelectedLang}
+                    scrollable
+                    narrow
                   />
                   <OptionPillDropdown
-                    icon={iconEnhance}
                     label={ENHANCE_OPTIONS.find(o => o.value === selectedEnhance)?.label || "Enhance on"}
                     options={ENHANCE_OPTIONS}
                     value={selectedEnhance}
                     onChange={setSelectedEnhance}
+                    highlightSelected
                   />
                   <OptionPillDropdown
-                    icon={iconTime}
                     label={TIME_OPTIONS.find(o => o.value === selectedTime)?.label || "6min"}
                     options={TIME_OPTIONS}
                     value={selectedTime}
                     onChange={setSelectedTime}
+                    narrow
                   />
                   <RatioToggle value={selectedRatio} onChange={setSelectedRatio} />
-                  <MakePill ctaText={config.cta} />
+                  <MakePill ctaText={config.cta} ctaIcon={config.ctaIcon} onClick={handleCTA} />
                 </div>
               </div>
             </div>
@@ -312,7 +462,7 @@ const Home = () => {
               <ForYouShowcase />
             </div>
 
-            {/* Quick navigation – 32px below For You */}
+            {/* Quick navigation */}
             <div className="flex flex-wrap justify-center" style={{ marginTop: 32, gap: 64 }}>
               {QUICK_LINKS.map((link) => (
                 <button
@@ -382,7 +532,7 @@ const Home = () => {
                     </span>
                   </div>
                   {/* Check It Out button */}
-                  <div className="absolute bottom-3 right-3 z-10">
+                  <div className="absolute bottom-3 right-3 z-20">
                     <GlassButton style={{ width: 120, height: 32 }}>
                       Check It Out
                     </GlassButton>
@@ -405,7 +555,7 @@ const Home = () => {
               <h2 className="absolute font-bold text-foreground z-10" style={{ left: 40, top: 129, fontFamily: "Arial, sans-serif", fontSize: 100, lineHeight: "16px" }}>
                 AIdeo World
               </h2>
-              <div className="absolute z-10" style={{ left: 25, top: 299 }}>
+              <div className="absolute z-20" style={{ left: 25, top: 299 }}>
                 <GlassButton style={{ width: 179, height: 41 }}>
                   Check It Out
                 </GlassButton>
@@ -447,7 +597,7 @@ const Home = () => {
                   Assets Library
                 </h3>
               </div>
-              <div className="absolute z-10" style={{ left: 38, top: 182 }}>
+              <div className="absolute z-20" style={{ left: 38, top: 182 }}>
                 <GlassButton style={{ width: 215, height: 43 }}>
                   Check It Out
                 </GlassButton>
@@ -466,17 +616,14 @@ const Home = () => {
 /* ───── Top‑right header ───── */
 const TopRightHeader = () => (
   <div className="fixed right-0 top-0 z-50 flex items-center gap-4" style={{ padding: "24px 32px" }}>
-    {/* Free Credit button with gift icon */}
     <button className="flex items-center gap-2 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
       <img src={iconGift} alt="gift" style={{ width: 18, height: 18 }} />
       <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
     </button>
-    {/* Credit score display */}
     <div className="flex items-center gap-1.5 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
       <img src={iconCredit} alt="credit" style={{ width: 16, height: 16 }} />
       <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>0</span>
     </div>
-    {/* Subscribe Now */}
     <GlassButton style={{ width: 180, height: 40 }}>
       Subscribe Now
     </GlassButton>
@@ -493,7 +640,6 @@ const ForYouShowcase = () => {
   const prev = () => setCenterIndex((c) => ((c - 1) % total + total) % total);
   const next = () => setCenterIndex((c) => (c + 1) % total);
 
-  // 5 slots: -2, -1, 0, +1, +2
   const slots = [-2, -1, 0, 1, 2].map((offset) => ({
     ...SHOWCASE_ITEMS[getSlotIndex(offset)],
     offset,
@@ -502,18 +648,22 @@ const ForYouShowcase = () => {
   const getSlotStyle = (offset: number): React.CSSProperties => {
     const absOff = Math.abs(offset);
     if (absOff === 0) {
-      return { width: "40%", height: 360, zIndex: 5, opacity: 1, transform: "scale(1)" };
+      return { width: "34%", zIndex: 5, opacity: 1, transform: "scale(1)", filter: "none" };
     }
     if (absOff === 1) {
-      return { width: "26%", height: 300, zIndex: 3, opacity: 0.8, transform: `perspective(800px) rotateY(${offset < 0 ? 8 : -8}deg)` };
+      return {
+        width: "22%", zIndex: 3, opacity: 0.85,
+        transform: `perspective(500px) rotateY(${offset < 0 ? 12 : -12}deg) scale(0.95)`,
+      };
     }
-    // absOff === 2
-    return { width: "18%", height: 240, zIndex: 1, opacity: 0.5, transform: `perspective(600px) rotateY(${offset < 0 ? 15 : -15}deg) scale(0.9)` };
+    return {
+      width: "14%", zIndex: 1, opacity: 0.5,
+      transform: `perspective(400px) rotateY(${offset < 0 ? 25 : -25}deg) scale(0.85)`,
+    };
   };
 
   return (
     <div className="relative">
-      {/* Arrows */}
       <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10" style={{ left: -4 }}>
         <CarouselArrow direction="left" onClick={prev} />
       </div>
@@ -521,18 +671,18 @@ const ForYouShowcase = () => {
         <CarouselArrow direction="right" onClick={next} />
       </div>
 
-      {/* 5-slot coverflow */}
-      <div className="flex items-center justify-center" style={{ height: 380, gap: 12 }}>
+      <div className="flex items-center justify-center" style={{ height: 260, gap: 8 }}>
         {slots.map((slot, i) => {
           const slotStyle = getSlotStyle(slot.offset);
           return (
             <div
               key={`${slot.offset}-${i}`}
-              className="flex-shrink-0 overflow-hidden rounded-[12px] transition-all duration-500"
+              className="flex-shrink-0 overflow-hidden rounded-[10px]"
               style={{
                 ...slotStyle,
                 aspectRatio: "16/9",
                 height: "auto",
+                transition: "all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)",
               }}
             >
               <img
@@ -546,8 +696,7 @@ const ForYouShowcase = () => {
         })}
       </div>
 
-      {/* Pagination dots */}
-      <div className="flex items-center justify-center gap-2 mt-4">
+      <div className="flex items-center justify-center gap-2 mt-3">
         {SHOWCASE_ITEMS.map((_, i) => (
           <button
             key={i}
@@ -568,7 +717,6 @@ const ForYouShowcase = () => {
 /* ───── Carousel arrow with 3 states ───── */
 const CarouselArrow = ({ direction, onClick }: { direction: "left" | "right"; onClick: () => void }) => {
   const Icon = direction === "left" ? ChevronLeft : ChevronRight;
-
   return (
     <button
       onClick={onClick}
@@ -599,15 +747,18 @@ const SectionHeader = ({ title }: { title: string }) => (
   </div>
 );
 
-/* ───── Reusable dropdown pill (Popover-based, opens downward, top z-index) ───── */
+/* ───── Reusable dropdown pill (Popover-based) ───── */
 const OptionPillDropdown = ({
-  icon, label, options, value, onChange,
+  label, options, value, onChange, scrollable, narrow, highlightSelected,
 }: {
   icon?: string;
   label: string;
   options: { label: string; value: string }[];
   value: string;
   onChange: (v: string) => void;
+  scrollable?: boolean;
+  narrow?: boolean;
+  highlightSelected?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -616,42 +767,50 @@ const OptionPillDropdown = ({
       <PopoverTrigger asChild>
         <button
           className="flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
-          style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
+          style={{ padding: narrow ? "0 12px" : "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 6 }}
         >
-          {icon && <img src={icon} alt="" className="w-4 h-4" style={{ opacity: 0.7 }} />}
           <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
             {label}
           </span>
-          <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
+          <ChevronDown size={14} className="text-foreground/50" />
         </button>
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
         align="start"
         sideOffset={8}
-        className="border-foreground/10 p-1 shadow-2xl"
-        style={{ minWidth: 160, background: "rgba(20, 20, 20, 0.95)", backdropFilter: "blur(20px)", borderRadius: 12 }}
+        className="border-foreground/10 p-1 shadow-2xl z-[9999]"
+        style={{
+          minWidth: narrow ? 120 : 160,
+          maxHeight: scrollable ? 280 : undefined,
+          overflowY: scrollable ? "auto" : undefined,
+          background: "rgba(20, 20, 20, 0.95)",
+          backdropFilter: "blur(20px)",
+          borderRadius: 12,
+        }}
       >
-        {options.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => { onChange(opt.value); setOpen(false); }}
-            className={`w-full flex items-center text-left transition-colors rounded-lg hover:bg-foreground/10 ${
-              value === opt.value ? "text-primary" : "text-foreground/70 hover:text-foreground"
-            }`}
-            style={{ padding: "8px 16px", gap: 8, fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "16px" }}
-          >
-            {icon && <img src={icon} alt="" className="w-4 h-4" style={{ opacity: value === opt.value ? 1 : 0.7 }} />}
-            {opt.label}
-            {value === opt.value && <Check size={14} className="ml-auto" style={{ color: "#71F0F6" }} />}
-          </button>
-        ))}
+        <div className={scrollable ? "hide-scrollbar" : ""}>
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={`w-full flex items-center text-left transition-colors rounded-lg hover:bg-foreground/10`}
+              style={{
+                padding: "8px 12px", gap: 8, fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "16px",
+                color: (highlightSelected && value === opt.value) ? "#71F0F6" : value === opt.value ? "#71F0F6" : "hsl(var(--foreground) / 0.7)",
+              }}
+            >
+              {opt.label}
+              {value === opt.value && <Check size={14} className="ml-auto" style={{ color: "#71F0F6" }} />}
+            </button>
+          ))}
+        </div>
       </PopoverContent>
     </Popover>
   );
 };
 
-/* ───── Model dropdown (Popover-based, redesigned with badge + desc) ───── */
+/* ───── Model dropdown (4-tier system) ───── */
 const ModelPillDropdown = ({
   value, onChange,
 }: {
@@ -669,10 +828,9 @@ const ModelPillDropdown = ({
           style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
         >
           <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
-            {selected?.label || "Seedance 2.0"}
+            {selected?.label || "AI Director"}
           </span>
           <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
-          {/* NEW badge */}
           {selected?.isNew && (
             <div className="absolute -right-2 -top-3" style={{ width: 30, height: 30 }}>
               <img src={iconNewBadge} alt="new" className="w-full h-full" />
@@ -684,16 +842,9 @@ const ModelPillDropdown = ({
         side="bottom"
         align="start"
         sideOffset={8}
-        className="border-foreground/10 p-0 shadow-2xl overflow-hidden"
+        className="border-foreground/10 p-0 shadow-2xl overflow-hidden z-[9999]"
         style={{ width: 340, background: "rgba(20, 20, 20, 0.95)", backdropFilter: "blur(20px)", borderRadius: 16 }}
       >
-        {/* Header */}
-        <div style={{ padding: "12px 16px 8px" }}>
-          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, fontWeight: 700, color: "#71F0F6" }}>
-            Select Mode
-          </span>
-        </div>
-        {/* Options */}
         {MODEL_OPTIONS.map((opt) => (
           <button
             key={opt.value}
@@ -713,7 +864,7 @@ const ModelPillDropdown = ({
                   className="rounded px-1.5 py-0.5"
                   style={{ fontSize: 11, background: "hsl(var(--foreground) / 0.1)", color: "hsl(var(--foreground) / 0.6)" }}
                 >
-                  {opt.badge}
+                  {opt.badgeLabel}
                 </span>
                 {opt.isNew && (
                   <img src={iconNewBadge} alt="new" style={{ width: 28, height: 12 }} />
@@ -733,7 +884,7 @@ const ModelPillDropdown = ({
   );
 };
 
-/* ───── Ratio icon & toggle ───── */
+/* ───── Ratio icon & toggle with smooth slider ───── */
 const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) => {
   const dims = ratio === "16:9" ? { w: 16, h: 10 } : { w: 10, h: 16 };
   return (
@@ -742,28 +893,41 @@ const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) =
         width: dims.w, height: dims.h,
         border: `1.5px solid ${selected ? "#71F0F6" : "hsl(var(--foreground) / 0.5)"}`,
         borderRadius: 2,
+        transition: "border-color 0.2s ease",
       }}
     />
   );
 };
 
-const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
-  <div
-    className="flex h-[31px] items-center rounded-full"
-    style={{ border: "0.7px solid hsl(var(--foreground) / 0.25)", padding: "0 4px", gap: 2 }}
-  >
-    {RATIO_OPTIONS.map((opt) => (
-      <button
-        key={opt.value}
-        onClick={() => onChange(opt.value)}
-        className="flex h-[25px] w-[30px] items-center justify-center rounded-full transition-colors"
-        style={{ background: value === opt.value ? "hsl(var(--foreground) / 0.15)" : "transparent" }}
-      >
-        <RatioIcon ratio={opt.value} selected={value === opt.value} />
-      </button>
-    ))}
-  </div>
-);
+const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const activeIdx = RATIO_OPTIONS.findIndex(o => o.value === value);
+  return (
+    <div
+      className="relative flex h-[31px] items-center rounded-full"
+      style={{ border: "0.7px solid hsl(var(--foreground) / 0.25)", padding: "0 4px", gap: 2 }}
+    >
+      {/* Smooth sliding background */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: 30, height: 25,
+          background: "hsl(var(--foreground) / 0.15)",
+          left: 4 + activeIdx * 32,
+          transition: "left 0.3s ease",
+        }}
+      />
+      {RATIO_OPTIONS.map((opt) => (
+        <button
+          key={opt.value}
+          onClick={() => onChange(opt.value)}
+          className="relative flex h-[25px] w-[30px] items-center justify-center rounded-full z-10"
+        >
+          <RatioIcon ratio={opt.value} selected={value === opt.value} />
+        </button>
+      ))}
+    </div>
+  );
+};
 
 /* ───── Glass CTA button (Figma spec, forwardRef) ───── */
 const GlassButton = forwardRef<
@@ -778,8 +942,13 @@ const GlassButton = forwardRef<
   <button
     ref={ref}
     onClick={onClick}
-    className={`glass-btn relative flex items-center justify-center rounded-full overflow-hidden transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className || ""}`}
-    style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45, ...style }}
+    className={`glass-btn relative flex items-center justify-center overflow-hidden transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className || ""}`}
+    style={{
+      background: "rgba(69, 196, 246, 0.05)",
+      borderRadius: 20.45,
+      border: "1px solid rgba(69, 196, 246, 0.15)",
+      ...style,
+    }}
   >
     {/* Inner glow layer */}
     <div
@@ -789,6 +958,7 @@ const GlassButton = forwardRef<
         background: "rgba(69, 196, 246, 0.6)",
         filter: "blur(6.75px)",
         borderRadius: 20.45,
+        zIndex: 1,
       }}
     />
     {/* Text layer – above glow */}
@@ -803,10 +973,11 @@ const GlassButton = forwardRef<
 GlassButton.displayName = "GlassButton";
 
 /* ───── Make pill button ───── */
-const MakePill = ({ ctaText = "Make" }: { ctaText?: string }) => (
+const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ctaIcon?: string; onClick?: () => void }) => (
   <button
+    onClick={onClick}
     className="glass-btn relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] overflow-hidden transition-all active:scale-[0.97]"
-    style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45 }}
+    style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45, border: "1px solid rgba(69, 196, 246, 0.15)" }}
   >
     <div
       className="glass-btn-glow absolute pointer-events-none transition-all duration-200"
@@ -815,9 +986,11 @@ const MakePill = ({ ctaText = "Make" }: { ctaText?: string }) => (
         background: "rgba(69, 196, 246, 0.6)",
         filter: "blur(6.75px)",
         borderRadius: 20.45,
+        zIndex: 1,
       }}
     />
     <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
+      {ctaIcon && <span className="mr-1">{ctaIcon}</span>}
       {ctaText}
     </span>
     <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", zIndex: 2 }}>
@@ -843,7 +1016,7 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
         className="relative"
         style={{
           width: 480,
-          background: "rgba(10, 10, 10, 0.45)",
+          background: "hsl(var(--background) / 0.05)",
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
           borderRadius: 20,
@@ -852,11 +1025,11 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
           boxShadow: "inset 0px 0px 7.3px rgba(255, 255, 255, 0.15), inset 0px 7.3px 14.6px rgba(255, 255, 255, 0.08), inset 0px 0.4px 0.49px rgba(255, 255, 255, 0.12), 0 24px 80px rgba(0,0,0,0.5)",
         }}
       >
-        {/* Close button */}
+        {/* Close button — positioned outside image area */}
         <button
           onClick={onClose}
-          className="absolute z-10 flex items-center justify-center rounded-full transition-all hover:bg-foreground/20"
-          style={{ right: 16, top: 16, width: 32, height: 32, background: "hsl(var(--foreground) / 0.1)" }}
+          className="absolute z-20 flex items-center justify-center rounded-full transition-all hover:bg-foreground/20"
+          style={{ right: -12, top: -12, width: 32, height: 32, background: "rgba(30,30,30,0.9)", border: "1px solid rgba(255,255,255,0.1)" }}
         >
           <X size={16} className="text-foreground/70" />
         </button>
@@ -901,7 +1074,6 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
             Available now for all subscribers. Free users get 3 trial generations.
           </p>
 
-          {/* CTA */}
           <div className="flex justify-end" style={{ marginTop: 20 }}>
             <GlassButton onClick={onClose} style={{ width: 140, height: 40 }}>
               Get Started
