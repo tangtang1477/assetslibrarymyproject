@@ -70,7 +70,7 @@ const Sidebar = ({ activePage }: SidebarProps) => {
           width: 48,
           borderRadius: 100,
           padding: "16px 12px",
-          gap: 12,
+          gap: 20,
         }}
       >
         {NAV_ITEMS.map((item) => {

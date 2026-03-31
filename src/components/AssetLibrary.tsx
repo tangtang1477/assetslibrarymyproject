@@ -98,56 +98,90 @@ export const useAssetLibrary = () => useContext(AssetLibraryContext);
 export const AssetFilterBar = ({
   periodTab, setPeriodTab, assetType, setAssetType,
   region, setRegion, subject, setSubject, style, setStyle, showFilters,
-}: AssetLibraryContextType) => (
-  <div className="flex items-start gap-4 flex-wrap">
-    <FilterDropdown label="Type" options={TYPE_OPTIONS} value={assetType} onChange={setAssetType} />
-    {showFilters && (
-      <>
-        <FilterDropdown label="Region" options={REGION_OPTIONS} value={region} onChange={setRegion} />
-        <FilterDropdown label="Subject" options={SUBJECT_OPTIONS} value={subject} onChange={setSubject} />
-        <FilterDropdown label="Style" options={STYLE_OPTIONS} value={style} onChange={setStyle} />
-      </>
-    )}
-    <div className="flex-1" />
-    {/* My / Public toggle */}
-    <div
-      className="flex items-center gap-1 rounded-full border p-1"
-      style={{
-        background: "hsl(var(--foreground) / 0.08)",
-        borderColor: "hsl(var(--foreground) / 0.15)",
-      }}
-    >
-      <button
-        onClick={() => setPeriodTab("my")}
-        className="flex items-center justify-center rounded-full transition-colors"
+}: AssetLibraryContextType) => {
+  const myRef = useRef<HTMLButtonElement>(null);
+  const publicRef = useRef<HTMLButtonElement>(null);
+  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
+
+  useEffect(() => {
+    const ref = periodTab === "my" ? myRef : publicRef;
+    if (ref.current) {
+      const parent = ref.current.parentElement;
+      if (parent) {
+        const parentRect = parent.getBoundingClientRect();
+        const btnRect = ref.current.getBoundingClientRect();
+        setSliderStyle({
+          left: btnRect.left - parentRect.left,
+          width: btnRect.width,
+        });
+      }
+    }
+  }, [periodTab]);
+
+  return (
+    <div className="flex items-center gap-4 flex-wrap">
+      <FilterDropdown label="Type" options={TYPE_OPTIONS} value={assetType} onChange={setAssetType} />
+      {showFilters && (
+        <>
+          <FilterDropdown label="Region" options={REGION_OPTIONS} value={region} onChange={setRegion} />
+          <FilterDropdown label="Subject" options={SUBJECT_OPTIONS} value={subject} onChange={setSubject} />
+          <FilterDropdown label="Style" options={STYLE_OPTIONS} value={style} onChange={setStyle} />
+        </>
+      )}
+      <div className="flex-1" />
+      {/* My / Public sliding toggle */}
+      <div
+        className="relative flex items-center rounded-full"
         style={{
-          fontFamily: "'SF Pro', Arial, sans-serif",
-          padding: "8px 16px",
-          fontSize: 16,
-          lineHeight: "24px",
-          background: periodTab === "my" ? "hsl(var(--primary))" : "transparent",
-          color: periodTab === "my" ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground) / 0.5)",
+          background: "hsl(var(--foreground) / 0.08)",
+          border: "1px solid hsl(var(--foreground) / 0.15)",
+          padding: 4,
         }}
       >
-        My
-      </button>
-      <button
-        onClick={() => setPeriodTab("public")}
-        className="flex items-center justify-center rounded-full transition-colors"
-        style={{
-          fontFamily: "'SF Pro', Arial, sans-serif",
-          padding: "8px 16px",
-          fontSize: 16,
-          lineHeight: "24px",
-          background: periodTab === "public" ? "hsl(var(--primary))" : "transparent",
-          color: periodTab === "public" ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground) / 0.5)",
-        }}
-      >
-        Public
-      </button>
+        {/* Sliding cyan pill */}
+        <div
+          className="absolute rounded-full"
+          style={{
+            height: "calc(100% - 8px)",
+            top: 4,
+            left: sliderStyle.left,
+            width: sliderStyle.width,
+            background: "hsl(var(--primary))",
+            transition: "left 0.3s ease, width 0.3s ease",
+          }}
+        />
+        <button
+          ref={myRef}
+          onClick={() => setPeriodTab("my")}
+          className="relative z-10 flex items-center justify-center rounded-full transition-colors"
+          style={{
+            fontFamily: "Arial, sans-serif",
+            padding: "8px 16px",
+            fontSize: 16,
+            lineHeight: "24px",
+            color: periodTab === "my" ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground) / 0.5)",
+          }}
+        >
+          My
+        </button>
+        <button
+          ref={publicRef}
+          onClick={() => setPeriodTab("public")}
+          className="relative z-10 flex items-center justify-center rounded-full transition-colors"
+          style={{
+            fontFamily: "Arial, sans-serif",
+            padding: "8px 16px",
+            fontSize: 16,
+            lineHeight: "24px",
+            color: periodTab === "public" ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground) / 0.5)",
+          }}
+        >
+          Public
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const AssetCard = ({
   asset, isSelected, onClick,
@@ -204,14 +238,22 @@ const FilterDropdown = ({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-[1.5px] transition-colors
-          hover:border-foreground/40 active:border-foreground/60
-          ${value !== "All" ? "border-primary text-foreground" : "border-foreground/20"}`}
+        className={`flex items-center gap-2 rounded-lg overflow-hidden transition-all duration-200
+          ${value !== "All"
+            ? "bg-primary hover:brightness-110 active:brightness-90"
+            : "bg-foreground/10 hover:bg-foreground/15 active:brightness-75"
+          }`}
+        style={{ padding: "8px 16px" }}
       >
-        <span className="text-[16px] leading-4 text-foreground/70" style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}>
+        <span
+          className={`text-[16px] leading-4 transition-colors ${
+            value !== "All" ? "text-primary-foreground" : "text-foreground/70"
+          }`}
+          style={{ fontFamily: "'SF Pro', Arial, sans-serif" }}
+        >
           {value === "All" ? label : value}
         </span>
-        <ChevronDown size={20} className={`text-foreground/50 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown size={20} className={`transition-transform ${value !== "All" ? "text-primary-foreground/70" : "text-foreground/50"} ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
         <div className="absolute top-full left-0 mt-2 min-w-[220px] rounded-xl bg-popover border border-foreground/10 shadow-lg z-50 py-1" style={{ scrollbarWidth: "none" }}>
