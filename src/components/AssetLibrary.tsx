@@ -109,34 +109,49 @@ export const AssetFilterBar = ({
       </>
     )}
     <div className="flex-1" />
+    {/* My / Public toggle */}
     <div
-      className="relative flex items-center rounded-full border border-foreground/20"
-      style={{ padding: "4px", background: "hsl(var(--background))" }}
+      className="relative flex items-center rounded-full"
+      style={{
+        padding: 4,
+        background: "rgba(255,255,255,0.08)",
+        border: "1px solid rgba(255,255,255,0.15)",
+      }}
     >
+      {/* Sliding indicator */}
       <div
-        className="absolute rounded-full bg-primary transition-all duration-300 ease-in-out"
+        className="absolute rounded-full transition-all duration-300 ease-in-out"
         style={{
-          width: "calc(50% - 4px)",
+          width: periodTab === "my" ? 60 : 84,
           height: "calc(100% - 8px)",
-          left: periodTab === "my" ? 4 : "calc(50% + 4px)",
+          left: periodTab === "my" ? 4 : 64,
           top: 4,
+          background: "hsl(var(--primary))",
         }}
       />
       <button
         onClick={() => setPeriodTab("my")}
-        className={`relative z-10 flex items-center justify-center rounded-full transition-colors ${
-          periodTab === "my" ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground/90"
-        }`}
-        style={{ fontFamily: "'SF Pro', Arial, sans-serif", padding: "8px 16px", fontSize: 16, lineHeight: "24px" }}
+        className="relative z-10 flex items-center justify-center rounded-full transition-colors"
+        style={{
+          fontFamily: "'SF Pro', Arial, sans-serif",
+          padding: "8px 16px",
+          fontSize: 16,
+          lineHeight: "24px",
+          color: periodTab === "my" ? "hsl(var(--primary-foreground))" : "rgba(255,255,255,0.5)",
+        }}
       >
         My
       </button>
       <button
         onClick={() => setPeriodTab("public")}
-        className={`relative z-10 flex items-center justify-center rounded-full transition-colors ${
-          periodTab === "public" ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground/90"
-        }`}
-        style={{ fontFamily: "'SF Pro', Arial, sans-serif", padding: "8px 16px", fontSize: 16, lineHeight: "24px" }}
+        className="relative z-10 flex items-center justify-center rounded-full transition-colors"
+        style={{
+          fontFamily: "'SF Pro', Arial, sans-serif",
+          padding: "8px 16px",
+          fontSize: 16,
+          lineHeight: "24px",
+          color: periodTab === "public" ? "hsl(var(--primary-foreground))" : "rgba(255,255,255,0.5)",
+        }}
       >
         Public
       </button>

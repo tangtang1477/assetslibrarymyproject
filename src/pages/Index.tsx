@@ -71,8 +71,8 @@ const Index = () => {
               />
             </TabBar>
           </div>
-          {/* 32px gap between filters and content */}
-          <div style={{ marginTop: 32 }}>
+          {/* 32px gap between filters/buttons and content */}
+          <div style={{ paddingTop: 32 }}>
             {renderContent()}
           </div>
         </div>
