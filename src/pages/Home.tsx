@@ -1071,7 +1071,7 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
           </p>
 
           <div className="flex justify-end" style={{ marginTop: 20 }}>
-            <GlassButton onClick={onClose} style={{ width: 140, height: 40 }}>
+            <GlassButton onClick={onClose} style={{ width: "100%", height: 44 }}>
               Get Started
             </GlassButton>
           </div>
