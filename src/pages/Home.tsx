@@ -942,7 +942,7 @@ const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string)
   );
 };
 
-/* ───── Glass CTA button (Figma spec, forwardRef) ───── */
+/* ───── Glass CTA button (artlist.io-inspired solid cyan) ───── */
 const GlassButton = forwardRef<
   HTMLButtonElement,
   {
@@ -955,30 +955,20 @@ const GlassButton = forwardRef<
   <button
     ref={ref}
     onClick={onClick}
-    className={`glass-btn relative flex items-center justify-center overflow-hidden transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className || ""}`}
+    className={`relative flex items-center justify-center rounded-full transition-all duration-200 hover:brightness-110 hover:shadow-[0_0_20px_rgba(113,240,246,0.4)] active:scale-[0.96] active:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className || ""}`}
     style={{
-      background: "rgba(69, 196, 246, 0.05)",
-      borderRadius: 20.45,
-      border: "1px solid rgba(69, 196, 246, 0.15)",
+      background: "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
+      borderRadius: 24,
+      color: "#000",
+      fontFamily: "Arial, sans-serif",
+      fontWeight: 700,
+      fontSize: 14,
+      lineHeight: "20px",
+      letterSpacing: "0.01em",
       ...style,
     }}
   >
-    {/* Inner glow layer */}
-    <div
-      className="glass-btn-glow absolute pointer-events-none transition-all duration-200"
-      style={{
-        left: 6, right: 4, top: 6, bottom: 5,
-        background: "rgba(69, 196, 246, 0.6)",
-        filter: "blur(6.75px)",
-        borderRadius: 20.45,
-        zIndex: 1,
-      }}
-    />
-    {/* Text layer – above glow */}
-    <span
-      className="relative font-bold"
-      style={{ fontFamily: "Arial, sans-serif", fontSize: 15, lineHeight: "23px", color: "#71F0F6", zIndex: 2 }}
-    >
+    <span className="relative" style={{ zIndex: 2 }}>
       {children}
     </span>
   </button>
