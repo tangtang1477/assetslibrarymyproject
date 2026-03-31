@@ -152,12 +152,12 @@ const RATIO_OPTIONS = [
 
 /* ───── Character cast list ───── */
 const CHARACTERS = [
-  { name: "Sara", color: "linear-gradient(135deg, #FF6B9D, #C45AB3)" },
-  { name: "Neko", color: "linear-gradient(135deg, #A78BFA, #7C3AED)" },
-  { name: "Cindy", color: "linear-gradient(135deg, #34D399, #059669)" },
-  { name: "Queen", color: "linear-gradient(135deg, #F59E0B, #D97706)" },
-  { name: "Sam", color: "linear-gradient(135deg, #3B82F6, #1D4ED8)" },
-  { name: "Jason", color: "linear-gradient(135deg, #EF4444, #B91C1C)" },
+  { name: "Sara", avatar: avatarSara },
+  { name: "Neko", avatar: avatarNeko },
+  { name: "Cindy", avatar: avatarCindy },
+  { name: "Queen", avatar: avatarQueen },
+  { name: "Sam", avatar: avatarSam },
+  { name: "Jason", avatar: avatarJason },
 ];
 
 /* ───── For‑You showcase videos (7 items) ───── */
