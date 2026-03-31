@@ -408,6 +408,7 @@ const OptionPillDropdown = ({
   value: string;
   onChange: (v: string) => void;
   badgeIcon?: string;
+  badgeSize?: number;
 }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
