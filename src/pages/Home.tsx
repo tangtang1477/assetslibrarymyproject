@@ -1,5 +1,6 @@
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import bannerBg from "@/assets/banner-bg.jpg";
 import project1 from "@/assets/project-1.jpg";
@@ -21,6 +22,10 @@ import iconTool from "@/assets/icon-tool.svg";
 import iconAideo from "@/assets/icon-aideo.svg";
 import iconAssets from "@/assets/icon-assets.svg";
 import iconAll from "@/assets/icon-all.svg";
+import iconLanguage from "@/assets/icon-language.svg";
+import iconEnhance from "@/assets/icon-enhance.svg";
+import iconTime from "@/assets/icon-time.svg";
+import iconNewBadge from "@/assets/icon-new-badge.svg";
 
 const QUICK_LINKS = [
   { label: "All", icon: iconAll, bg: "hsl(var(--quick-link-all))", path: "/home" },
@@ -47,15 +52,51 @@ const TOOLKIT_ITEMS = [
   { src: tool3 },
 ];
 
+const MODEL_OPTIONS = [
+  { label: "Seedance", value: "seedance" },
+  { label: "Kling", value: "kling" },
+];
+
+const LANGUAGE_OPTIONS = [
+  { label: "EN", value: "en" },
+  { label: "中文", value: "zh" },
+  { label: "日本語", value: "ja" },
+  { label: "한국어", value: "ko" },
+  { label: "Español", value: "es" },
+];
+
+const ENHANCE_OPTIONS = [
+  { label: "Enhance on", value: "on" },
+  { label: "Enhance off", value: "off" },
+];
+
+const TIME_OPTIONS = [
+  { label: "6min", value: "6min" },
+  { label: "3min", value: "3min" },
+  { label: "1min", value: "1min" },
+  { label: "10min", value: "10min" },
+];
+
+const RATIO_OPTIONS = [
+  { label: "Portrait", value: "portrait" },
+  { label: "Landscape", value: "landscape" },
+  { label: "Square", value: "square" },
+];
+
 const Home = () => {
   const navigate = useNavigate();
+  const [selectedModel, setSelectedModel] = useState("seedance");
+  const [selectedLang, setSelectedLang] = useState("en");
+  const [selectedEnhance, setSelectedEnhance] = useState("on");
+  const [selectedTime, setSelectedTime] = useState("6min");
+  const [selectedRatio, setSelectedRatio] = useState("portrait");
 
   return (
-    <div className="min-h-screen bg-background flex overflow-hidden">
+    <div className="h-screen bg-background flex overflow-hidden">
       <Sidebar activePage="home" />
 
       <div className="flex-1 ml-[88px] overflow-y-auto hide-scrollbar">
-        <div className="relative overflow-hidden px-9 pt-6" style={{ minHeight: 1180 }}>
+        <div className="relative overflow-hidden px-9 pt-6" style={{ minHeight: 800 }}>
           <div
             className="absolute left-9 right-9 top-0 rounded-[12px]"
             style={{
@@ -92,7 +133,7 @@ const Home = () => {
 
           <TopRightHeader />
 
-          <div className="relative z-10 flex flex-col items-center pt-10">
+          <div className="relative z-10 flex flex-col items-center" style={{ paddingTop: 64 }}>
             <div className="flex flex-col items-center gap-2">
               <h1 className="text-foreground font-bold text-center" style={{ fontFamily: "Arial, sans-serif", fontSize: 36, lineHeight: "44px" }}>
                 Ideas Spark Movies
@@ -146,22 +187,56 @@ const Home = () => {
                   </span>
                 </div>
 
-                <div className="absolute bottom-2 left-4 right-4 flex items-center gap-2">
-                  <OptionPill label="EN" minWidth={80} />
-                  <OptionPill label="Enhance on" minWidth={128} />
-                  <OptionPill label="6min" minWidth={93} hasNew />
-                  <OptionPill label="Portrait" minWidth={73} />
-                  <OptionPill label="Landscape" minWidth={73} />
+                {/* Input options inside the box, 8px from bottom, 8px gap */}
+                <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8 }}>
+                  <OptionPillDropdown
+                    icon={undefined}
+                    label={MODEL_OPTIONS.find(o => o.value === selectedModel)?.label || "Seedance"}
+                    options={MODEL_OPTIONS}
+                    value={selectedModel}
+                    onChange={setSelectedModel}
+                  />
+                  <OptionPillDropdown
+                    icon={iconLanguage}
+                    label={LANGUAGE_OPTIONS.find(o => o.value === selectedLang)?.label || "EN"}
+                    options={LANGUAGE_OPTIONS}
+                    value={selectedLang}
+                    onChange={setSelectedLang}
+                  />
+                  <OptionPillDropdown
+                    icon={iconEnhance}
+                    label={ENHANCE_OPTIONS.find(o => o.value === selectedEnhance)?.label || "Enhance on"}
+                    options={ENHANCE_OPTIONS}
+                    value={selectedEnhance}
+                    onChange={setSelectedEnhance}
+                  />
+                  <OptionPillDropdown
+                    icon={iconTime}
+                    label={TIME_OPTIONS.find(o => o.value === selectedTime)?.label || "6min"}
+                    options={TIME_OPTIONS}
+                    value={selectedTime}
+                    onChange={setSelectedTime}
+                    badgeIcon={iconNewBadge}
+                  />
+                  <OptionPillDropdown
+                    icon={undefined}
+                    label={RATIO_OPTIONS.find(o => o.value === selectedRatio)?.label || "Portrait"}
+                    options={RATIO_OPTIONS}
+                    value={selectedRatio}
+                    onChange={setSelectedRatio}
+                  />
                   <MakePill />
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 w-full max-w-[1794px]">
+            {/* For You showcase - 32px below input */}
+            <div style={{ marginTop: 32 }} className="w-full max-w-[1794px]">
               <ForYouShowcase />
             </div>
 
-            <div className="mt-8 flex flex-wrap justify-center gap-16">
+            {/* Quick navigation - 32px below For You */}
+            <div className="flex flex-wrap justify-center" style={{ marginTop: 32, gap: 64 }}>
               {QUICK_LINKS.map((link) => (
                 <button
                   key={link.label}
@@ -180,6 +255,7 @@ const Home = () => {
           </div>
         </div>
 
+        {/* Scrollable lower content */}
         <div className="px-9 pb-16">
           <SectionHeader title="Inspiration Labs" />
           <div className="mt-12 flex gap-[22px] overflow-x-auto hide-scrollbar">
@@ -336,17 +412,95 @@ const SectionHeader = ({ title }: { title: string }) => (
   </div>
 );
 
-const OptionPill = ({ label, minWidth, hasNew }: { label: string; minWidth: number; hasNew?: boolean }) => (
-  <div className="relative">
-    <button
-      className="flex h-[31px] items-center justify-center rounded-full px-4"
-      style={{ minWidth, border: "0.7px solid hsl(var(--foreground) / 0.25)", fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}
-    >
-      {label}
-    </button>
-    {hasNew && <div className="absolute -right-1 -top-1 h-[10px] w-[10px] rounded-full bg-primary" />}
-  </div>
-);
+/** Reusable dropdown pill for input options */
+const OptionPillDropdown = ({
+  icon,
+  label,
+  options,
+  value,
+  onChange,
+  badgeIcon,
+}: {
+  icon?: string;
+  label: string;
+  options: { label: string; value: string }[];
+  value: string;
+  onChange: (v: string) => void;
+  badgeIcon?: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
+        style={{
+          padding: "0 16px",
+          border: "0.7px solid hsl(var(--foreground) / 0.25)",
+          gap: 8,
+        }}
+      >
+        {icon && <img src={icon} alt="" className="w-4 h-4" style={{ opacity: 0.7 }} />}
+        <span
+          style={{
+            fontFamily: "Arial, sans-serif",
+            fontSize: 14,
+            lineHeight: "22px",
+            color: "hsl(var(--foreground) / 0.8)",
+          }}
+        >
+          {label}
+        </span>
+        <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
+      </button>
+      {badgeIcon && (
+        <div className="absolute -right-1 -top-1 w-[10px] h-[10px]">
+          <img src={badgeIcon} alt="new" className="w-full h-full" />
+        </div>
+      )}
+      {open && (
+        <div
+          className="absolute bottom-full left-0 mb-2 rounded-xl border border-foreground/10 shadow-lg z-50 py-1"
+          style={{
+            minWidth: 160,
+            background: "#1a1a1a",
+          }}
+        >
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={`w-full flex items-center text-left transition-colors hover:bg-foreground/10 ${
+                value === opt.value ? "text-primary" : "text-foreground/70 hover:text-foreground"
+              }`}
+              style={{
+                padding: "8px 16px",
+                gap: 8,
+                fontFamily: "Arial, sans-serif",
+                fontSize: 16,
+                lineHeight: "16px",
+                fontWeight: 400,
+              }}
+            >
+              {icon && <img src={icon} alt="" className="w-4 h-4" style={{ opacity: value === opt.value ? 1 : 0.7 }} />}
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const MakePill = () => (
   <button className="relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px]" style={{ background: "hsl(var(--primary) / 0.05)" }}>
