@@ -1021,13 +1021,13 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
           boxShadow: "inset 0px 0px 7.3px rgba(255, 255, 255, 0.15), inset 0px 7.3px 14.6px rgba(255, 255, 255, 0.08), inset 0px 0.4px 0.49px rgba(255, 255, 255, 0.12), 0 24px 80px rgba(0,0,0,0.5)",
         }}
       >
-        {/* Close button — positioned outside image area */}
+        {/* Close button — no background, just X */}
         <button
           onClick={onClose}
-          className="absolute z-20 flex items-center justify-center rounded-full transition-all hover:bg-foreground/20"
-          style={{ right: -12, top: -12, width: 32, height: 32, background: "rgba(30,30,30,0.9)", border: "1px solid rgba(255,255,255,0.1)" }}
+          className="absolute z-20 flex items-center justify-center transition-all hover:opacity-100"
+          style={{ right: 16, top: 16, opacity: 0.6 }}
         >
-          <X size={16} className="text-foreground/70" />
+          <X size={20} className="text-foreground" />
         </button>
 
         {/* Hero image */}
