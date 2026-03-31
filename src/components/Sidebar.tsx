@@ -41,39 +41,36 @@ const Sidebar = ({ activePage }: SidebarProps) => {
   };
 
   return (
-    <div
-      className="fixed left-0 top-0 h-screen flex flex-col items-center z-50"
-      style={{ width: 88, paddingLeft: 20 }}
-    >
+    <div className="fixed left-0 top-0 z-50 h-screen w-[88px]">
       {/* Logo */}
-      <div className="mt-6 mb-6 cursor-pointer" onClick={() => navigate("/home")}>
+      <div className="absolute left-8 top-6 cursor-pointer" onClick={() => navigate("/home")}>
         <img src={logoM} alt="Logo" className="w-6 h-7 object-contain" />
       </div>
 
       {/* Plus button */}
       <button
         onClick={() => navigate("/home")}
-        className="w-12 h-12 rounded-full flex items-center justify-center mb-4
+        className="absolute left-5 flex h-12 w-12 items-center justify-center rounded-full
           hover:brightness-90 active:brightness-75 transition-all"
-        style={{ background: "rgba(255,255,255,0.4)" }}
+        style={{
+          top: "calc(50% - 146px)",
+          background: "hsl(var(--foreground) / 0.4)",
+        }}
       >
         <Plus size={18} className="text-foreground" />
       </button>
 
-      {/* Spacer to push nav pill to vertical center */}
-      <div className="flex-1" />
-
       {/* Nav pill - glass effect, vertically centered */}
       <div
-        className="flex flex-col items-center"
+        className="absolute left-5 top-1/2 flex -translate-y-1/2 flex-col items-center"
         style={{
-          background: "rgba(255,255,255,0.1)",
+          background: "hsl(var(--foreground) / 0.1)",
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
           width: 48,
           borderRadius: 100,
           padding: "16px 12px",
-          gap: 20,
+          gap: 12,
         }}
       >
         {NAV_ITEMS.map((item) => {
@@ -99,7 +96,7 @@ const Sidebar = ({ activePage }: SidebarProps) => {
                     top: "50%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
-                    background: "rgba(255,255,255,0.2)",
+                  background: "hsl(var(--foreground) / 0.2)",
                   }}
                 />
               )}
@@ -119,12 +116,13 @@ const Sidebar = ({ activePage }: SidebarProps) => {
                 <div
                   className="absolute flex items-center justify-center whitespace-nowrap"
                   style={{
-                    left: "calc(100% + 28px)",
+                    left: "calc(100% + 20px)",
                     top: "50%",
                     transform: "translateY(-50%)",
-                    background: "rgba(255,255,255,0.4)",
+                    background: "hsl(var(--foreground) / 0.4)",
                     borderRadius: 100,
                     padding: "8px 16px",
+                    pointerEvents: "none",
                   }}
                 >
                   <span
@@ -145,11 +143,8 @@ const Sidebar = ({ activePage }: SidebarProps) => {
         })}
       </div>
 
-      {/* Spacer */}
-      <div className="flex-1" />
-
       {/* Bottom icons */}
-      <div className="flex flex-col items-center gap-4 mb-6">
+      <div className="absolute bottom-6 left-7 flex flex-col items-center gap-4">
         <button className="w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity">
           <img src={iconSubscribe} alt="Subscribe" className="w-6 h-6" />
         </button>
