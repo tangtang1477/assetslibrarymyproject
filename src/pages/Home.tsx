@@ -217,10 +217,7 @@ const Home = () => {
                     onChange={setSelectedTime}
                     badgeIcon={iconNewBadge}
                   />
-                  <OptionPillDropdown
-                    icon={undefined}
-                    label={RATIO_OPTIONS.find(o => o.value === selectedRatio)?.label || "Portrait"}
-                    options={RATIO_OPTIONS}
+                  <RatioPillDropdown
                     value={selectedRatio}
                     onChange={setSelectedRatio}
                   />
