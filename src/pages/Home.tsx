@@ -28,6 +28,12 @@ import iconTime from "@/assets/icon-time.svg";
 import iconNewBadge from "@/assets/icon-new-badge.svg";
 import iconGift from "@/assets/icon-gift.svg";
 import iconCredit from "@/assets/icon-credit.svg";
+import avatarSara from "@/assets/avatar-sara.jpg";
+import avatarNeko from "@/assets/avatar-neko.jpg";
+import avatarCindy from "@/assets/avatar-cindy.jpg";
+import avatarQueen from "@/assets/avatar-queen.jpg";
+import avatarSam from "@/assets/avatar-sam.jpg";
+import avatarJason from "@/assets/avatar-jason.jpg";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 /* ───── Quick‑link data ───── */
@@ -146,12 +152,12 @@ const RATIO_OPTIONS = [
 
 /* ───── Character cast list ───── */
 const CHARACTERS = [
-  { name: "Sara", color: "linear-gradient(135deg, #FF6B9D, #C45AB3)" },
-  { name: "Neko", color: "linear-gradient(135deg, #A78BFA, #7C3AED)" },
-  { name: "Cindy", color: "linear-gradient(135deg, #34D399, #059669)" },
-  { name: "Queen", color: "linear-gradient(135deg, #F59E0B, #D97706)" },
-  { name: "Sam", color: "linear-gradient(135deg, #3B82F6, #1D4ED8)" },
-  { name: "Jason", color: "linear-gradient(135deg, #EF4444, #B91C1C)" },
+  { name: "Sara", avatar: avatarSara },
+  { name: "Neko", avatar: avatarNeko },
+  { name: "Cindy", avatar: avatarCindy },
+  { name: "Queen", avatar: avatarQueen },
+  { name: "Sam", avatar: avatarSam },
+  { name: "Jason", avatar: avatarJason },
 ];
 
 /* ───── For‑You showcase videos (7 items) ───── */
@@ -285,27 +291,32 @@ const Home = () => {
               </p>
             </div>
 
-            {/* Character Cast List */}
-            <div className="flex items-center justify-center mt-8" style={{ gap: 35 }}>
+            {/* Character Cast List — 48px avatars, left-aligned with input */}
+            <div className="flex items-center mt-6" style={{ gap: 20, width: 990, marginLeft: "auto", marginRight: "auto" }}>
               {CHARACTERS.map((char) => (
                 <button
                   key={char.name}
-                  className="flex flex-col items-center transition-all"
-                  style={{ gap: 16, width: 96 }}
+                  className="flex flex-col items-center transition-all hover:opacity-90 active:scale-95"
+                  style={{ gap: 6 }}
                   onClick={() => setSelectedCharacter(selectedCharacter === char.name ? null : char.name)}
                 >
                   <div
-                    className="rounded-full flex-shrink-0"
+                    className="rounded-full flex-shrink-0 overflow-hidden"
                     style={{
-                      width: 100, height: 100,
-                      background: char.color,
-                      border: selectedCharacter === char.name ? "3px solid #71F0F6" : "3px solid #191E1F",
+                      width: 48, height: 48,
+                      border: selectedCharacter === char.name ? "2px solid #71F0F6" : "2px solid #191E1F",
                       transition: "border-color 0.2s ease",
                     }}
-                  />
+                  >
+                    <img src={char.avatar} alt={char.name} className="w-full h-full object-cover" loading="lazy" />
+                  </div>
                   <span
-                    className="text-center text-foreground"
-                    style={{ fontFamily: "Arial, sans-serif", fontSize: 20, lineHeight: "23px", width: 96 }}
+                    className="text-center"
+                    style={{
+                      fontFamily: "Arial, sans-serif", fontSize: 12, lineHeight: "14px",
+                      color: selectedCharacter === char.name ? "#71F0F6" : "hsl(var(--foreground) / 0.7)",
+                      transition: "color 0.2s ease",
+                    }}
                   >
                     {char.name}
                   </span>
@@ -332,16 +343,9 @@ const Home = () => {
                     style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
                     <video src="/banner-video.mp4" autoPlay loop muted playsInline
                       className="absolute inset-0 w-full h-full object-cover rounded-[25px] opacity-30" />
-                    <button
-                      className="glass-btn relative z-30 flex items-center justify-center rounded-full overflow-hidden px-6 py-3"
-                      style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45, animation: "pulse 2s infinite" }}
-                    >
-                      <div className="glass-btn-glow absolute pointer-events-none"
-                        style={{ left: 6, right: 4, top: 6, bottom: 5, background: "rgba(69, 196, 246, 0.6)", filter: "blur(6.75px)", borderRadius: 20.45 }} />
-                      <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, color: "#71F0F6", zIndex: 2 }}>
-                        🎟 Join Waitlist
-                      </span>
-                    </button>
+                    <GlassButton style={{ padding: "12px 28px", animation: "pulse 2s infinite", zIndex: 30 }}>
+                      🎟 Join Waitlist
+                    </GlassButton>
                   </div>
                 )}
 
@@ -394,7 +398,9 @@ const Home = () => {
                             onClick={() => handleSelectCharacterFromAt(char.name)}
                             className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-foreground/10 transition-colors text-left"
                           >
-                            <div className="rounded-full" style={{ width: 32, height: 32, background: char.color, flexShrink: 0 }} />
+                            <div className="rounded-full overflow-hidden" style={{ width: 28, height: 28, flexShrink: 0 }}>
+                              <img src={char.avatar} alt={char.name} className="w-full h-full object-cover" />
+                            </div>
                             <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 14 }}>{char.name}</span>
                           </button>
                         ))}
@@ -781,15 +787,16 @@ const OptionPillDropdown = ({
         sideOffset={8}
         className="border-foreground/10 p-1 shadow-2xl z-[9999]"
         style={{
-          minWidth: narrow ? 120 : 160,
-          maxHeight: scrollable ? 280 : undefined,
-          overflowY: scrollable ? "auto" : undefined,
+          minWidth: narrow ? 90 : 140,
           background: "rgba(20, 20, 20, 0.95)",
           backdropFilter: "blur(20px)",
           borderRadius: 12,
         }}
       >
-        <div className={scrollable ? "hide-scrollbar" : ""}>
+        <div className={scrollable ? "hide-scrollbar" : ""} style={{
+          maxHeight: scrollable ? 280 : undefined,
+          overflowY: scrollable ? "auto" : undefined,
+        }}>
           {options.map((opt) => (
             <button
               key={opt.value}
@@ -929,7 +936,7 @@ const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string)
   );
 };
 
-/* ───── Glass CTA button (Figma spec, forwardRef) ───── */
+/* ───── Glass CTA button (artlist.io-inspired solid cyan) ───── */
 const GlassButton = forwardRef<
   HTMLButtonElement,
   {
@@ -942,63 +949,46 @@ const GlassButton = forwardRef<
   <button
     ref={ref}
     onClick={onClick}
-    className={`glass-btn relative flex items-center justify-center overflow-hidden transition-all active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className || ""}`}
+    className={`relative flex items-center justify-center rounded-full transition-all duration-200 hover:brightness-110 hover:shadow-[0_0_20px_rgba(113,240,246,0.4)] active:scale-[0.96] active:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className || ""}`}
     style={{
-      background: "rgba(69, 196, 246, 0.05)",
-      borderRadius: 20.45,
-      border: "1px solid rgba(69, 196, 246, 0.15)",
+      background: "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
+      borderRadius: 24,
+      color: "#000",
+      fontFamily: "Arial, sans-serif",
+      fontWeight: 700,
+      fontSize: 14,
+      lineHeight: "20px",
+      letterSpacing: "0.01em",
       ...style,
     }}
   >
-    {/* Inner glow layer */}
-    <div
-      className="glass-btn-glow absolute pointer-events-none transition-all duration-200"
-      style={{
-        left: 6, right: 4, top: 6, bottom: 5,
-        background: "rgba(69, 196, 246, 0.6)",
-        filter: "blur(6.75px)",
-        borderRadius: 20.45,
-        zIndex: 1,
-      }}
-    />
-    {/* Text layer – above glow */}
-    <span
-      className="relative font-bold"
-      style={{ fontFamily: "Arial, sans-serif", fontSize: 15, lineHeight: "23px", color: "#71F0F6", zIndex: 2 }}
-    >
+    <span className="relative" style={{ zIndex: 2 }}>
       {children}
     </span>
   </button>
 ));
 GlassButton.displayName = "GlassButton";
 
-/* ───── Make pill button ───── */
+/* ───── Make pill button (artlist.io solid cyan style) ───── */
 const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ctaIcon?: string; onClick?: () => void }) => (
   <button
     onClick={onClick}
-    className="glass-btn relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] overflow-hidden transition-all active:scale-[0.97]"
-    style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45, border: "1px solid rgba(69, 196, 246, 0.15)" }}
+    className="relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] transition-all duration-200 hover:brightness-110 hover:shadow-[0_0_16px_rgba(113,240,246,0.4)] active:scale-[0.96] active:brightness-95"
+    style={{
+      background: "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
+      borderRadius: 20.45,
+    }}
   >
-    <div
-      className="glass-btn-glow absolute pointer-events-none transition-all duration-200"
-      style={{
-        left: 6, right: 4, top: 6, bottom: 5,
-        background: "rgba(69, 196, 246, 0.6)",
-        filter: "blur(6.75px)",
-        borderRadius: 20.45,
-        zIndex: 1,
-      }}
-    />
-    <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
+    <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#000", zIndex: 2 }}>
       {ctaIcon && <span className="mr-1">{ctaIcon}</span>}
       {ctaText}
     </span>
     <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", zIndex: 2 }}>
-      <span style={{ background: "linear-gradient(90deg, #71F0F6 25%, #AEF5FB 84%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+      <span style={{ color: "#000" }}>
         ✦
       </span>
     </span>
-    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
+    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#000", zIndex: 2 }}>
       10/s
     </span>
   </button>
@@ -1025,13 +1015,13 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
           boxShadow: "inset 0px 0px 7.3px rgba(255, 255, 255, 0.15), inset 0px 7.3px 14.6px rgba(255, 255, 255, 0.08), inset 0px 0.4px 0.49px rgba(255, 255, 255, 0.12), 0 24px 80px rgba(0,0,0,0.5)",
         }}
       >
-        {/* Close button — positioned outside image area */}
+        {/* Close button — no background, just X */}
         <button
           onClick={onClose}
-          className="absolute z-20 flex items-center justify-center rounded-full transition-all hover:bg-foreground/20"
-          style={{ right: -12, top: -12, width: 32, height: 32, background: "rgba(30,30,30,0.9)", border: "1px solid rgba(255,255,255,0.1)" }}
+          className="absolute z-20 flex items-center justify-center transition-all hover:opacity-100"
+          style={{ right: 16, top: 16, opacity: 0.6 }}
         >
-          <X size={16} className="text-foreground/70" />
+          <X size={20} className="text-foreground" />
         </button>
 
         {/* Hero image */}
@@ -1075,7 +1065,7 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
           </p>
 
           <div className="flex justify-end" style={{ marginTop: 20 }}>
-            <GlassButton onClick={onClose} style={{ width: 140, height: 40 }}>
+            <GlassButton onClick={onClose} style={{ width: "100%", height: 44 }}>
               Get Started
             </GlassButton>
           </div>
