@@ -401,6 +401,7 @@ const OptionPillDropdown = ({
   value,
   onChange,
   badgeIcon,
+  badgeSize,
 }: {
   icon?: string;
   label: string;
