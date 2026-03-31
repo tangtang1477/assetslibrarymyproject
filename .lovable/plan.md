@@ -1,119 +1,107 @@
 
-目标：这次不再“局部补丁”，而是把首页 Hero 区的 5 个核心问题一起重构到可用状态：For You、模型适配、下拉层级、弹窗、玻璃按钮。
 
-1. 先把玻璃按钮体系彻底修正
-- 用一个可复用的 `GlassButton` 基组件统一 `Make / Subscribe Now / Check It Out / 弹窗CTA`，不要再让 `MakePill` 和其他蓝色按钮各写一套。
-- 严格按你给的 Figma 结构还原：外层浅蓝玻璃壳 + 内层发光模糊层 + 上层文字/图标层。
-- 补齐默认 / hover / active / focus-visible 四态，hover 时蓝光晕增强，active 时轻微按压。
-- `Check It Out` 当前“不可见”一起修：按钮内容层明确 `z-index`，banner 文案层和按钮层都提到遮罩之上，避免被背景/模糊层吞掉。
-- 顺手把当前控制台里的 `GlassButton` ref warning 一起清掉，改成可安全复用的 `forwardRef` 写法。
+# 首页重构计划（10项改动）
 
-2. 模型下拉改成 3 项，并按文档做输入框能力适配
-- `MODEL_OPTIONS` 改为固定 3 项，顺序就是：
-  1) `Seedance 2.0`
-  2) `Kling 3.0`
-  3) `Standard`
-- 新增一个 `MODEL_CONFIG` 配置源，统一管理每个模型的：
-  - placeholder
-  - CTA 文案/图标
-  - 参考图上限
-  - style 数量
-  - 辅助文案
-  - 是否显示 `Lock Character`
-  - 是否显示 Agent 思考交互
-- 按文档映射成 3 种体验，但保留当前黑色毛玻璃输入框外观：
-  - `Seedance 2.0`：旗舰模式，支持最多 5 张参考图，style 选项最多，保持当前最完整控制面板。
-  - `Kling 3.0`：脚本/剧情模式，placeholder 改成 `Paste your script, let the Agent do the rest...`，高亮 `Lock Character`，参考图上限 4，CTA 改成 `Summon Agent`，点击后有简短 typing/分析感交互。
-  - `Standard`：基础导演模式，placeholder 更简洁，参考图上限 3，CTA 回到普通生成流。
-- 现在左上角静态 `+` 会改成真正的上传入口/参考图状态入口，不再只是装饰。
-- 为了不把底栏挤爆，模型切换时会“替换型显示”控件，而不是无脑新增一排。
+## 概览
+根据用户 10 个需求点 + PDF 文档中的4阶梯模型体系，对 `src/pages/Home.tsx` 进行全面重构。
 
-3. 所有选择下拉都改成真正向下展开，并且永远在最上层
-- 当前问题的根因不是只有透明度，而是 Hero 区本身有 `overflow-hidden`，再叠加本地 `absolute` 下拉，导致菜单容易被裁切、被别的层盖住。
-- 解决方式：把 `ModelPillDropdown` 和其他 `OptionPillDropdown` 都切到现有 `Popover` 方案，用 portal 挂到页面顶层。
-- 统一规则：
-  - 只从下方展开
-  - 不再被 Hero / For You / section 遮挡
-  - z-index 提到页面交互层最高级
-  - 背景改成更实的深色磨砂面板，不再像现在这样太透看不清
-- 模型下拉的 trigger 和 option 样式按你发的红框截图重做：
-  - trigger 更宽
-  - 左侧图标 + 中间标题 + 右侧箭头
-  - option 行带 badge / 描述 / 选中勾
-  - 选中项有整行高亮底
+---
 
-4. For You 改成默认展示 5 个 16:9 视频，并删掉标题
-- 删除 `For You` 标题，只保留视频带、左右箭头、底部圆点。
-- 现有 3 张图分组逻辑会改成真正的 5 槽位 coverflow 结构，不再是现在这种 3 图布局。
-- 默认视觉结构：
-  ```text
-  [small] [medium] [large] [medium] [small]
-  ```
-- 要求全部满足：
-  - 5 个都是 16:9
-  - 中间最大
-  - 第 2 / 4 个中尺寸
-  - 首尾最小
-  - 首尾加边缘拉伸/透视感，营造参考站那种立体感
-- 左右箭头保留并补齐三态，点击后循环切换。
-- 圆点保留在中间卡片下方。
-- 数据层会改成“中心索引 + 5 槽位推导”，这样切换才自然。
-- 资源上优先复用现有 `public/banner-video.mp4` + 不同 poster，先把结构、尺寸、切换和层级做准。
+## 1. 视频 Banner 替换 + 下边缘模糊
+- 复制 `user-uploads://kling_20260304_...mp4` → `public/banner-video.mp4`
+- Banner 区域参考截图：圆角更大，底部加渐变黑色模糊遮罩（`linear-gradient(transparent 60%, black 100%)`），不再用整面暗色 overlay
+- 高度和圆角参考截图调整（约 `height: 400px`, `border-radius: 16px`）
 
-5. 弹窗改成更轻、更透的输入框同系毛玻璃
-- 当前弹窗太厚重，会改成参考输入框那种更清透、更淡的玻璃质感。
-- 外层遮罩保留，但减淡；内容容器改成：
-  - 更低不透明度
-  - 更柔和的 blur
-  - 更细的高光边框
-  - 更接近输入框的内阴影/玻璃质感
-- 布局参考你最后一张图，但文案全部英文，主色统一 `#71F0F6`：
-  - 顶部大图
-  - 主标题
-  - 亮点条目
-  - 底部说明
-  - 右下 CTA
-- 这部分会切到现有 `Dialog`/portal 方案，保证关闭按钮、遮罩点击、Esc 关闭都稳定。
+## 2. 弹窗关闭按钮和图片重叠修复
+- `AnnouncementModal` 的 `X` 按钮从 `right:16, top:16` 调整到不与顶部图片重叠的位置
+- 方案：把关闭按钮移到弹窗容器右上角外侧（`right: -8, top: -8`），或在图片区上方留足 padding
 
-6. 这次会一起修掉的已知回归问题
-- `GlassButton` / `AnnouncementModal` 的 ref warning
-- `Check It Out` 不可见
-- 下拉背景太透明、被遮挡、被裁切
-- 模型下拉仍是旧的 2 项和旧文案
-- `For You` 仍是 3 图而不是你要的 5 视频结构
+## 3. GlassButton 样式彻底还原
+当前 CSS hover/active 已在 `src/index.css` 中定义（`.glass-btn:hover .glass-btn-glow`），但按钮可能仍不可见。
 
-技术细节
-- 主要改动文件：`src/pages/Home.tsx`
-- 直接复用现有：
-  - `src/components/ui/popover.tsx`
-  - `src/components/ui/dialog.tsx`
-  - `public/banner-video.mp4`
-- 建议新增的本地配置结构：
-  ```text
-  MODEL_CONFIG
-  - seedance: maxRefs=5, styleCount=20, full controls
-  - kling: maxRefs=4, script-first, lockCharacter, agent thinking
-  - standard: maxRefs=3, simpler generate flow
-  ```
-- 玻璃按钮统一规则：
-  ```text
-  shell: rgba(69,196,246,0.05)
-  glow : inset 6px 4px 5px 6px / rgba(69,196,246,0.6)
-  hover: glow stronger + blur(10px)
-  active: slight press + darker shell
-  text/icons always above glow
-  ```
-- For You 布局将从“图片分组”改成“单列表 + 5 槽位变换”：
-  ```text
-  slot1 small
-  slot2 medium
-  slot3 large
-  slot4 medium
-  slot5 small
-  ```
-- QA 会重点核对：
-  - 3 个模型切换后 placeholder / 上传上限 / CTA / 辅助控件是否同步变化
-  - 所有下拉是否都只出现在下方且不再被遮挡
-  - `Make / Subscribe Now / Check It Out` 的默认态、hover 态、active 态是否都清晰可见
-  - For You 是否默认就是 5 个 16:9 视频且中间最大
-  - 控制台是否不再出现 ref warning
+根因分析：
+- `GlassButton` 和 `MakePill` 的 glow 层可能遮盖了文字
+- 需要确保文字层 `z-index: 2` 且 glow 层 `z-index: 1`
+- 外层 shell 的 `background: rgba(69,196,246,0.05)` 要确保可见
+- Check It Out 按钮在 lab 卡片底部，可能被 `backdrop-filter` 吞掉
+
+修复：
+- GlassButton 内层 glow 加 `z-index: 1`
+- 文字层确保 `z-index: 2`（已有 `relative` + `zIndex: 2`）
+- 外层加 `border: 1px solid rgba(69,196,246,0.15)` 让按钮在默认态也可见
+- Lab 卡片的 Check It Out 确保在 `z-10` 之上
+
+## 4. For You 立体效果增强 + 缩小 + 丝滑轮播
+- 缩小整体高度让一屏能容下5个：中间 `height: 280px`，中间 `width: 35%`，第2/4 `width: 22%`，首尾 `width: 14%`
+- 首尾加更强的透视拉伸：`perspective(500px) rotateY(±25deg) scale(0.85)`
+- 第2/4：`perspective(700px) rotateY(±12deg)`
+- 添加 `transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)` 实现丝滑切换动画
+
+## 5. 模型下拉框重做（4阶梯体系）
+按 PDF 文档改为4个选项，去掉 "Select Mode" 字样：
+
+| Tab | 前端展示 | badge | desc |
+|-----|---------|-------|------|
+| 1 | ⚡ Fast-Gen | Free | Instant text-to-video, daily free credits |
+| 2 | AI Director | Standard | Character consistency, reference images, storyboarding |
+| 3 | 🎬 Story Agent | ✨ New | Script-driven Agent with character lock & auto scenes |
+| 4 | 🌪 Cinematic | Ultra | Cinema-grade physics, lighting & unlimited styles |
+
+- Seedance/Kling 后面加 NEW icon（用 `iconNewBadge`）
+- Standard 后面的 badge 改为 "MF"
+- 去掉下拉顶部 "Select Mode" 标题
+
+## 6. 语言和时长下拉框修改
+- 缩小宽度：trigger `padding: 0 12px`，移除 icon（枚举项前不带 icon）
+- 语言扩展到36种（含中日韩英法德西葡意俄等常见语言）
+- 下拉内容区用 `max-height: 280px` + `overflow-y: auto` + 隐藏滚动条（`.hide-scrollbar`）
+
+## 7. Enhance on 选中态颜色
+- 当下拉选项被选中时，文字颜色改为 `#71F0F6`（当前用的是 `text-primary`，需确认 CSS 变量 `--primary` 对应 `#71F0F6`）
+
+## 8. 横竖比例切换滑块丝滑动画
+- `RatioToggle` 改成带滑块背景的切换：
+  - 在两个按钮后面加一个绝对定位的圆角背景 div
+  - 用 `transform: translateX()` + `transition: transform 0.3s ease` 实现丝滑滑动
+  - 选中态背景色 `hsl(var(--foreground) / 0.15)`
+
+## 9. 按文档做4阶梯模型适配
+`MODEL_CONFIG` 改为4项，切换模型时输入框同步变化：
+
+| 模型 | placeholder | CTA | maxRefs | 特殊UI |
+|------|-----------|-----|---------|--------|
+| Fast-Gen | "Describe your scene..." | ⚡ Generate | 0 | 隐藏上传按钮 |
+| AI Director | "Describe your story..." | Generate | 3 | 5种风格，上传3图 |
+| Story Agent | "Paste your script, let the Agent do the rest..." | 🚀 Summon Agent | 4 | Lock Character 高亮，点击CTA有打字机效果 |
+| Cinematic | — | 🎟 Join Waitlist | 5 | 输入框锁定（毛玻璃不可输入），背景播放demo视频，中心悬浮闪烁按钮 |
+
+- Cinematic(Ultra)选中时：
+  - 输入框变为半透明锁定状态
+  - 中心显示闪烁的 "Join Waitlist" 按钮
+  - 点击弹窗提示邀请好友
+
+## 10. 输入框上方角色选择 + @功能
+- 在输入框上方添加角色列表：
+  - 横向排列6个角色：Sara, Neko, Cindy, Queen, Sam, Jason
+  - 每个角色：100x100 圆形头像 + 3px `#191E1F` 边框 + 底部名字（Arial 20px 白色）
+  - 角色间距 `gap: 35px`，居中显示
+  - 头像用 placeholder 色块（因为没有真实头像图片，用渐变色块代替）
+  - 选中态：边框变为 `#71F0F6`
+- 输入框内支持 `@` 触发：
+  - 用户输入 `@` 时在光标位置弹出角色选择浮层
+  - 选择后在输入中插入 `@角色名`
+  - 需要把 `<span>` placeholder 改成真正的 `<textarea>` 或 contentEditable
+
+---
+
+## 涉及文件
+1. `src/pages/Home.tsx` — 主要改动
+2. `src/index.css` — 可能微调（已有 glass-btn 样式）
+3. `public/banner-video.mp4` — 替换为用户上传的视频
+
+## 技术要点
+- 所有下拉继续用 `Popover` portal 方案
+- For You 轮播用 CSS transition 而非 JS 动画库
+- 角色 `@` 功能需要把当前静态 placeholder 改成可交互的输入组件
+- Cinematic 模式的锁定态用 `pointer-events-none` + overlay 实现
+
