@@ -405,7 +405,9 @@ const Home = () => {
                             onClick={() => handleSelectCharacterFromAt(char.name)}
                             className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-foreground/10 transition-colors text-left"
                           >
-                            <div className="rounded-full" style={{ width: 32, height: 32, background: char.color, flexShrink: 0 }} />
+                            <div className="rounded-full overflow-hidden" style={{ width: 28, height: 28, flexShrink: 0 }}>
+                              <img src={char.avatar} alt={char.name} className="w-full h-full object-cover" />
+                            </div>
                             <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 14 }}>{char.name}</span>
                           </button>
                         ))}
