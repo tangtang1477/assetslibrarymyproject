@@ -88,7 +88,7 @@ const Home = () => {
   const [selectedLang, setSelectedLang] = useState("en");
   const [selectedEnhance, setSelectedEnhance] = useState("on");
   const [selectedTime, setSelectedTime] = useState("6min");
-  const [selectedRatio, setSelectedRatio] = useState("portrait");
+  const [selectedRatio, setSelectedRatio] = useState("16:9");
 
   return (
     <div className="h-screen bg-background flex overflow-hidden">
