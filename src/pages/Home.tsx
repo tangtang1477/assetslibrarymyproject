@@ -194,6 +194,8 @@ const Home = () => {
                     options={MODEL_OPTIONS}
                     value={selectedModel}
                     onChange={setSelectedModel}
+                    badgeIcon={iconNewBadge}
+                    badgeSize={30}
                   />
                   <OptionPillDropdown
                     icon={iconLanguage}
@@ -215,12 +217,8 @@ const Home = () => {
                     options={TIME_OPTIONS}
                     value={selectedTime}
                     onChange={setSelectedTime}
-                    badgeIcon={iconNewBadge}
                   />
-                  <RatioPillDropdown
-                    value={selectedRatio}
-                    onChange={setSelectedRatio}
-                  />
+                  <RatioToggle value={selectedRatio} onChange={setSelectedRatio} />
                   <MakePill />
                 </div>
               </div>
