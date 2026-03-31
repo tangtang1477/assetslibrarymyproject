@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Check } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import bannerBg from "@/assets/banner-bg.jpg";
 import project1 from "@/assets/project-1.jpg";
@@ -26,6 +26,8 @@ import iconLanguage from "@/assets/icon-language.svg";
 import iconEnhance from "@/assets/icon-enhance.svg";
 import iconTime from "@/assets/icon-time.svg";
 import iconNewBadge from "@/assets/icon-new-badge.svg";
+import iconGift from "@/assets/icon-gift.svg";
+import iconCredit from "@/assets/icon-credit.svg";
 
 /* ───── Quick‑link data ───── */
 const QUICK_LINKS = [
@@ -50,8 +52,8 @@ const FUN_ITEMS = [assetChar1, assetChar2, assetChar3, assetChar4, assetChar5, a
 const TOOLKIT_ITEMS = [{ src: tool1 }, { src: tool2 }, { src: tool3 }];
 
 const MODEL_OPTIONS = [
-  { label: "Seedance", value: "seedance" },
-  { label: "Kling", value: "kling" },
+  { label: "Seedance", value: "seedance", badge: "Seedance 2.0", desc: "Full-featured Agent for images, clips & long videos", isNew: false },
+  { label: "Kling", value: "kling", badge: "Kling 1.6", desc: "High-quality video generation with cinematic style", isNew: true },
 ];
 
 const LANGUAGE_OPTIONS = [
@@ -81,9 +83,9 @@ const RATIO_OPTIONS = [
 
 /* ───── For‑You showcase images ───── */
 const SHOWCASE_SETS = [
-  [project1, project2, tool2, project3, project4],
-  [project3, project5, tool1, project1, project2],
-  [project4, project1, tool3, project5, project3],
+  [project1, project2, project3],
+  [project3, project5, project1],
+  [project4, project1, project5],
 ];
 
 /* ───── Main page ───── */
@@ -95,6 +97,7 @@ const Home = () => {
   const [selectedTime, setSelectedTime] = useState("6min");
   const [selectedRatio, setSelectedRatio] = useState("16:9");
   const [activeQuickLink, setActiveQuickLink] = useState("all");
+  const [showAnnouncement, setShowAnnouncement] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToSection = useCallback((section: string) => {
@@ -118,21 +121,31 @@ const Home = () => {
       <div ref={scrollRef} className="flex-1 ml-[88px] overflow-y-auto hide-scrollbar">
         {/* ── Hero section with video banner behind input ── */}
         <div className="relative overflow-hidden px-9 pt-6" style={{ minHeight: 800 }}>
-          {/* Video banner background */}
-          <video
-            src="/banner-video.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute left-9 right-9 top-0 w-[calc(100%-72px)] object-cover rounded-[12px]"
-            style={{ height: 343 }}
-          />
-          {/* Dark overlay on video */}
+          {/* Video banner background — fallback to image if video missing */}
           <div
-            className="absolute left-9 right-9 top-0 rounded-[12px]"
-            style={{ height: 343, background: "hsl(var(--background) / 0.45)" }}
-          />
+            className="absolute left-9 right-9 top-0 rounded-[12px] overflow-hidden"
+            style={{ height: 343 }}
+          >
+            <img
+              src={bannerBg}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <video
+              src="/banner-video.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ zIndex: 1 }}
+            />
+            {/* Dark overlay on video */}
+            <div
+              className="absolute inset-0"
+              style={{ background: "hsl(var(--background) / 0.55)", zIndex: 2 }}
+            />
+          </div>
 
           {/* Blue glow layers */}
           <div
@@ -210,14 +223,9 @@ const Home = () => {
 
                 {/* Input options bar */}
                 <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8 }}>
-                  <OptionPillDropdown
-                    icon={undefined}
-                    label={MODEL_OPTIONS.find(o => o.value === selectedModel)?.label || "Seedance"}
-                    options={MODEL_OPTIONS}
+                  <ModelPillDropdown
                     value={selectedModel}
                     onChange={setSelectedModel}
-                    badgeIcon={iconNewBadge}
-                    badgeSize={30}
                   />
                   <OptionPillDropdown
                     icon={iconLanguage}
@@ -385,6 +393,9 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      {/* Announcement Modal */}
+      {showAnnouncement && <AnnouncementModal onClose={() => setShowAnnouncement(false)} />}
     </div>
   );
 };
@@ -392,17 +403,24 @@ const Home = () => {
 /* ───── Top‑right header ───── */
 const TopRightHeader = () => (
   <div className="fixed right-0 top-0 z-50 flex items-center gap-4" style={{ padding: "24px 32px" }}>
+    {/* Free Credit button with gift icon */}
     <button className="flex items-center gap-2 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
-      <span className="text-foreground" style={{ fontSize: 16, lineHeight: "24px" }}>🎁</span>
+      <img src={iconGift} alt="gift" style={{ width: 18, height: 18 }} />
       <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
     </button>
+    {/* Credit score display */}
+    <div className="flex items-center gap-1.5 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
+      <img src={iconCredit} alt="credit" style={{ width: 16, height: 16 }} />
+      <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>0</span>
+    </div>
+    {/* Subscribe Now */}
     <GlassButton style={{ width: 180, height: 40 }}>
       Subscribe Now
     </GlassButton>
   </div>
 );
 
-/* ───── For‑You showcase with carousel ───── */
+/* ───── For‑You showcase with carousel (3 images, center focus) ───── */
 const ForYouShowcase = () => {
   const [currentSet, setCurrentSet] = useState(0);
   const imgs = SHOWCASE_SETS[currentSet];
@@ -411,32 +429,64 @@ const ForYouShowcase = () => {
   const next = () => setCurrentSet((c) => (c + 1) % SHOWCASE_SETS.length);
 
   return (
-    <div className="relative mx-auto h-[518px] w-full max-w-[1794px] overflow-hidden">
-      {/* Left arrow */}
-      <CarouselArrow direction="left" onClick={prev} />
-
-      {/* Images */}
-      <div className="absolute bottom-0 left-[5.2%] h-[24.8%] w-[10.7%] overflow-hidden rounded-[6px] blur-[1.16px]">
-        <img src={imgs[0]} alt="" className="h-full w-full object-cover transition-all duration-500" />
-      </div>
-      <div className="absolute left-[10.9%] top-0 h-[98.7%] w-[32.5%] overflow-hidden rounded-[10px]">
-        <img src={imgs[1]} alt="" className="h-full w-full object-cover transition-all duration-500" />
-      </div>
-      <div
-        className="absolute left-1/2 top-[39.2%] h-[46.3%] w-[28.8%] -translate-x-1/2 overflow-hidden rounded-[14px] border"
-        style={{ borderColor: "hsl(var(--foreground) / 0.1)" }}
-      >
-        <img src={imgs[2]} alt="" className="h-full w-full object-cover transition-all duration-500" />
-      </div>
-      <div className="absolute right-[10.9%] top-0 h-[98.7%] w-[32.5%] overflow-hidden rounded-[10px]">
-        <img src={imgs[3]} alt="" className="h-full w-full object-cover transition-all duration-500 scale-x-[-1]" />
-      </div>
-      <div className="absolute bottom-0 right-[5.2%] h-[24.8%] w-[10.7%] overflow-hidden rounded-[6px] blur-[1.16px]">
-        <img src={imgs[4]} alt="" className="h-full w-full object-cover transition-all duration-500 scale-x-[-1]" />
+    <div>
+      {/* Title row */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 20, lineHeight: "16px" }}>
+          For You
+        </h2>
+        <div className="flex items-center gap-2">
+          <CarouselArrow direction="left" onClick={prev} />
+          <CarouselArrow direction="right" onClick={next} />
+        </div>
       </div>
 
-      {/* Right arrow */}
-      <CarouselArrow direction="right" onClick={next} />
+      {/* 3-image carousel */}
+      <div className="relative flex items-center justify-center" style={{ height: 420, gap: 16 }}>
+        {/* Left image – smaller, dimmed */}
+        <div
+          className="flex-shrink-0 overflow-hidden rounded-[12px] transition-all duration-500"
+          style={{ width: "28%", height: "85%", opacity: 0.6, filter: "brightness(0.7)" }}
+        >
+          <img src={imgs[0]} alt="" className="h-full w-full object-cover" />
+        </div>
+
+        {/* Center image – largest, highlighted */}
+        <div
+          className="flex-shrink-0 overflow-hidden rounded-[14px] transition-all duration-500 border"
+          style={{
+            width: "40%", height: "100%", zIndex: 2,
+            borderColor: "hsl(var(--foreground) / 0.1)",
+            boxShadow: "0 8px 32px hsl(var(--background) / 0.5)",
+          }}
+        >
+          <img src={imgs[1]} alt="" className="h-full w-full object-cover" />
+        </div>
+
+        {/* Right image – smaller, dimmed */}
+        <div
+          className="flex-shrink-0 overflow-hidden rounded-[12px] transition-all duration-500"
+          style={{ width: "28%", height: "85%", opacity: 0.6, filter: "brightness(0.7)" }}
+        >
+          <img src={imgs[2]} alt="" className="h-full w-full object-cover" />
+        </div>
+      </div>
+
+      {/* Pagination dots */}
+      <div className="flex items-center justify-center gap-2 mt-4">
+        {SHOWCASE_SETS.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentSet(i)}
+            className="rounded-full transition-all"
+            style={{
+              width: currentSet === i ? 24 : 8,
+              height: 8,
+              background: currentSet === i ? "#71F0F6" : "hsl(var(--foreground) / 0.3)",
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 };
@@ -444,19 +494,18 @@ const ForYouShowcase = () => {
 /* ───── Carousel arrow with 3 states ───── */
 const CarouselArrow = ({ direction, onClick }: { direction: "left" | "right"; onClick: () => void }) => {
   const Icon = direction === "left" ? ChevronLeft : ChevronRight;
-  const posClass = direction === "left" ? "left-2" : "right-2";
 
   return (
     <button
       onClick={onClick}
-      className={`absolute ${posClass} top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full
+      className="flex h-8 w-8 items-center justify-center rounded-full
         bg-foreground/10 text-foreground/70
         hover:bg-foreground/20 hover:text-foreground
         active:bg-foreground/30 active:scale-95
-        transition-all duration-200`}
+        transition-all duration-200"
       aria-label={direction === "left" ? "Previous" : "Next"}
     >
-      <Icon size={20} />
+      <Icon size={16} />
     </button>
   );
 };
@@ -476,17 +525,15 @@ const SectionHeader = ({ title }: { title: string }) => (
   </div>
 );
 
-/* ───── Reusable dropdown pill ───── */
+/* ───── Reusable dropdown pill (opens downward) ───── */
 const OptionPillDropdown = ({
-  icon, label, options, value, onChange, badgeIcon, badgeSize,
+  icon, label, options, value, onChange,
 }: {
   icon?: string;
   label: string;
   options: { label: string; value: string }[];
   value: string;
   onChange: (v: string) => void;
-  badgeIcon?: string;
-  badgeSize?: number;
 }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -512,14 +559,9 @@ const OptionPillDropdown = ({
         </span>
         <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
       </button>
-      {badgeIcon && (
-        <div className="absolute -right-2 -top-3" style={{ width: badgeSize || 10, height: badgeSize || 10 }}>
-          <img src={badgeIcon} alt="new" className="w-full h-full" />
-        </div>
-      )}
       {open && (
         <div
-          className="absolute bottom-full left-0 mb-2 rounded-xl border border-foreground/10 shadow-lg z-50 py-1"
+          className="absolute top-full left-0 mt-2 rounded-xl border border-foreground/10 shadow-lg z-50 py-1"
           style={{ minWidth: 160, background: "#1a1a1a" }}
         >
           {options.map((opt) => (
@@ -541,6 +583,92 @@ const OptionPillDropdown = ({
   );
 };
 
+/* ───── Model dropdown (redesigned with badge + desc) ───── */
+const ModelPillDropdown = ({
+  value, onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = MODEL_OPTIONS.find(o => o.value === value);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
+        style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
+      >
+        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
+          {selected?.label || "Seedance"}
+        </span>
+        <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
+      </button>
+      {/* NEW badge on model pill */}
+      {selected && MODEL_OPTIONS.some(o => o.isNew) && (
+        <div className="absolute -right-2 -top-3" style={{ width: 30, height: 30 }}>
+          <img src={iconNewBadge} alt="new" className="w-full h-full" />
+        </div>
+      )}
+      {open && (
+        <div
+          className="absolute top-full left-0 mt-2 rounded-2xl border border-foreground/10 shadow-2xl z-50 overflow-hidden"
+          style={{ width: 320, background: "rgba(26, 26, 26, 0.95)", backdropFilter: "blur(20px)" }}
+        >
+          {/* Header */}
+          <div style={{ padding: "12px 16px 8px" }}>
+            <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, fontWeight: 700, color: "#71F0F6" }}>
+              Select Mode
+            </span>
+          </div>
+          {/* Options */}
+          {MODEL_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className="w-full flex items-start text-left transition-colors hover:bg-foreground/8"
+              style={{ padding: "12px 16px", gap: 12 }}
+            >
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 15 }}>
+                    {opt.label}
+                  </span>
+                  <span
+                    className="rounded px-1.5 py-0.5"
+                    style={{ fontSize: 11, background: "hsl(var(--foreground) / 0.1)", color: "hsl(var(--foreground) / 0.6)" }}
+                  >
+                    {opt.badge}
+                  </span>
+                  {opt.isNew && (
+                    <img src={iconNewBadge} alt="new" style={{ width: 28, height: 12 }} />
+                  )}
+                </div>
+                <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, lineHeight: "18px", color: "hsl(var(--foreground) / 0.5)", marginTop: 4 }}>
+                  {opt.desc}
+                </p>
+              </div>
+              {value === opt.value && (
+                <Check size={16} className="flex-shrink-0 mt-1" style={{ color: "#71F0F6" }} />
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 /* ───── Ratio icon & toggle ───── */
 const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) => {
   const dims = ratio === "16:9" ? { w: 16, h: 10 } : { w: 10, h: 16 };
@@ -548,7 +676,7 @@ const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) =
     <div
       style={{
         width: dims.w, height: dims.h,
-        border: `1.5px solid ${selected ? "hsl(var(--primary))" : "hsl(var(--foreground) / 0.5)"}`,
+        border: `1.5px solid ${selected ? "#71F0F6" : "hsl(var(--foreground) / 0.5)"}`,
         borderRadius: 2,
       }}
     />
@@ -588,17 +716,17 @@ const GlassButton = ({
     <button
       onClick={onClick}
       data-glass={id}
-      className={`relative flex items-center justify-center rounded-full transition-all active:scale-[0.97] ${className || ""}`}
-      style={{ background: "rgba(69, 196, 246, 0.05)", ...style }}
+      className={`relative flex items-center justify-center rounded-full overflow-hidden transition-all active:scale-[0.97] ${className || ""}`}
+      style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45, ...style }}
     >
       <div
-        className="absolute rounded-full pointer-events-none"
+        className="absolute pointer-events-none"
         data-glass-glow={id}
         style={{
           left: 6, right: 4, top: 6, bottom: 5,
           background: "rgba(69, 196, 246, 0.6)",
           filter: "blur(6.75px)",
-          borderRadius: 20,
+          borderRadius: 20.45,
           transition: "background 0.2s, filter 0.2s",
         }}
       />
@@ -625,11 +753,11 @@ const MakePill = () => {
   return (
     <button
       data-make={id}
-      className="relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] transition-all active:scale-[0.97]"
+      className="relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] overflow-hidden transition-all active:scale-[0.97]"
       style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45 }}
     >
       <div
-        className="absolute rounded-full pointer-events-none"
+        className="absolute pointer-events-none"
         data-make-glow={id}
         style={{
           left: 6, right: 4, top: 6, bottom: 5,
@@ -657,6 +785,87 @@ const MakePill = () => {
         }
       `}</style>
     </button>
+  );
+};
+
+/* ───── Announcement Modal (frosted glass) ───── */
+const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center"
+      style={{ background: "rgba(0, 0, 0, 0.6)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="relative"
+        style={{
+          width: 480,
+          background: "rgba(26, 26, 26, 0.85)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderRadius: 20,
+          padding: 24,
+          border: "1px solid rgba(255, 255, 255, 0.08)",
+        }}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute z-10 flex items-center justify-center rounded-full transition-all hover:bg-foreground/20"
+          style={{ right: 16, top: 16, width: 32, height: 32, background: "hsl(var(--foreground) / 0.1)" }}
+        >
+          <X size={16} className="text-foreground/70" />
+        </button>
+
+        {/* Hero image */}
+        <div className="overflow-hidden rounded-[12px]" style={{ height: 200 }}>
+          <img src={bannerBg} alt="Announcement" className="w-full h-full object-cover" />
+        </div>
+
+        {/* Content */}
+        <div style={{ marginTop: 20 }}>
+          <h3
+            className="font-bold text-foreground"
+            style={{ fontFamily: "Arial, sans-serif", fontSize: 22, lineHeight: "28px" }}
+          >
+            The Most Powerful <span style={{ color: "#71F0F6" }}>Model 2.0</span> is Here
+          </h3>
+
+          <div className="flex flex-col gap-3" style={{ marginTop: 16 }}>
+            {[
+              { highlight: "10x faster", text: " video generation with enhanced AI engine" },
+              { highlight: "Cinema-grade", text: " quality output at up to 4K resolution" },
+              { highlight: "Multi-scene", text: " storytelling with intelligent transitions" },
+              { highlight: "Voice & Music", text: " auto-generation for complete productions" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                <div
+                  className="flex-shrink-0 flex items-center justify-center rounded-full mt-0.5"
+                  style={{ width: 18, height: 18, background: "rgba(113, 240, 246, 0.15)" }}
+                >
+                  <Check size={12} style={{ color: "#71F0F6" }} />
+                </div>
+                <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "20px", color: "hsl(var(--foreground) / 0.7)" }}>
+                  <span className="font-bold" style={{ color: "#71F0F6" }}>{item.highlight}</span>
+                  {item.text}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ marginTop: 16, fontFamily: "Arial, sans-serif", fontSize: 12, lineHeight: "18px", color: "hsl(var(--foreground) / 0.4)" }}>
+            Available now for all subscribers. Free users get 3 trial generations.
+          </p>
+
+          {/* CTA */}
+          <div className="flex justify-end" style={{ marginTop: 20 }}>
+            <GlassButton onClick={onClose} style={{ width: 140, height: 40 }}>
+              Get Started
+            </GlassButton>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
