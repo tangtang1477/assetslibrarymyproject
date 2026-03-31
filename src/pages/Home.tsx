@@ -135,7 +135,7 @@ const Home = () => {
           <div className="relative z-10 flex flex-col items-center" style={{ paddingTop: 64 }}>
             <div className="flex flex-col items-center gap-2">
               <h1 className="text-foreground font-bold text-center" style={{ fontFamily: "Arial, sans-serif", fontSize: 36, lineHeight: "44px" }}>
-                Ideas Spark Movies
+                Your idea. A movie. In minutes.
               </h1>
               <p
                 className="text-center"
