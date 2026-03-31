@@ -975,33 +975,26 @@ const GlassButton = forwardRef<
 ));
 GlassButton.displayName = "GlassButton";
 
-/* ───── Make pill button ───── */
+/* ───── Make pill button (artlist.io solid cyan style) ───── */
 const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ctaIcon?: string; onClick?: () => void }) => (
   <button
     onClick={onClick}
-    className="glass-btn relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] overflow-hidden transition-all active:scale-[0.97]"
-    style={{ background: "rgba(69, 196, 246, 0.05)", borderRadius: 20.45, border: "1px solid rgba(69, 196, 246, 0.15)" }}
+    className="relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] transition-all duration-200 hover:brightness-110 hover:shadow-[0_0_16px_rgba(113,240,246,0.4)] active:scale-[0.96] active:brightness-95"
+    style={{
+      background: "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
+      borderRadius: 20.45,
+    }}
   >
-    <div
-      className="glass-btn-glow absolute pointer-events-none transition-all duration-200"
-      style={{
-        left: 6, right: 4, top: 6, bottom: 5,
-        background: "rgba(69, 196, 246, 0.6)",
-        filter: "blur(6.75px)",
-        borderRadius: 20.45,
-        zIndex: 1,
-      }}
-    />
-    <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
+    <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#000", zIndex: 2 }}>
       {ctaIcon && <span className="mr-1">{ctaIcon}</span>}
       {ctaText}
     </span>
     <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", zIndex: 2 }}>
-      <span style={{ background: "linear-gradient(90deg, #71F0F6 25%, #AEF5FB 84%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+      <span style={{ color: "#000" }}>
         ✦
       </span>
     </span>
-    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
+    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#000", zIndex: 2 }}>
       10/s
     </span>
   </button>
