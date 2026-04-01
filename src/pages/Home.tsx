@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ChevronDown, X, Check, Sparkles, Lock } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Check, Sparkles, Lock, Film, Zap } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import bannerBg from "@/assets/banner-bg.jpg";
 import project1 from "@/assets/project-1.jpg";
@@ -57,13 +57,36 @@ const LABS = [
 const FUN_ITEMS = [assetChar1, assetChar2, assetChar3, assetChar4, assetChar5, assetChar6, assetChar7];
 const TOOLKIT_ITEMS = [{ src: tool1 }, { src: tool2 }, { src: tool3 }];
 
-/* ───── 4-tier model system (from PDF doc) ───── */
+/* ───── 3-model system ───── */
 const MODEL_OPTIONS = [
-  { label: "⚡ Fast-Gen", value: "fastgen", badge: "Free", desc: "Instant text-to-video, daily free credits", isNew: false, badgeLabel: "Free" },
-  { label: "AI Director", value: "director", badge: "Standard", desc: "Character consistency, reference images, storyboarding", isNew: true, badgeLabel: "MF" },
-  { label: "🎬 Story Agent", value: "storyagent", badge: "✨ New", desc: "Script-driven Agent with character lock & auto scenes", isNew: true, badgeLabel: "New" },
-  { label: "🌪 Cinematic", value: "cinematic", badge: "Ultra", desc: "Cinema-grade physics, lighting & unlimited styles", isNew: false, badgeLabel: "Ultra" },
+  {
+    label: "Surprise",
+    value: "surprise",
+    badge: "Advanced",
+    desc: "Multimodal creation, editing, extension, and precise prompt control",
+    icon: "sparkles" as const,
+  },
+  {
+    label: "Kling 2.0",
+    value: "kling",
+    badge: "Pro",
+    desc: "Better character consistency and long-script scene understanding",
+    icon: "film" as const,
+  },
+  {
+    label: "Standard",
+    value: "standard",
+    badge: "Recommended",
+    desc: "Balanced quality, speed, and control for daily creation",
+    icon: "zap" as const,
+  },
 ];
+
+const MODEL_ICONS: Record<string, typeof Sparkles> = {
+  sparkles: Sparkles,
+  film: Film,
+  zap: Zap,
+};
 
 type ModelConfigType = {
   placeholder: string;
@@ -75,45 +98,47 @@ type ModelConfigType = {
   agentThinking: boolean;
   hideUpload?: boolean;
   locked?: boolean;
+  timeOptions: { label: string; value: string }[];
 };
 
 const MODEL_CONFIG: Record<string, ModelConfigType> = {
-  fastgen: {
-    placeholder: "Describe your scene...",
-    cta: "Generate",
-    ctaIcon: "⚡",
-    maxRefs: 0,
+  surprise: {
+    placeholder: "Create, edit, or extend with text, images, video, and audio...",
+    cta: "Generate with Surprise",
+    maxRefs: 9,
     styleCount: 0,
     lockCharacter: false,
     agentThinking: false,
-    hideUpload: true,
+    timeOptions: [
+      { label: "4s", value: "4s" },
+      { label: "5s", value: "5s" },
+      { label: "10s", value: "10s" },
+      { label: "15s", value: "15s" },
+    ],
   },
-  director: {
+  kling: {
+    placeholder: "Describe your story or paste your script...",
+    cta: "Direct Scene",
+    maxRefs: 4,
+    styleCount: 5,
+    lockCharacter: true,
+    agentThinking: false,
+    timeOptions: [
+      { label: "5s", value: "5s" },
+      { label: "10s", value: "10s" },
+    ],
+  },
+  standard: {
     placeholder: "Describe your story...",
     cta: "Generate",
     maxRefs: 3,
     styleCount: 5,
     lockCharacter: false,
     agentThinking: false,
-  },
-  storyagent: {
-    placeholder: "Paste your script, let the Agent do the rest...",
-    cta: "Summon Agent",
-    ctaIcon: "🚀",
-    maxRefs: 4,
-    styleCount: 12,
-    lockCharacter: true,
-    agentThinking: true,
-  },
-  cinematic: {
-    placeholder: "",
-    cta: "Join Waitlist",
-    ctaIcon: "🎟",
-    maxRefs: 5,
-    styleCount: 20,
-    lockCharacter: false,
-    agentThinking: false,
-    locked: true,
+    timeOptions: [
+      { label: "5s", value: "5s" },
+      { label: "10s", value: "10s" },
+    ],
   },
 };
 
@@ -136,13 +161,6 @@ const LANGUAGE_OPTIONS = [
 const ENHANCE_OPTIONS = [
   { label: "Enhance on", value: "on" },
   { label: "Enhance off", value: "off" },
-];
-
-const TIME_OPTIONS = [
-  { label: "6min", value: "6min" },
-  { label: "3min", value: "3min" },
-  { label: "1min", value: "1min" },
-  { label: "10min", value: "10min" },
 ];
 
 const RATIO_OPTIONS = [
@@ -174,10 +192,10 @@ const SHOWCASE_ITEMS = [
 /* ───── Main page ───── */
 const Home = () => {
   const navigate = useNavigate();
-  const [selectedModel, setSelectedModel] = useState("director");
+  const [selectedModel, setSelectedModel] = useState("standard");
   const [selectedLang, setSelectedLang] = useState("en");
   const [selectedEnhance, setSelectedEnhance] = useState("on");
-  const [selectedTime, setSelectedTime] = useState("6min");
+  const [selectedTime, setSelectedTime] = useState("5s");
   const [selectedRatio, setSelectedRatio] = useState("16:9");
   const [activeQuickLink, setActiveQuickLink] = useState("all");
   const [showAnnouncement, setShowAnnouncement] = useState(true);
@@ -185,10 +203,19 @@ const Home = () => {
   const [inputText, setInputText] = useState("");
   const [showAtMenu, setShowAtMenu] = useState(false);
   const [agentThinking, setAgentThinking] = useState(false);
+  const [surpriseBanner, setSurpriseBanner] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.director;
+  const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.standard;
+
+  // When model changes, sync time to first available option
+  useEffect(() => {
+    const timeOpts = config.timeOptions;
+    if (!timeOpts.find(t => t.value === selectedTime)) {
+      setSelectedTime(timeOpts[0].value);
+    }
+  }, [selectedModel]);
 
   const scrollToSection = useCallback((section: string) => {
     setActiveQuickLink(section);
@@ -207,7 +234,6 @@ const Home = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
     setInputText(val);
-    // Show @ menu when user types @
     if (val.endsWith("@")) {
       setShowAtMenu(true);
     } else {
@@ -227,6 +253,13 @@ const Home = () => {
       setAgentThinking(true);
       setTimeout(() => setAgentThinking(false), 3000);
     }
+  };
+
+  const handleTrySurprise = () => {
+    setShowAnnouncement(false);
+    setSelectedModel("surprise");
+    setSurpriseBanner(true);
+    setTimeout(() => setSurpriseBanner(false), 5000);
   };
 
   return (
@@ -249,7 +282,6 @@ const Home = () => {
               playsInline
               className="absolute inset-0 w-full h-full object-cover"
             />
-            {/* Bottom edge gradient fade — no full overlay */}
             <div
               className="absolute left-0 right-0 bottom-0 pointer-events-none"
               style={{ height: 160, background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 60%, #000 100%)" }}
@@ -291,7 +323,7 @@ const Home = () => {
               </p>
             </div>
 
-            {/* Character Cast List — 48px avatars, left-aligned with input */}
+            {/* Character Cast List */}
             <div className="flex items-center mt-6" style={{ gap: 20, width: 990, marginLeft: "auto", marginRight: "auto" }}>
               {CHARACTERS.map((char) => (
                 <button
@@ -324,6 +356,25 @@ const Home = () => {
               ))}
             </div>
 
+            {/* Surprise unlocked banner */}
+            {surpriseBanner && (
+              <div
+                className="mt-4 w-[990px] rounded-xl px-5 py-3"
+                style={{
+                  background: "rgba(113,240,246,0.08)",
+                  border: "1px solid rgba(113,240,246,0.25)",
+                  animation: "fadeIn 0.3s ease",
+                }}
+              >
+                <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14, color: "#71F0F6", fontWeight: 700 }}>
+                  You've unlocked Surprise for today — create an 8s storyboard free.
+                </p>
+                <p style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "hsl(var(--foreground) / 0.6)", marginTop: 2 }}>
+                  Use text, images, video, and audio together, or type @ to reference assets.
+                </p>
+              </div>
+            )}
+
             {/* Input box */}
             <div className="mt-6 flex w-full justify-center">
               <div
@@ -350,7 +401,7 @@ const Home = () => {
                 )}
 
                 <div className="flex items-start px-6 pt-4">
-                  {/* Upload button — hidden for Fast-Gen */}
+                  {/* Upload button */}
                   {!config.hideUpload && (
                     <div
                       className="mr-3 flex h-[50px] w-10 flex-shrink-0 items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
@@ -409,7 +460,7 @@ const Home = () => {
                   </div>
                 </div>
 
-                {/* Lock Character indicator for Story Agent */}
+                {/* Lock Character indicator */}
                 {config.lockCharacter && (
                   <div className="absolute right-6 top-4 flex items-center gap-1.5 rounded-full px-3 py-1 cursor-pointer hover:opacity-80 transition-opacity"
                     style={{ background: "rgba(113, 240, 246, 0.1)", border: "1px solid rgba(113, 240, 246, 0.3)" }}>
@@ -451,8 +502,8 @@ const Home = () => {
                     highlightSelected
                   />
                   <OptionPillDropdown
-                    label={TIME_OPTIONS.find(o => o.value === selectedTime)?.label || "6min"}
-                    options={TIME_OPTIONS}
+                    label={config.timeOptions.find(o => o.value === selectedTime)?.label || config.timeOptions[0].label}
+                    options={config.timeOptions}
                     value={selectedTime}
                     onChange={setSelectedTime}
                     narrow
@@ -463,7 +514,7 @@ const Home = () => {
               </div>
             </div>
 
-            {/* For You showcase – 32px below input, NO title */}
+            {/* For You showcase */}
             <div style={{ marginTop: 32 }} className="w-full">
               <ForYouShowcase />
             </div>
@@ -548,7 +599,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* AIdeo World banner – 64px gap */}
+          {/* AIdeo World banner */}
           <div id="section-aideo" style={{ marginTop: 64 }}>
             <div className="relative overflow-hidden rounded-[20px]" style={{ height: 412 }}>
               <img src={bannerBg} alt="AIdeo World" className="h-full w-full object-cover" />
@@ -569,7 +620,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Fun – 64px gap */}
+          {/* Fun */}
           <div id="section-fun" style={{ marginTop: 64 }}>
             <SectionHeader title="Fun" />
             <div className="flex gap-[26px] overflow-x-auto hide-scrollbar" style={{ marginTop: 24 }}>
@@ -582,7 +633,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Toolkits – 64px gap */}
+          {/* Toolkits */}
           <div id="section-toolkits" style={{ marginTop: 64 }}>
             <SectionHeader title="Toolkits" />
             <div className="flex gap-3" style={{ marginTop: 24 }}>
@@ -594,7 +645,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Assets banner – 64px gap */}
+          {/* Assets banner */}
           <div id="section-assets" style={{ marginTop: 64 }}>
             <div className="relative overflow-hidden rounded-[5px]" style={{ height: 297 }}>
               <img src={bannerBg} alt="Assets Library" className="h-full w-full object-cover" />
@@ -614,7 +665,12 @@ const Home = () => {
       </div>
 
       {/* Announcement Modal */}
-      {showAnnouncement && <AnnouncementModal onClose={() => setShowAnnouncement(false)} />}
+      {showAnnouncement && (
+        <AnnouncementModal
+          onClose={() => setShowAnnouncement(false)}
+          onTrySurprise={handleTrySurprise}
+        />
+      )}
     </div>
   );
 };
@@ -636,7 +692,7 @@ const TopRightHeader = () => (
   </div>
 );
 
-/* ───── For‑You showcase – 5 slots coverflow, smaller, within arrows ───── */
+/* ───── For‑You showcase – 5 slots coverflow ───── */
 const ForYouShowcase = () => {
   const [centerIndex, setCenterIndex] = useState(0);
   const [hoveredCenter, setHoveredCenter] = useState(false);
@@ -647,45 +703,60 @@ const ForYouShowcase = () => {
   const prev = () => setCenterIndex((c) => ((c - 1) % total + total) % total);
   const next = () => setCenterIndex((c) => (c + 1) % total);
 
+  // Absolute position based layout: 5 slots within arrows
+  const getSlotStyle = (offset: number): React.CSSProperties => {
+    const absOff = Math.abs(offset);
+    // Positions as percentage from left edge of container
+    // Container is between arrows. Slots: [-2, -1, 0, 1, 2]
+    // Layout: |16px| slot-2 | slot-1 | slot0 | slot1 | slot2 |16px|
+    const widths = [10, 18, 30, 18, 10]; // percentages
+    const positions = [1, 12, 34, 65, 82]; // left% approx
+    const idx = offset + 2;
+
+    const baseStyle: React.CSSProperties = {
+      position: "absolute" as const,
+      width: `${widths[idx]}%`,
+      left: `${positions[idx]}%`,
+      top: "50%",
+      transform: "translateY(-50%)",
+      transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+    };
+
+    if (absOff === 0) {
+      return { ...baseStyle, zIndex: 5, opacity: 1, transform: "translateY(-50%) scale(1)" };
+    }
+    if (absOff === 1) {
+      return {
+        ...baseStyle, zIndex: 3, opacity: 0.75,
+        transform: `translateY(-50%) perspective(600px) rotateY(${offset < 0 ? 15 : -15}deg) scale(0.9)`,
+      };
+    }
+    return {
+      ...baseStyle, zIndex: 1, opacity: 0.4,
+      transform: `translateY(-50%) perspective(400px) rotateY(${offset < 0 ? 30 : -30}deg) scale(0.78)`,
+    };
+  };
+
   const slots = [-2, -1, 0, 1, 2].map((offset) => ({
     ...SHOWCASE_ITEMS[getSlotIndex(offset)],
     offset,
   }));
 
-  const getSlotStyle = (offset: number): React.CSSProperties => {
-    const absOff = Math.abs(offset);
-    if (absOff === 0) {
-      return { width: "28%", zIndex: 5, opacity: 1, transform: "scale(1)", filter: "none" };
-    }
-    if (absOff === 1) {
-      return {
-        width: "18%", zIndex: 3, opacity: 0.75,
-        transform: `perspective(600px) rotateY(${offset < 0 ? 15 : -15}deg) scale(0.9)`,
-      };
-    }
-    return {
-      width: "10%", zIndex: 1, opacity: 0.4,
-      transform: `perspective(400px) rotateY(${offset < 0 ? 30 : -30}deg) scale(0.78)`,
-    };
-  };
-
   return (
-    <div className="relative flex items-center" style={{ gap: 16 }}>
+    <div className="relative flex items-center justify-center" style={{ maxWidth: 900, margin: "0 auto" }}>
       <CarouselArrow direction="left" onClick={prev} />
 
-      <div className="flex-1 flex items-center justify-center" style={{ height: 160, gap: 4 }}>
+      <div className="relative overflow-hidden" style={{ flex: 1, height: 140, margin: "0 16px" }}>
         {slots.map((slot, i) => {
           const slotStyle = getSlotStyle(slot.offset);
           const isCenter = slot.offset === 0;
           return (
             <div
-              key={`${slot.offset}-${i}`}
-              className="relative flex-shrink-0 overflow-hidden rounded-[8px]"
+              key={`${centerIndex}-${slot.offset}`}
+              className="overflow-hidden rounded-[8px]"
               style={{
                 ...slotStyle,
                 aspectRatio: "16/9",
-                height: "auto",
-                transition: "all 0.6s cubic-bezier(0.22, 0.61, 0.36, 1)",
               }}
               onMouseEnter={() => isCenter && setHoveredCenter(true)}
               onMouseLeave={() => isCenter && setHoveredCenter(false)}
@@ -694,12 +765,11 @@ const ForYouShowcase = () => {
                 src={slot.poster}
                 alt={slot.title}
                 className="w-full h-full object-cover"
-                style={{ aspectRatio: "16/9" }}
               />
               {isCenter && hoveredCenter && (
                 <div
                   className="absolute left-0 right-0 flex items-center justify-center"
-                  style={{ bottom: 4, gap: 4, transition: "opacity 0.3s ease" }}
+                  style={{ bottom: 4, gap: 4 }}
                 >
                   {SHOWCASE_ITEMS.map((_, j) => (
                     <div
@@ -724,13 +794,13 @@ const ForYouShowcase = () => {
   );
 };
 
-/* ───── Carousel arrow with 3 states ───── */
+/* ───── Carousel arrow ───── */
 const CarouselArrow = ({ direction, onClick }: { direction: "left" | "right"; onClick: () => void }) => {
   const Icon = direction === "left" ? ChevronLeft : ChevronRight;
   return (
     <button
       onClick={onClick}
-      className="flex h-8 w-8 items-center justify-center rounded-full
+      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full
         bg-foreground/10 text-foreground/70
         hover:bg-foreground/20 hover:text-foreground
         active:bg-foreground/30 active:scale-95
@@ -757,7 +827,7 @@ const SectionHeader = ({ title }: { title: string }) => (
   </div>
 );
 
-/* ───── Reusable dropdown pill (Popover-based) ───── */
+/* ───── Reusable dropdown pill ───── */
 const OptionPillDropdown = ({
   label, options, value, onChange, scrollable, narrow, highlightSelected,
 }: {
@@ -821,7 +891,7 @@ const OptionPillDropdown = ({
   );
 };
 
-/* ───── Model dropdown (4-tier system) ───── */
+/* ───── Model dropdown (3 models with icons + card style) ───── */
 const ModelPillDropdown = ({
   value, onChange,
 }: {
@@ -830,72 +900,95 @@ const ModelPillDropdown = ({
 }) => {
   const [open, setOpen] = useState(false);
   const selected = MODEL_OPTIONS.find(o => o.value === value);
+  const SelectedIcon = selected ? MODEL_ICONS[selected.icon] : Zap;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className="relative flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
-          style={{ padding: "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 8 }}
+          className="relative flex h-[40px] items-center rounded-full transition-all"
+          style={{
+            padding: "0 14px",
+            gap: 8,
+            background: open ? "rgba(113,240,246,0.14)" : "rgba(255,255,255,0.06)",
+            border: open ? "1px solid rgba(113,240,246,0.52)" : "1px solid rgba(255,255,255,0.12)",
+            boxShadow: open ? "0 0 0 3px rgba(113,240,246,0.18)" : "none",
+          }}
         >
-          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
-            {selected?.label || "AI Director"}
+          <SelectedIcon size={14} style={{ color: "rgba(255,255,255,0.7)" }} />
+          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "rgba(255,255,255,0.92)" }}>
+            {selected?.label || "Standard"}
           </span>
-          <ChevronDown size={14} className="text-foreground/50" style={{ marginLeft: -2 }} />
-          {selected?.isNew && (
-            <div className="absolute -right-2 -top-3" style={{ width: 30, height: 30 }}>
-              <img src={iconNewBadge} alt="new" className="w-full h-full" />
-            </div>
-          )}
+          <ChevronDown size={14} style={{ color: "rgba(255,255,255,0.5)" }} />
         </button>
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
         align="start"
         sideOffset={8}
-        className="border-foreground/10 p-0 shadow-2xl overflow-hidden z-[9999]"
-        style={{ width: 340, background: "rgba(20, 20, 20, 0.95)", backdropFilter: "blur(20px)", borderRadius: 16 }}
+        className="p-0 shadow-2xl overflow-hidden z-[9999]"
+        style={{
+          width: 320,
+          background: "rgba(10,14,18,0.94)",
+          backdropFilter: "blur(20px)",
+          border: "1px solid rgba(255,255,255,0.10)",
+          borderRadius: 16,
+          boxShadow: "0 16px 60px rgba(0,0,0,0.55)",
+        }}
       >
-        {MODEL_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => { onChange(opt.value); setOpen(false); }}
-            className="w-full flex items-start text-left transition-colors hover:bg-foreground/8"
-            style={{
-              padding: "12px 16px", gap: 12,
-              background: value === opt.value ? "rgba(113, 240, 246, 0.06)" : "transparent",
-            }}
-          >
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 15 }}>
-                  {opt.label}
-                </span>
-                <span
-                  className="rounded px-1.5 py-0.5"
-                  style={{ fontSize: 11, background: "hsl(var(--foreground) / 0.1)", color: "hsl(var(--foreground) / 0.6)" }}
-                >
-                  {opt.badgeLabel}
-                </span>
-                {opt.isNew && (
-                  <img src={iconNewBadge} alt="new" style={{ width: 28, height: 12 }} />
-                )}
+        <div style={{ padding: "12px 16px 4px", fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.45)" }}>
+          Choose model
+        </div>
+        {MODEL_OPTIONS.map((opt) => {
+          const OptIcon = MODEL_ICONS[opt.icon];
+          const isSelected = value === opt.value;
+          return (
+            <button
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className="w-full flex items-start text-left transition-colors hover:bg-white/5"
+              style={{
+                padding: "12px 16px", gap: 12,
+                background: isSelected ? "rgba(113,240,246,0.12)" : "transparent",
+                borderLeft: isSelected ? "2px solid rgba(113,240,246,0.42)" : "2px solid transparent",
+              }}
+            >
+              <OptIcon size={18} style={{ color: isSelected ? "#71F0F6" : "rgba(255,255,255,0.5)", marginTop: 2, flexShrink: 0 }} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold" style={{
+                    fontFamily: "Arial, sans-serif", fontSize: 15,
+                    color: isSelected ? "#71F0F6" : "rgba(255,255,255,0.92)",
+                  }}>
+                    {opt.label}
+                  </span>
+                  <span
+                    className="rounded px-1.5 py-0.5"
+                    style={{
+                      fontSize: 11,
+                      background: isSelected ? "rgba(113,240,246,0.15)" : "rgba(255,255,255,0.08)",
+                      color: isSelected ? "#71F0F6" : "rgba(255,255,255,0.56)",
+                    }}
+                  >
+                    {opt.badge}
+                  </span>
+                </div>
+                <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, lineHeight: "18px", color: "rgba(255,255,255,0.56)", marginTop: 4 }}>
+                  {opt.desc}
+                </p>
               </div>
-              <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, lineHeight: "18px", color: "hsl(var(--foreground) / 0.5)", marginTop: 4 }}>
-                {opt.desc}
-              </p>
-            </div>
-            {value === opt.value && (
-              <Check size={16} className="flex-shrink-0 mt-1" style={{ color: "#71F0F6" }} />
-            )}
-          </button>
-        ))}
+              {isSelected && (
+                <Check size={16} className="flex-shrink-0 mt-1" style={{ color: "#71F0F6" }} />
+              )}
+            </button>
+          );
+        })}
       </PopoverContent>
     </Popover>
   );
 };
 
-/* ───── Ratio icon & toggle with smooth slider ───── */
+/* ───── Ratio toggle ───── */
 const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) => {
   const dims = ratio === "16:9" ? { w: 16, h: 10 } : { w: 10, h: 16 };
   return (
@@ -917,7 +1010,6 @@ const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string)
       className="relative flex h-[31px] items-center rounded-full"
       style={{ border: "0.7px solid hsl(var(--foreground) / 0.25)", padding: "0 4px", gap: 2 }}
     >
-      {/* Smooth sliding background */}
       <div
         className="absolute rounded-full"
         style={{
@@ -940,7 +1032,7 @@ const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string)
   );
 };
 
-/* ───── Glass CTA button (artlist.io ::before border technique, via CSS class) ───── */
+/* ───── Glass CTA button — artlist.io style with inner border div ───── */
 const GlassButton = forwardRef<
   HTMLButtonElement,
   {
@@ -961,40 +1053,48 @@ const GlassButton = forwardRef<
       fontSize: 14,
       lineHeight: "20px",
       letterSpacing: "0.01em",
-      color: "#71F0F6",
+      color: "white",
+      padding: "6px 18px",
       ...style,
     }}
   >
-    {children}
+    <span style={{ position: "relative", zIndex: 2 }}>{children}</span>
   </button>
 ));
 GlassButton.displayName = "GlassButton";
 
-/* ───── Make pill button (same glass-btn-v2 style) ───── */
+/* ───── Make pill button ───── */
 const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ctaIcon?: string; onClick?: () => void }) => (
   <button
     onClick={onClick}
     className="glass-btn-v2 ml-auto flex h-[29px] items-center justify-center px-[10px] focus-visible:outline-none"
     style={{
       borderRadius: 20.45,
-      color: "#71F0F6",
+      color: "white",
     }}
   >
-    <span className="font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
+    <span className="font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", position: "relative", zIndex: 2 }}>
       {ctaIcon && <span className="mr-1">{ctaIcon}</span>}
       {ctaText}
     </span>
-    <span className="ml-1">
-      <Sparkles size={10} style={{ color: "#71F0F6" }} />
+    <span className="ml-1" style={{ position: "relative", zIndex: 2 }}>
+      <Sparkles size={10} style={{ color: "white" }} />
     </span>
-    <span className="ml-1 font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
+    <span className="ml-1 font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", position: "relative", zIndex: 2 }}>
       10/s
     </span>
   </button>
 );
 
-/* ───── Announcement Modal (reference image layout: title 24px, body 16px, note 14px) ───── */
-const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
+/* ───── Announcement Modal — Surprise Campaign ───── */
+const AnnouncementModal = ({ onClose, onTrySurprise }: { onClose: () => void; onTrySurprise: () => void }) => {
+  const benefits = [
+    { text: "Use text, images, video, and audio together", tag: "UNLIMITED" },
+    { text: "Edit, extend, or connect clips with AI", tag: "FREE" },
+    { text: "Turn ideas into storyboards in seconds", tag: null },
+    { text: "Subscribe to unlock Surprise for videos up to 1 minute", tag: "PRO" },
+  ];
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center"
@@ -1011,7 +1111,7 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
           boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
         }}
       >
-        {/* Close button — just X, no background */}
+        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute z-30 flex h-8 w-8 items-center justify-center transition-opacity hover:opacity-100"
@@ -1021,40 +1121,54 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
         </button>
 
         {/* Hero image */}
-        <div style={{ height: 260 }}>
-          <img src={bannerBg} alt="Announcement" className="w-full h-full object-cover" />
+        <div style={{ height: 220 }}>
+          <img src={bannerBg} alt="Surprise" className="w-full h-full object-cover" />
         </div>
 
-        {/* Content — matching reference image layout */}
+        {/* Content */}
         <div style={{ padding: "20px 24px 24px" }}>
           <h3
             className="font-bold text-foreground"
             style={{ fontFamily: "Arial, sans-serif", fontSize: 24, lineHeight: "30px" }}
           >
-            最强模型 <span style={{ color: "#71F0F6" }}>2.0</span> 即将登陆
+            Unlock <span style={{ color: "#71F0F6" }}>Surprise</span> for Free Today
           </h3>
 
-          <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: "6px 24px" }}>
-            {[
-              { icon: "✅", text: "体验", bold: "超低特惠权" },
-              { icon: "✅", text: "团队会员最高赠送", bold: "500次生成" },
-              { icon: "✅", text: "会员最高", bold: "46折" },
-              { icon: "✅", text: "团队会员满血高并发", bold: "告别排队" },
-            ].map((item, i) => (
-              <span key={i} style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "26px", color: "hsl(var(--foreground) / 0.8)" }}>
-                {item.icon} {item.text}<span className="font-bold" style={{ color: "#71F0F6" }}>{item.bold}</span>
-              </span>
+          <p style={{ marginTop: 6, fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "rgba(255,255,255,0.7)" }}>
+            500 free daily spots for 8s storyboard creation
+          </p>
+
+          <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+            {benefits.map((item, i) => (
+              <div key={i} className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <Check size={16} style={{ color: "#71F0F6", flexShrink: 0 }} />
+                  <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "22px", color: "rgba(255,255,255,0.85)" }}>
+                    {item.text}
+                  </span>
+                </div>
+                {item.tag && (
+                  <span style={{
+                    fontFamily: "Arial, sans-serif", fontSize: 11, fontWeight: 700,
+                    padding: "2px 8px", borderRadius: 4, flexShrink: 0, marginLeft: 8,
+                    background: item.tag === "FREE" ? "rgba(113,240,246,0.15)" : "rgba(255,255,255,0.08)",
+                    color: item.tag === "FREE" ? "#71F0F6" : "rgba(255,255,255,0.5)",
+                  }}>
+                    {item.tag}
+                  </span>
+                )}
+              </div>
             ))}
           </div>
 
-          <p style={{ marginTop: 10, fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "20px", color: "hsl(var(--foreground) / 0.45)" }}>
-            *开放注册倒计时，抢先充值锁定老会员专属优惠
+          <p style={{ marginTop: 14, fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "20px", color: "rgba(255,255,255,0.4)" }}>
+            Free access resets daily. First come, first served.
           </p>
 
           {/* Two buttons */}
           <div className="flex gap-3" style={{ marginTop: 20 }}>
             <button
-              onClick={onClose}
+              onClick={onTrySurprise}
               className="flex-1 flex items-center justify-center rounded-full font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.97]"
               style={{
                 height: 44,
@@ -1064,7 +1178,7 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
                 fontSize: 16,
               }}
             >
-              去体验
+              Try Surprise
             </button>
             <button
               onClick={onClose}
@@ -1078,7 +1192,7 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
                 border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              去订阅
+              Subscribe Now
             </button>
           </div>
         </div>
