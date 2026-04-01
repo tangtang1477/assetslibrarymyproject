@@ -989,26 +989,42 @@ const GlassButton = forwardRef<
 ));
 GlassButton.displayName = "GlassButton";
 
-/* ───── Make pill button (artlist.io solid cyan style) ───── */
+/* ───── Make pill button (artlist.io glass border style) ───── */
 const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ctaIcon?: string; onClick?: () => void }) => (
   <button
     onClick={onClick}
-    className="relative ml-auto flex h-[29px] items-center justify-center rounded-full px-[10px] transition-all duration-200 hover:brightness-110 hover:shadow-[0_0_16px_rgba(113,240,246,0.4)] active:scale-[0.96] active:brightness-95"
+    className="glass-btn-artlist group relative ml-auto flex h-[29px] items-center justify-center overflow-hidden px-[10px] transition-all duration-200 active:scale-[0.96]"
     style={{
-      background: "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
+      background: "rgba(113, 240, 246, 0.06)",
       borderRadius: 20.45,
+      isolation: "isolate",
     }}
   >
-    <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#000", zIndex: 2 }}>
+    {/* Gradient border */}
+    <div
+      className="pointer-events-none absolute inset-0"
+      style={{
+        borderRadius: "inherit",
+        padding: "0.5px",
+        background: "linear-gradient(110.26deg, rgba(113, 240, 246, 0.5) 4.24%, rgba(255,255,255,0) 64.28%), linear-gradient(0deg, rgba(58,58,57,0.6), rgba(113,240,246,0.6))",
+        WebkitMask: "linear-gradient(#fff 0, #fff 0) content-box exclude, linear-gradient(#fff 0, #fff 0)",
+        mask: "linear-gradient(#fff 0, #fff 0) content-box exclude, linear-gradient(#fff 0, #fff 0)",
+        zIndex: 0,
+      }}
+    />
+    {/* Hover glow */}
+    <div
+      className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      style={{ borderRadius: "inherit", boxShadow: "0 0 16px rgba(113, 240, 246, 0.35)" }}
+    />
+    <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
       {ctaIcon && <span className="mr-1">{ctaIcon}</span>}
       {ctaText}
     </span>
     <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", zIndex: 2 }}>
-      <span style={{ color: "#000" }}>
-        ✦
-      </span>
+      <Sparkles size={10} style={{ color: "#71F0F6" }} />
     </span>
-    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#000", zIndex: 2 }}>
+    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
       10/s
     </span>
   </button>
