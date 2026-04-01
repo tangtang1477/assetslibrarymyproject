@@ -655,27 +655,25 @@ const ForYouShowcase = () => {
   const getSlotStyle = (offset: number): React.CSSProperties => {
     const absOff = Math.abs(offset);
     if (absOff === 0) {
-      return { width: "30%", zIndex: 5, opacity: 1, transform: "scale(1)", filter: "none" };
+      return { width: "28%", zIndex: 5, opacity: 1, transform: "scale(1)", filter: "none" };
     }
     if (absOff === 1) {
       return {
-        width: "20%", zIndex: 3, opacity: 0.8,
-        transform: `perspective(600px) rotateY(${offset < 0 ? 15 : -15}deg) scale(0.92)`,
+        width: "18%", zIndex: 3, opacity: 0.75,
+        transform: `perspective(600px) rotateY(${offset < 0 ? 15 : -15}deg) scale(0.9)`,
       };
     }
     return {
-      width: "12%", zIndex: 1, opacity: 0.45,
-      transform: `perspective(400px) rotateY(${offset < 0 ? 30 : -30}deg) scale(0.8)`,
+      width: "10%", zIndex: 1, opacity: 0.4,
+      transform: `perspective(400px) rotateY(${offset < 0 ? 30 : -30}deg) scale(0.78)`,
     };
   };
 
   return (
     <div className="relative flex items-center" style={{ gap: 16 }}>
-      {/* Left arrow */}
       <CarouselArrow direction="left" onClick={prev} />
 
-      {/* Carousel container */}
-      <div className="flex-1 flex items-center justify-center" style={{ height: 200, gap: 6 }}>
+      <div className="flex-1 flex items-center justify-center" style={{ height: 160, gap: 4 }}>
         {slots.map((slot, i) => {
           const slotStyle = getSlotStyle(slot.offset);
           const isCenter = slot.offset === 0;
@@ -687,7 +685,7 @@ const ForYouShowcase = () => {
                 ...slotStyle,
                 aspectRatio: "16/9",
                 height: "auto",
-                transition: "all 0.5s cubic-bezier(0.22, 0.61, 0.36, 1)",
+                transition: "all 0.6s cubic-bezier(0.22, 0.61, 0.36, 1)",
               }}
               onMouseEnter={() => isCenter && setHoveredCenter(true)}
               onMouseLeave={() => isCenter && setHoveredCenter(false)}
@@ -698,7 +696,6 @@ const ForYouShowcase = () => {
                 className="w-full h-full object-cover"
                 style={{ aspectRatio: "16/9" }}
               />
-              {/* Position dots — only on center card, only on hover */}
               {isCenter && hoveredCenter && (
                 <div
                   className="absolute left-0 right-0 flex items-center justify-center"
@@ -709,7 +706,7 @@ const ForYouShowcase = () => {
                       key={j}
                       className="rounded-full"
                       style={{
-                        width: 6, height: 6,
+                        width: 5, height: 5,
                         background: "white",
                         opacity: j === centerIndex ? 1 : j === ((centerIndex - 1 + total) % total) || j === ((centerIndex + 1) % total) ? 0.5 : 0.25,
                       }}
@@ -722,7 +719,6 @@ const ForYouShowcase = () => {
         })}
       </div>
 
-      {/* Right arrow */}
       <CarouselArrow direction="right" onClick={next} />
     </div>
   );
@@ -944,7 +940,7 @@ const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string)
   );
 };
 
-/* ───── Glass CTA button (artlist.io-inspired glass border style, blue text) ───── */
+/* ───── Glass CTA button (artlist.io ::before border technique, via CSS class) ───── */
 const GlassButton = forwardRef<
   HTMLButtonElement,
   {
@@ -957,88 +953,47 @@ const GlassButton = forwardRef<
   <button
     ref={ref}
     onClick={onClick}
-    className={`glass-btn-artlist group relative flex items-center justify-center overflow-hidden transition-all duration-200 active:scale-[0.96] focus-visible:outline-none ${className || ""}`}
+    className={`glass-btn-v2 flex items-center justify-center focus-visible:outline-none ${className || ""}`}
     style={{
-      background: "rgba(113, 240, 246, 0.06)",
       borderRadius: 24,
       fontFamily: "Arial, sans-serif",
       fontWeight: 700,
       fontSize: 14,
       lineHeight: "20px",
       letterSpacing: "0.01em",
-      isolation: "isolate",
+      color: "#71F0F6",
       ...style,
     }}
   >
-    {/* Gradient border via pseudo-element technique (simulated with inner div) */}
-    <div
-      className="pointer-events-none absolute inset-0"
-      style={{
-        borderRadius: "inherit",
-        padding: "0.5px",
-        background: "linear-gradient(110.26deg, rgba(113, 240, 246, 0.5) 4.24%, rgba(255,255,255,0) 64.28%), linear-gradient(0deg, rgba(58,58,57,0.6), rgba(113,240,246,0.6))",
-        WebkitMask: "linear-gradient(#fff 0, #fff 0) content-box exclude, linear-gradient(#fff 0, #fff 0)",
-        mask: "linear-gradient(#fff 0, #fff 0) content-box exclude, linear-gradient(#fff 0, #fff 0)",
-        zIndex: 0,
-      }}
-    />
-    {/* Hover glow */}
-    <div
-      className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-      style={{
-        borderRadius: "inherit",
-        boxShadow: "0 0 20px rgba(113, 240, 246, 0.35), inset 0 0 12px rgba(113, 240, 246, 0.1)",
-      }}
-    />
-    <span className="relative" style={{ zIndex: 2, color: "#71F0F6" }}>
-      {children}
-    </span>
+    {children}
   </button>
 ));
 GlassButton.displayName = "GlassButton";
 
-/* ───── Make pill button (artlist.io glass border style) ───── */
+/* ───── Make pill button (same glass-btn-v2 style) ───── */
 const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ctaIcon?: string; onClick?: () => void }) => (
   <button
     onClick={onClick}
-    className="glass-btn-artlist group relative ml-auto flex h-[29px] items-center justify-center overflow-hidden px-[10px] transition-all duration-200 active:scale-[0.96]"
+    className="glass-btn-v2 ml-auto flex h-[29px] items-center justify-center px-[10px] focus-visible:outline-none"
     style={{
-      background: "rgba(113, 240, 246, 0.06)",
       borderRadius: 20.45,
-      isolation: "isolate",
+      color: "#71F0F6",
     }}
   >
-    {/* Gradient border */}
-    <div
-      className="pointer-events-none absolute inset-0"
-      style={{
-        borderRadius: "inherit",
-        padding: "0.5px",
-        background: "linear-gradient(110.26deg, rgba(113, 240, 246, 0.5) 4.24%, rgba(255,255,255,0) 64.28%), linear-gradient(0deg, rgba(58,58,57,0.6), rgba(113,240,246,0.6))",
-        WebkitMask: "linear-gradient(#fff 0, #fff 0) content-box exclude, linear-gradient(#fff 0, #fff 0)",
-        mask: "linear-gradient(#fff 0, #fff 0) content-box exclude, linear-gradient(#fff 0, #fff 0)",
-        zIndex: 0,
-      }}
-    />
-    {/* Hover glow */}
-    <div
-      className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-      style={{ borderRadius: "inherit", boxShadow: "0 0 16px rgba(113, 240, 246, 0.35)" }}
-    />
-    <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
+    <span className="font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
       {ctaIcon && <span className="mr-1">{ctaIcon}</span>}
       {ctaText}
     </span>
-    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", zIndex: 2 }}>
+    <span className="ml-1">
       <Sparkles size={10} style={{ color: "#71F0F6" }} />
     </span>
-    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
+    <span className="ml-1 font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
       10/s
     </span>
   </button>
 );
 
-/* ───── Announcement Modal (suno-style: image top, two buttons bottom) ───── */
+/* ───── Announcement Modal (reference image layout: title 24px, body 16px, note 14px) ───── */
 const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
   return (
     <div
@@ -1056,34 +1011,47 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
           boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
         }}
       >
-        {/* Close button — just X, positioned on image */}
+        {/* Close button — just X, no background */}
         <button
           onClick={onClose}
-          className="absolute z-30 flex h-10 w-10 items-center justify-center rounded-full transition-all hover:opacity-100"
-          style={{ right: 12, top: 12, opacity: 0.7, background: "rgba(0,0,0,0.5)" }}
+          className="absolute z-30 flex h-8 w-8 items-center justify-center transition-opacity hover:opacity-100"
+          style={{ right: 12, top: 12, opacity: 0.6 }}
         >
-          <X size={18} className="text-foreground" />
+          <X size={16} className="text-foreground" />
         </button>
 
-        {/* Hero image — full width, no padding */}
+        {/* Hero image */}
         <div style={{ height: 260 }}>
           <img src={bannerBg} alt="Announcement" className="w-full h-full object-cover" />
         </div>
 
-        {/* Content */}
+        {/* Content — matching reference image layout */}
         <div style={{ padding: "20px 24px 24px" }}>
           <h3
             className="font-bold text-foreground"
-            style={{ fontFamily: "Arial, sans-serif", fontSize: 22, lineHeight: "28px" }}
+            style={{ fontFamily: "Arial, sans-serif", fontSize: 24, lineHeight: "30px" }}
           >
-            The Most Powerful <span style={{ color: "#71F0F6" }}>Model 2.0</span> is Here
+            最强模型 <span style={{ color: "#71F0F6" }}>2.0</span> 即将登陆
           </h3>
 
-          <p style={{ marginTop: 12, fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.6)" }}>
-            v2.0 is our best, most expressive model yet. With AI Director, Story Agent and Cinematic mode, v2.0 gives you brand-new ways to create videos uniquely yours.
+          <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: "6px 24px" }}>
+            {[
+              { icon: "✅", text: "体验", bold: "超低特惠权" },
+              { icon: "✅", text: "团队会员最高赠送", bold: "500次生成" },
+              { icon: "✅", text: "会员最高", bold: "46折" },
+              { icon: "✅", text: "团队会员满血高并发", bold: "告别排队" },
+            ].map((item, i) => (
+              <span key={i} style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "26px", color: "hsl(var(--foreground) / 0.8)" }}>
+                {item.icon} {item.text}<span className="font-bold" style={{ color: "#71F0F6" }}>{item.bold}</span>
+              </span>
+            ))}
+          </div>
+
+          <p style={{ marginTop: 10, fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "20px", color: "hsl(var(--foreground) / 0.45)" }}>
+            *开放注册倒计时，抢先充值锁定老会员专属优惠
           </p>
 
-          {/* Two buttons — primary "Try It" + dark "Subscribe" */}
+          {/* Two buttons */}
           <div className="flex gap-3" style={{ marginTop: 20 }}>
             <button
               onClick={onClose}
@@ -1093,10 +1061,10 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
                 background: "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
                 color: "#000",
                 fontFamily: "Arial, sans-serif",
-                fontSize: 15,
+                fontSize: 16,
               }}
             >
-              Try It Now
+              去体验
             </button>
             <button
               onClick={onClose}
@@ -1106,11 +1074,11 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
                 background: "rgba(255, 255, 255, 0.08)",
                 color: "hsl(var(--foreground) / 0.8)",
                 fontFamily: "Arial, sans-serif",
-                fontSize: 15,
+                fontSize: 16,
                 border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              Subscribe
+              去订阅
             </button>
           </div>
         </div>
