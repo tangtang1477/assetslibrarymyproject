@@ -263,7 +263,7 @@ const Home = () => {
     setSurpriseBanner(true);
     setModelPillFlash(true);
     setTimeout(() => setSurpriseBanner(false), 5000);
-    setTimeout(() => setModelPillFlash(false), 3000);
+    setTimeout(() => setModelPillFlash(false), 6500);
   };
 
   return (
