@@ -204,6 +204,8 @@ const Home = () => {
   const [showAtMenu, setShowAtMenu] = useState(false);
   const [agentThinking, setAgentThinking] = useState(false);
   const [surpriseBanner, setSurpriseBanner] = useState(false);
+  const [modelPillFlash, setModelPillFlash] = useState(false);
+  const [quotaExhausted, setQuotaExhausted] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -259,7 +261,9 @@ const Home = () => {
     setShowAnnouncement(false);
     setSelectedModel("surprise");
     setSurpriseBanner(true);
+    setModelPillFlash(true);
     setTimeout(() => setSurpriseBanner(false), 5000);
+    setTimeout(() => setModelPillFlash(false), 3000);
   };
 
   return (
@@ -485,7 +489,7 @@ const Home = () => {
 
                 {/* Input options bar */}
                 <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8, zIndex: 60 }}>
-                  <ModelPillDropdown value={selectedModel} onChange={setSelectedModel} />
+                  <ModelPillDropdown value={selectedModel} onChange={setSelectedModel} flash={modelPillFlash} />
                   <OptionPillDropdown
                     label={LANGUAGE_OPTIONS.find(o => o.value === selectedLang)?.label || "EN"}
                     options={LANGUAGE_OPTIONS}
@@ -568,11 +572,9 @@ const Home = () => {
                   <div
                     className="absolute bottom-0 left-0 right-0"
                     style={{
-                      height: 136,
-                      background: "hsl(var(--background) / 0.05)",
-                      boxShadow: "inset 0px 0px 7.1px hsl(var(--foreground) / 0.25), inset 0px 7.1px 14.2px hsl(var(--foreground) / 0.15)",
-                      backdropFilter: "blur(12px)",
+                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.75) 100%)",
                       borderRadius: "0 0 10px 10px",
+                      padding: "40px 12px 12px",
                     }}
                   />
                   <div className="absolute bottom-3 left-3 right-3 z-10">
@@ -587,12 +589,6 @@ const Home = () => {
                     <span className="font-bold" style={{ fontSize: 14, lineHeight: "16px", color: "hsl(var(--foreground))", transform: "matrix(1, 0, -0.17, 0.98, 0, 0)" }}>
                       {lab.badge}
                     </span>
-                  </div>
-                  {/* Check It Out button */}
-                  <div className="absolute bottom-3 right-3 z-20">
-                    <GlassButton style={{ width: 120, height: 32 }}>
-                      Check It Out
-                    </GlassButton>
                   </div>
                 </div>
               ))}
@@ -669,6 +665,7 @@ const Home = () => {
         <AnnouncementModal
           onClose={() => setShowAnnouncement(false)}
           onTrySurprise={handleTrySurprise}
+          quotaExhausted={quotaExhausted}
         />
       )}
     </div>
@@ -682,7 +679,7 @@ const TopRightHeader = () => (
       <img src={iconGift} alt="gift" style={{ width: 18, height: 18 }} />
       <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
     </button>
-    <div className="flex items-center gap-1.5 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
+    <div className="flex items-center gap-1.5">
       <img src={iconCredit} alt="credit" style={{ width: 16, height: 16 }} />
       <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>0</span>
     </div>
@@ -709,8 +706,8 @@ const ForYouShowcase = () => {
     // Positions as percentage from left edge of container
     // Container is between arrows. Slots: [-2, -1, 0, 1, 2]
     // Layout: |16px| slot-2 | slot-1 | slot0 | slot1 | slot2 |16px|
-    const widths = [10, 18, 30, 18, 10]; // percentages
-    const positions = [1, 12, 34, 65, 82]; // left% approx
+    const widths = [12, 20, 34, 20, 12]; // percentages
+    const positions = [1, 14, 34, 68, 88]; // left% approx
     const idx = offset + 2;
 
     const baseStyle: React.CSSProperties = {
@@ -743,16 +740,16 @@ const ForYouShowcase = () => {
   }));
 
   return (
-    <div className="relative flex items-center justify-center" style={{ maxWidth: 900, margin: "0 auto" }}>
+    <div className="relative flex items-center justify-center" style={{ maxWidth: 1000, margin: "0 auto" }}>
       <CarouselArrow direction="left" onClick={prev} />
 
-      <div className="relative overflow-hidden" style={{ flex: 1, height: 140, margin: "0 16px" }}>
-        {slots.map((slot, i) => {
+      <div className="relative overflow-hidden" style={{ flex: 1, height: 220, margin: "0 16px" }}>
+        {slots.map((slot) => {
           const slotStyle = getSlotStyle(slot.offset);
           const isCenter = slot.offset === 0;
           return (
             <div
-              key={`${centerIndex}-${slot.offset}`}
+              key={slot.offset}
               className="overflow-hidden rounded-[8px]"
               style={{
                 ...slotStyle,
@@ -893,10 +890,11 @@ const OptionPillDropdown = ({
 
 /* ───── Model dropdown (3 models with icons + card style) ───── */
 const ModelPillDropdown = ({
-  value, onChange,
+  value, onChange, flash,
 }: {
   value: string;
   onChange: (v: string) => void;
+  flash?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const selected = MODEL_OPTIONS.find(o => o.value === value);
@@ -913,6 +911,7 @@ const ModelPillDropdown = ({
             background: open ? "rgba(113,240,246,0.14)" : "rgba(255,255,255,0.06)",
             border: open ? "1px solid rgba(113,240,246,0.52)" : "1px solid rgba(255,255,255,0.12)",
             boxShadow: open ? "0 0 0 3px rgba(113,240,246,0.18)" : "none",
+            animation: flash ? "glowPulse 0.6s ease 5" : "none",
           }}
         >
           <SelectedIcon size={14} style={{ color: "rgba(255,255,255,0.7)" }} />
@@ -1087,13 +1086,24 @@ const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ct
 );
 
 /* ───── Announcement Modal — Surprise Campaign ───── */
-const AnnouncementModal = ({ onClose, onTrySurprise }: { onClose: () => void; onTrySurprise: () => void }) => {
+const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted }: { onClose: () => void; onTrySurprise: () => void; quotaExhausted?: boolean }) => {
+  const [shaking, setShaking] = useState(false);
+
   const benefits = [
     { text: "Use text, images, video, and audio together", tag: "UNLIMITED" },
     { text: "Edit, extend, or connect clips with AI", tag: "FREE" },
     { text: "Turn ideas into storyboards in seconds", tag: null },
     { text: "Subscribe to unlock Surprise for videos up to 1 minute", tag: "PRO" },
   ];
+
+  const handlePrimaryClick = () => {
+    if (quotaExhausted) {
+      setShaking(true);
+      setTimeout(() => { setShaking(false); onClose(); }, 800);
+    } else {
+      onTrySurprise();
+    }
+  };
 
   return (
     <div
@@ -1135,7 +1145,9 @@ const AnnouncementModal = ({ onClose, onTrySurprise }: { onClose: () => void; on
           </h3>
 
           <p style={{ marginTop: 6, fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "rgba(255,255,255,0.7)" }}>
-            500 free daily spots for 8s storyboard creation
+            {quotaExhausted
+              ? "Today's 500 free spots are gone. Come back tomorrow or subscribe for longer access."
+              : "500 free daily spots for 8s storyboard creation"}
           </p>
 
           <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1168,17 +1180,21 @@ const AnnouncementModal = ({ onClose, onTrySurprise }: { onClose: () => void; on
           {/* Two buttons */}
           <div className="flex gap-3" style={{ marginTop: 20 }}>
             <button
-              onClick={onTrySurprise}
+              onClick={handlePrimaryClick}
               className="flex-1 flex items-center justify-center rounded-full font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.97]"
               style={{
                 height: 44,
-                background: "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
-                color: "#000",
+                background: quotaExhausted
+                  ? "rgba(255, 255, 255, 0.08)"
+                  : "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
+                color: quotaExhausted ? "rgba(255,255,255,0.6)" : "#000",
                 fontFamily: "Arial, sans-serif",
                 fontSize: 16,
+                border: quotaExhausted ? "1px solid rgba(255,255,255,0.1)" : "none",
+                animation: shaking ? "shake 0.5s ease" : "none",
               }}
             >
-              Try Surprise
+              {quotaExhausted ? "Come Back Tomorrow" : "Try Surprise"}
             </button>
             <button
               onClick={onClose}
