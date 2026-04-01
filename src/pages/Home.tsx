@@ -682,7 +682,7 @@ const TopRightHeader = () => (
       <img src={iconGift} alt="gift" style={{ width: 18, height: 18 }} />
       <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
     </button>
-    <div className="flex items-center gap-1.5 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
+    <div className="flex items-center gap-1.5">
       <img src={iconCredit} alt="credit" style={{ width: 16, height: 16 }} />
       <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>0</span>
     </div>
