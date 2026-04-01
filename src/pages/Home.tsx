@@ -740,16 +740,16 @@ const ForYouShowcase = () => {
   }));
 
   return (
-    <div className="relative flex items-center justify-center" style={{ maxWidth: 900, margin: "0 auto" }}>
+    <div className="relative flex items-center justify-center" style={{ maxWidth: 1000, margin: "0 auto" }}>
       <CarouselArrow direction="left" onClick={prev} />
 
-      <div className="relative overflow-hidden" style={{ flex: 1, height: 140, margin: "0 16px" }}>
-        {slots.map((slot, i) => {
+      <div className="relative overflow-hidden" style={{ flex: 1, height: 220, margin: "0 16px" }}>
+        {slots.map((slot) => {
           const slotStyle = getSlotStyle(slot.offset);
           const isCenter = slot.offset === 0;
           return (
             <div
-              key={`${centerIndex}-${slot.offset}`}
+              key={slot.offset}
               className="overflow-hidden rounded-[8px]"
               style={{
                 ...slotStyle,
