@@ -636,9 +636,10 @@ const TopRightHeader = () => (
   </div>
 );
 
-/* ───── For‑You showcase – 5 slots coverflow, no title ───── */
+/* ───── For‑You showcase – 5 slots coverflow, smaller, within arrows ───── */
 const ForYouShowcase = () => {
   const [centerIndex, setCenterIndex] = useState(0);
+  const [hoveredCenter, setHoveredCenter] = useState(false);
   const total = SHOWCASE_ITEMS.length;
 
   const getSlotIndex = (offset: number) => ((centerIndex + offset) % total + total) % total;
@@ -654,42 +655,42 @@ const ForYouShowcase = () => {
   const getSlotStyle = (offset: number): React.CSSProperties => {
     const absOff = Math.abs(offset);
     if (absOff === 0) {
-      return { width: "34%", zIndex: 5, opacity: 1, transform: "scale(1)", filter: "none" };
+      return { width: "30%", zIndex: 5, opacity: 1, transform: "scale(1)", filter: "none" };
     }
     if (absOff === 1) {
       return {
-        width: "22%", zIndex: 3, opacity: 0.85,
-        transform: `perspective(500px) rotateY(${offset < 0 ? 12 : -12}deg) scale(0.95)`,
+        width: "20%", zIndex: 3, opacity: 0.8,
+        transform: `perspective(600px) rotateY(${offset < 0 ? 15 : -15}deg) scale(0.92)`,
       };
     }
     return {
-      width: "14%", zIndex: 1, opacity: 0.5,
-      transform: `perspective(400px) rotateY(${offset < 0 ? 25 : -25}deg) scale(0.85)`,
+      width: "12%", zIndex: 1, opacity: 0.45,
+      transform: `perspective(400px) rotateY(${offset < 0 ? 30 : -30}deg) scale(0.8)`,
     };
   };
 
   return (
-    <div className="relative">
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10" style={{ left: -4 }}>
-        <CarouselArrow direction="left" onClick={prev} />
-      </div>
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10" style={{ right: -4 }}>
-        <CarouselArrow direction="right" onClick={next} />
-      </div>
+    <div className="relative flex items-center" style={{ gap: 16 }}>
+      {/* Left arrow */}
+      <CarouselArrow direction="left" onClick={prev} />
 
-      <div className="flex items-center justify-center" style={{ height: 260, gap: 8 }}>
+      {/* Carousel container */}
+      <div className="flex-1 flex items-center justify-center" style={{ height: 200, gap: 6 }}>
         {slots.map((slot, i) => {
           const slotStyle = getSlotStyle(slot.offset);
+          const isCenter = slot.offset === 0;
           return (
             <div
               key={`${slot.offset}-${i}`}
-              className="flex-shrink-0 overflow-hidden rounded-[10px]"
+              className="relative flex-shrink-0 overflow-hidden rounded-[8px]"
               style={{
                 ...slotStyle,
                 aspectRatio: "16/9",
                 height: "auto",
-                transition: "all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                transition: "all 0.5s cubic-bezier(0.22, 0.61, 0.36, 1)",
               }}
+              onMouseEnter={() => isCenter && setHoveredCenter(true)}
+              onMouseLeave={() => isCenter && setHoveredCenter(false)}
             >
               <img
                 src={slot.poster}
@@ -697,25 +698,32 @@ const ForYouShowcase = () => {
                 className="w-full h-full object-cover"
                 style={{ aspectRatio: "16/9" }}
               />
+              {/* Position dots — only on center card, only on hover */}
+              {isCenter && hoveredCenter && (
+                <div
+                  className="absolute left-0 right-0 flex items-center justify-center"
+                  style={{ bottom: 4, gap: 4, transition: "opacity 0.3s ease" }}
+                >
+                  {SHOWCASE_ITEMS.map((_, j) => (
+                    <div
+                      key={j}
+                      className="rounded-full"
+                      style={{
+                        width: 6, height: 6,
+                        background: "white",
+                        opacity: j === centerIndex ? 1 : j === ((centerIndex - 1 + total) % total) || j === ((centerIndex + 1) % total) ? 0.5 : 0.25,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
-      <div className="flex items-center justify-center gap-2 mt-3">
-        {SHOWCASE_ITEMS.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCenterIndex(i)}
-            className="rounded-full transition-all"
-            style={{
-              width: centerIndex === i ? 24 : 8,
-              height: 8,
-              background: centerIndex === i ? "#71F0F6" : "hsl(var(--foreground) / 0.3)",
-            }}
-          />
-        ))}
-      </div>
+      {/* Right arrow */}
+      <CarouselArrow direction="right" onClick={next} />
     </div>
   );
 };
