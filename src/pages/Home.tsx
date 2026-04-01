@@ -897,28 +897,49 @@ const ModelPillDropdown = ({
   flash?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const selected = MODEL_OPTIONS.find(o => o.value === value);
   const SelectedIcon = selected ? MODEL_ICONS[selected.icon] : Zap;
+
+  const triggerBg = open
+    ? "rgba(113,240,246,0.16)"
+    : hovered
+      ? "rgba(113,240,246,0.10)"
+      : "rgba(255,255,255,0.06)";
+  const triggerBorder = open
+    ? "1px solid rgba(113,240,246,0.55)"
+    : hovered
+      ? "1px solid rgba(113,240,246,0.35)"
+      : "1px solid rgba(255,255,255,0.12)";
+  const triggerShadow = flash
+    ? undefined
+    : open
+      ? "0 0 16px 3px rgba(113,240,246,0.22), 0 0 40px 6px rgba(113,240,246,0.08)"
+      : hovered
+        ? "0 0 12px 2px rgba(113,240,246,0.15)"
+        : "none";
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className="relative flex h-[40px] items-center rounded-full transition-all"
+          className="relative flex h-[40px] items-center rounded-full transition-all duration-200"
           style={{
             padding: "0 14px",
             gap: 8,
-            background: open ? "rgba(113,240,246,0.14)" : "rgba(255,255,255,0.06)",
-            border: open ? "1px solid rgba(113,240,246,0.52)" : "1px solid rgba(255,255,255,0.12)",
-            boxShadow: open ? "0 0 0 3px rgba(113,240,246,0.18)" : "none",
+            background: triggerBg,
+            border: triggerBorder,
+            boxShadow: triggerShadow,
             animation: flash ? "glowPulse 0.6s ease 5" : "none",
           }}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
         >
-          <SelectedIcon size={14} style={{ color: "rgba(255,255,255,0.7)" }} />
+          <SelectedIcon size={14} style={{ color: hovered || open ? "#71F0F6" : "rgba(255,255,255,0.7)", transition: "color 0.2s" }} />
           <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "rgba(255,255,255,0.92)" }}>
             {selected?.label || "Standard"}
           </span>
-          <ChevronDown size={14} style={{ color: "rgba(255,255,255,0.5)" }} />
+          <ChevronDown size={14} style={{ color: hovered || open ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.5)", transition: "color 0.2s" }} />
         </button>
       </PopoverTrigger>
       <PopoverContent
@@ -945,17 +966,23 @@ const ModelPillDropdown = ({
             <button
               key={opt.value}
               onClick={() => { onChange(opt.value); setOpen(false); }}
-              className="w-full flex items-start text-left transition-colors hover:bg-white/5"
+              className="w-full flex items-start text-left transition-all duration-150 group"
               style={{
                 padding: "12px 16px", gap: 12,
                 background: isSelected ? "rgba(113,240,246,0.12)" : "transparent",
                 borderLeft: isSelected ? "2px solid rgba(113,240,246,0.42)" : "2px solid transparent",
               }}
+              onMouseEnter={(e) => {
+                if (!isSelected) e.currentTarget.style.background = "rgba(113,240,246,0.06)";
+              }}
+              onMouseLeave={(e) => {
+                if (!isSelected) e.currentTarget.style.background = "transparent";
+              }}
             >
-              <OptIcon size={18} style={{ color: isSelected ? "#71F0F6" : "rgba(255,255,255,0.5)", marginTop: 2, flexShrink: 0 }} />
+              <OptIcon size={18} style={{ color: isSelected ? "#71F0F6" : "rgba(255,255,255,0.5)", marginTop: 2, flexShrink: 0, transition: "color 0.15s" }} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold" style={{
+                  <span className="font-bold group-hover:text-[#71F0F6] transition-colors" style={{
                     fontFamily: "Arial, sans-serif", fontSize: 15,
                     color: isSelected ? "#71F0F6" : "rgba(255,255,255,0.92)",
                   }}>
