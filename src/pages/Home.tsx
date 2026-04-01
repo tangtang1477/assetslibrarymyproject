@@ -665,6 +665,7 @@ const Home = () => {
         <AnnouncementModal
           onClose={() => setShowAnnouncement(false)}
           onTrySurprise={handleTrySurprise}
+          quotaExhausted={quotaExhausted}
         />
       )}
     </div>
