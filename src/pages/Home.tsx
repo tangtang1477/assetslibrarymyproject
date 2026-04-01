@@ -543,7 +543,7 @@ const Home = () => {
             </div>
 
             {/* For You showcase */}
-            <div style={{ marginTop: 32, width: 990, marginLeft: "auto", marginRight: "auto" }}>
+            <div style={{ marginTop: 32, width: "100%" }}>
               <ForYouShowcase />
             </div>
 
