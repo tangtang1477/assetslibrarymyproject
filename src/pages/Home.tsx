@@ -778,72 +778,91 @@ const ForYouShowcase = () => {
   };
 
   return (
-    <div className="relative flex items-center" style={{ width: "100%" }}>
-      {/* Left arrow */}
-      <button
-        onClick={prev}
-        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
-          bg-foreground/10 text-foreground/70
-          hover:bg-foreground/20 hover:text-foreground hover:scale-110
-          active:bg-foreground/30 active:scale-95
-          transition-all duration-200"
-        style={{ marginRight: 12 }}
-        aria-label="Previous"
-      >
-        <ChevronLeft size={18} />
-      </button>
+    <div className="flex flex-col items-center" style={{ width: "100%" }}>
+      <div className="relative flex items-center" style={{ width: "100%" }}>
+        {/* Left arrow */}
+        <button
+          onClick={prev}
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
+            bg-foreground/10 text-foreground/70
+            hover:bg-foreground/20 hover:text-foreground hover:scale-110
+            active:bg-foreground/30 active:scale-95
+            transition-all duration-200"
+          style={{ marginRight: 12 }}
+          aria-label="Previous"
+        >
+          <ChevronLeft size={18} />
+        </button>
 
-      {/* Carousel track */}
-      <div className="relative flex-1" style={{ height: 280, perspective: 1200 }}>
-        {slots.map((slot) => {
-          const idx = ((centerIndex + slot) % total + total) % total;
-          const item = SHOWCASE_ITEMS[idx];
-          const isHovered = hoveredSlot === slot;
-          return (
-            <div
-              key={`slot-${slot}`}
-              style={getSlotStyle(slot, isHovered)}
-              onMouseEnter={() => setHoveredSlot(slot)}
-              onMouseLeave={() => setHoveredSlot(null)}
-            >
-              <img
-                src={item.poster}
-                alt={item.title}
-                className="w-full h-full object-cover"
-                draggable={false}
-              />
-              {/* Title overlay on center card */}
-              {slot === 0 && (
-                <div
-                  className="absolute bottom-0 left-0 right-0"
-                  style={{
-                    background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
-                    padding: "20px 14px 10px",
-                  }}
-                >
-                  <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.9)", fontWeight: 600 }}>
-                    {item.title}
-                  </span>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {/* Carousel track */}
+        <div className="relative flex-1" style={{ height: 280, perspective: 1200 }}>
+          {slots.map((slot) => {
+            const idx = ((centerIndex + slot) % total + total) % total;
+            const item = SHOWCASE_ITEMS[idx];
+            const isHovered = hoveredSlot === slot;
+            return (
+              <div
+                key={`slot-${slot}`}
+                style={getSlotStyle(slot, isHovered)}
+                onMouseEnter={() => setHoveredSlot(slot)}
+                onMouseLeave={() => setHoveredSlot(null)}
+              >
+                <img
+                  src={item.poster}
+                  alt={item.title}
+                  className="w-full h-full object-cover"
+                  draggable={false}
+                />
+                {slot === 0 && (
+                  <div
+                    className="absolute bottom-0 left-0 right-0"
+                    style={{
+                      background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
+                      padding: "20px 14px 10px",
+                    }}
+                  >
+                    <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.9)", fontWeight: 600 }}>
+                      {item.title}
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Right arrow */}
+        <button
+          onClick={next}
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
+            bg-foreground/10 text-foreground/70
+            hover:bg-foreground/20 hover:text-foreground hover:scale-110
+            active:bg-foreground/30 active:scale-95
+            transition-all duration-200"
+          style={{ marginLeft: 12 }}
+          aria-label="Next"
+        >
+          <ChevronRight size={18} />
+        </button>
       </div>
 
-      {/* Right arrow */}
-      <button
-        onClick={next}
-        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
-          bg-foreground/10 text-foreground/70
-          hover:bg-foreground/20 hover:text-foreground hover:scale-110
-          active:bg-foreground/30 active:scale-95
-          transition-all duration-200"
-        style={{ marginLeft: 12 }}
-        aria-label="Next"
-      >
-        <ChevronRight size={18} />
-      </button>
+      {/* Dot indicators */}
+      <div className="flex items-center justify-center" style={{ marginTop: 16, gap: 8 }}>
+        {SHOWCASE_ITEMS.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCenterIndex(i)}
+            className="rounded-full transition-all duration-300"
+            style={{
+              width: centerIndex === i ? 20 : 6,
+              height: 6,
+              background: centerIndex === i ? "#71F0F6" : "rgba(255,255,255,0.25)",
+              border: "none",
+              cursor: "pointer",
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 };
