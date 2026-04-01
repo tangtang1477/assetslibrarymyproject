@@ -974,42 +974,24 @@ const GlassButton = forwardRef<
 ));
 GlassButton.displayName = "GlassButton";
 
-/* ───── Make pill button (artlist.io glass border style) ───── */
+/* ───── Make pill button (same glass-btn-v2 style) ───── */
 const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ctaIcon?: string; onClick?: () => void }) => (
   <button
     onClick={onClick}
-    className="glass-btn-artlist group relative ml-auto flex h-[29px] items-center justify-center overflow-hidden px-[10px] transition-all duration-200 active:scale-[0.96]"
+    className="glass-btn-v2 ml-auto flex h-[29px] items-center justify-center px-[10px] focus-visible:outline-none"
     style={{
-      background: "rgba(113, 240, 246, 0.06)",
       borderRadius: 20.45,
-      isolation: "isolate",
+      color: "#71F0F6",
     }}
   >
-    {/* Gradient border */}
-    <div
-      className="pointer-events-none absolute inset-0"
-      style={{
-        borderRadius: "inherit",
-        padding: "0.5px",
-        background: "linear-gradient(110.26deg, rgba(113, 240, 246, 0.5) 4.24%, rgba(255,255,255,0) 64.28%), linear-gradient(0deg, rgba(58,58,57,0.6), rgba(113,240,246,0.6))",
-        WebkitMask: "linear-gradient(#fff 0, #fff 0) content-box exclude, linear-gradient(#fff 0, #fff 0)",
-        mask: "linear-gradient(#fff 0, #fff 0) content-box exclude, linear-gradient(#fff 0, #fff 0)",
-        zIndex: 0,
-      }}
-    />
-    {/* Hover glow */}
-    <div
-      className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-      style={{ borderRadius: "inherit", boxShadow: "0 0 16px rgba(113, 240, 246, 0.35)" }}
-    />
-    <span className="relative font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
+    <span className="font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
       {ctaIcon && <span className="mr-1">{ctaIcon}</span>}
       {ctaText}
     </span>
-    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", zIndex: 2 }}>
+    <span className="ml-1">
       <Sparkles size={10} style={{ color: "#71F0F6" }} />
     </span>
-    <span className="relative ml-1" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", color: "#71F0F6", zIndex: 2 }}>
+    <span className="ml-1 font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px" }}>
       10/s
     </span>
   </button>
