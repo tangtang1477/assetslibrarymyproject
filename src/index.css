@@ -73,14 +73,38 @@
 }
 
 @layer utilities {
-  /* Glass button hover/active states */
-  .glass-btn:hover .glass-btn-glow {
-    background: rgba(69, 196, 246, 0.85) !important;
-    filter: blur(10px) !important;
+  /* Artlist.io-style glass border button */
+  .glass-btn-v2 {
+    position: relative;
+    isolation: isolate;
+    background: rgba(113, 240, 246, 0.06);
+    border: none;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease, transform 0.15s ease;
   }
-  .glass-btn:active .glass-btn-glow {
-    background: rgba(69, 196, 246, 0.5) !important;
-    filter: blur(5px) !important;
+  .glass-btn-v2::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(110.26deg, rgba(113, 240, 246, 0.5) 4.24%, rgba(255, 255, 255, 0) 64.28%),
+                linear-gradient(0deg, rgba(58, 58, 57, 0.6), rgba(113, 240, 246, 0.6));
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+  }
+  .glass-btn-v2:hover {
+    box-shadow: 0 0 20px rgba(113, 240, 246, 0.3), 0 0 40px rgba(113, 240, 246, 0.12);
+  }
+  .glass-btn-v2:active {
+    transform: scale(0.96);
   }
 
   .hide-scrollbar {
