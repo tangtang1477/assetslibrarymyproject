@@ -424,35 +424,43 @@ const Home = () => {
 
                   {/* Real textarea input with @ support */}
                   <div className="relative flex-1">
-                   {/* Custom placeholder overlay for @角色名 */}
-                    <div
-                      className="absolute inset-0 pointer-events-none flex items-start"
-                      style={{ paddingTop: 8 }}
-                    >
-                      {selectedCharacter ? (
-                        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>
-                          @{selectedCharacter}
+                   {/* Custom placeholder overlay */}
+                    {!inputText && !selectedCharacter && (
+                      <div
+                        className="absolute inset-0 pointer-events-none flex items-start"
+                        style={{ paddingTop: 8 }}
+                      >
+                        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "hsl(var(--foreground) / 0.4)" }}>
+                          {config.placeholder}
                         </span>
-                      ) : (
-                        !inputText && (
-                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "hsl(var(--foreground) / 0.4)" }}>
-                            {config.placeholder}
-                          </span>
-                        )
+                      </div>
+                    )}
+                    <div className="flex items-start" style={{ paddingTop: 8, gap: 0 }}>
+                      {/* @角色名 chip — always visible when character selected */}
+                      {selectedCharacter && (
+                        <span
+                          className="flex-shrink-0 select-none"
+                          style={{
+                            fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
+                            color: "#71F0F6", whiteSpace: "nowrap", pointerEvents: "none",
+                          }}
+                        >
+                          @{selectedCharacter}&nbsp;
+                        </span>
                       )}
+                      <textarea
+                        ref={textareaRef}
+                        value={inputText}
+                        onChange={handleInputChange}
+                        disabled={config.locked}
+                        className="flex-1 bg-transparent border-none outline-none resize-none text-foreground"
+                        style={{
+                          fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
+                          letterSpacing: "0.015em", height: 64,
+                          color: "hsl(var(--foreground) / 0.9)",
+                        }}
+                      />
                     </div>
-                    <textarea
-                      ref={textareaRef}
-                      value={inputText}
-                      onChange={handleInputChange}
-                      disabled={config.locked}
-                      className="w-full bg-transparent border-none outline-none resize-none text-foreground"
-                      style={{
-                        fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
-                        letterSpacing: "0.015em", height: 72, paddingTop: 8,
-                        color: "hsl(var(--foreground) / 0.9)",
-                      }}
-                    />
                     {/* @ mention popup */}
                     {showAtMenu && (
                       <div
