@@ -706,8 +706,8 @@ const ForYouShowcase = () => {
     // Positions as percentage from left edge of container
     // Container is between arrows. Slots: [-2, -1, 0, 1, 2]
     // Layout: |16px| slot-2 | slot-1 | slot0 | slot1 | slot2 |16px|
-    const widths = [10, 18, 30, 18, 10]; // percentages
-    const positions = [1, 12, 34, 65, 82]; // left% approx
+    const widths = [12, 20, 34, 20, 12]; // percentages
+    const positions = [1, 14, 34, 68, 88]; // left% approx
     const idx = offset + 2;
 
     const baseStyle: React.CSSProperties = {
