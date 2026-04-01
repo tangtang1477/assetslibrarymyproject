@@ -993,7 +993,7 @@ const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ct
   </button>
 );
 
-/* ───── Announcement Modal (suno-style: image top, two buttons bottom) ───── */
+/* ───── Announcement Modal (reference image layout: title 24px, body 16px, note 14px) ───── */
 const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
   return (
     <div
@@ -1011,34 +1011,47 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
           boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
         }}
       >
-        {/* Close button — just X, positioned on image */}
+        {/* Close button — just X, no background */}
         <button
           onClick={onClose}
-          className="absolute z-30 flex h-10 w-10 items-center justify-center rounded-full transition-all hover:opacity-100"
-          style={{ right: 12, top: 12, opacity: 0.7, background: "rgba(0,0,0,0.5)" }}
+          className="absolute z-30 flex h-8 w-8 items-center justify-center transition-opacity hover:opacity-100"
+          style={{ right: 12, top: 12, opacity: 0.6 }}
         >
-          <X size={18} className="text-foreground" />
+          <X size={16} className="text-foreground" />
         </button>
 
-        {/* Hero image — full width, no padding */}
+        {/* Hero image */}
         <div style={{ height: 260 }}>
           <img src={bannerBg} alt="Announcement" className="w-full h-full object-cover" />
         </div>
 
-        {/* Content */}
+        {/* Content — matching reference image layout */}
         <div style={{ padding: "20px 24px 24px" }}>
           <h3
             className="font-bold text-foreground"
-            style={{ fontFamily: "Arial, sans-serif", fontSize: 22, lineHeight: "28px" }}
+            style={{ fontFamily: "Arial, sans-serif", fontSize: 24, lineHeight: "30px" }}
           >
-            The Most Powerful <span style={{ color: "#71F0F6" }}>Model 2.0</span> is Here
+            最强模型 <span style={{ color: "#71F0F6" }}>2.0</span> 即将登陆
           </h3>
 
-          <p style={{ marginTop: 12, fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.6)" }}>
-            v2.0 is our best, most expressive model yet. With AI Director, Story Agent and Cinematic mode, v2.0 gives you brand-new ways to create videos uniquely yours.
+          <div style={{ marginTop: 14, display: "flex", flexWrap: "wrap", gap: "6px 24px" }}>
+            {[
+              { icon: "✅", text: "体验", bold: "超低特惠权" },
+              { icon: "✅", text: "团队会员最高赠送", bold: "500次生成" },
+              { icon: "✅", text: "会员最高", bold: "46折" },
+              { icon: "✅", text: "团队会员满血高并发", bold: "告别排队" },
+            ].map((item, i) => (
+              <span key={i} style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "26px", color: "hsl(var(--foreground) / 0.8)" }}>
+                {item.icon} {item.text}<span className="font-bold" style={{ color: "#71F0F6" }}>{item.bold}</span>
+              </span>
+            ))}
+          </div>
+
+          <p style={{ marginTop: 10, fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "20px", color: "hsl(var(--foreground) / 0.45)" }}>
+            *开放注册倒计时，抢先充值锁定老会员专属优惠
           </p>
 
-          {/* Two buttons — primary "Try It" + dark "Subscribe" */}
+          {/* Two buttons */}
           <div className="flex gap-3" style={{ marginTop: 20 }}>
             <button
               onClick={onClose}
@@ -1048,10 +1061,10 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
                 background: "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
                 color: "#000",
                 fontFamily: "Arial, sans-serif",
-                fontSize: 15,
+                fontSize: 16,
               }}
             >
-              Try It Now
+              去体验
             </button>
             <button
               onClick={onClose}
@@ -1061,11 +1074,11 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
                 background: "rgba(255, 255, 255, 0.08)",
                 color: "hsl(var(--foreground) / 0.8)",
                 fontFamily: "Arial, sans-serif",
-                fontSize: 15,
+                fontSize: 16,
                 border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              Subscribe
+              去订阅
             </button>
           </div>
         </div>
