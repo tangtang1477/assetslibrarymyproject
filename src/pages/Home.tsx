@@ -936,7 +936,7 @@ const RatioToggle = ({ value, onChange }: { value: string; onChange: (v: string)
   );
 };
 
-/* ───── Glass CTA button (artlist.io-inspired solid cyan) ───── */
+/* ───── Glass CTA button (artlist.io-inspired glass border style, blue text) ───── */
 const GlassButton = forwardRef<
   HTMLButtonElement,
   {
@@ -949,20 +949,40 @@ const GlassButton = forwardRef<
   <button
     ref={ref}
     onClick={onClick}
-    className={`relative flex items-center justify-center rounded-full transition-all duration-200 hover:brightness-110 hover:shadow-[0_0_20px_rgba(113,240,246,0.4)] active:scale-[0.96] active:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className || ""}`}
+    className={`glass-btn-artlist group relative flex items-center justify-center overflow-hidden transition-all duration-200 active:scale-[0.96] focus-visible:outline-none ${className || ""}`}
     style={{
-      background: "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
+      background: "rgba(113, 240, 246, 0.06)",
       borderRadius: 24,
-      color: "#000",
       fontFamily: "Arial, sans-serif",
       fontWeight: 700,
       fontSize: 14,
       lineHeight: "20px",
       letterSpacing: "0.01em",
+      isolation: "isolate",
       ...style,
     }}
   >
-    <span className="relative" style={{ zIndex: 2 }}>
+    {/* Gradient border via pseudo-element technique (simulated with inner div) */}
+    <div
+      className="pointer-events-none absolute inset-0"
+      style={{
+        borderRadius: "inherit",
+        padding: "0.5px",
+        background: "linear-gradient(110.26deg, rgba(113, 240, 246, 0.5) 4.24%, rgba(255,255,255,0) 64.28%), linear-gradient(0deg, rgba(58,58,57,0.6), rgba(113,240,246,0.6))",
+        WebkitMask: "linear-gradient(#fff 0, #fff 0) content-box exclude, linear-gradient(#fff 0, #fff 0)",
+        mask: "linear-gradient(#fff 0, #fff 0) content-box exclude, linear-gradient(#fff 0, #fff 0)",
+        zIndex: 0,
+      }}
+    />
+    {/* Hover glow */}
+    <div
+      className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      style={{
+        borderRadius: "inherit",
+        boxShadow: "0 0 20px rgba(113, 240, 246, 0.35), inset 0 0 12px rgba(113, 240, 246, 0.1)",
+      }}
+    />
+    <span className="relative" style={{ zIndex: 2, color: "#71F0F6" }}>
       {children}
     </span>
   </button>
