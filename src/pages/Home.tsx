@@ -911,6 +911,7 @@ const ModelPillDropdown = ({
             background: open ? "rgba(113,240,246,0.14)" : "rgba(255,255,255,0.06)",
             border: open ? "1px solid rgba(113,240,246,0.52)" : "1px solid rgba(255,255,255,0.12)",
             boxShadow: open ? "0 0 0 3px rgba(113,240,246,0.18)" : "none",
+            animation: flash ? "glowPulse 0.6s ease 5" : "none",
           }}
         >
           <SelectedIcon size={14} style={{ color: "rgba(255,255,255,0.7)" }} />
