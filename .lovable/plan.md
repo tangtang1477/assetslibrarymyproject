@@ -1,89 +1,79 @@
 
 
-# 首页 5 项重构计划
+# 首页 6 项修复计划
 
-## 1. GlassButton — 彻底按 artlist.io `::before` 边框技术重做
+## 1. 右上角积分数量去掉背景
+`TopRightHeader` 中积分展示区（显示 `0` 的那个 div）当前有 `background: "hsl(var(--foreground) / 0.08)"` 和 `padding: "8px 16px"`。去掉 background，保留 icon + 数字即可。
 
-当前 `.glass-btn-v2` 的 CSS 已经写了 `::before` + mask，但实际渲染可能因 `isolation: isolate` + `z-index: -1` 导致伪元素被吞掉（黑色背景下几乎不可见）。
+**改动位置**：`Home.tsx` 第 685 行，删除 `background` 和 `padding` 样式。
 
-**修复方案**：不再依赖 `z-index: -1`，改用真实内嵌 div 模拟边框光效，确保在任何层级下都可见：
+## 2. GlassButton 参考截图中黄色玻璃按钮样式重做
+截图中的按钮特征：**实心填充渐变 + 圆润胶囊形 + 内部有光泽感**，不是纯边框按钮。
 
-- 外层 `background: rgba(113,240,246,0.06)` + `border-radius: 20px` + `overflow: hidden` + `position: relative`
-- 内嵌一个绝对定位的边框层 div：
-  - `inset: 0`，`border-radius: inherit`，`padding: 1px`
-  - `background: linear-gradient(110.26deg, rgba(113,240,246,0.5) 4.24%, rgba(255,255,255,0) 64.28%), linear-gradient(0deg, rgba(58,58,57,0.6), rgba(113,240,246,0.6))`
-  - 用 CSS mask content-box exclude 实现只显示边框
-  - `pointer-events: none`
-- 文字层 `position: relative; z-index: 1`
-- hover: `box-shadow: 0 0 20px rgba(113,240,246,0.3)`
-- active: `transform: scale(0.96)`
-- **白色文字**（在深色玻璃边框上白色比蓝色更清晰），`font-weight: 700`
+当前 `.glass-btn-v2` 只有微弱的 `rgba(113,240,246,0.06)` 底色 + `::before` 边框，在深色背景上几乎不可见。
 
-统一 `GlassButton`、`MakePill`、`Subscribe Now`、`Check It Out` 全部用这套。
+**修复方案**：改为类似截图的**实心渐变填充按钮**：
+- 背景：`linear-gradient(180deg, rgba(113,240,246,0.35) 0%, rgba(69,196,246,0.15) 100%)`
+- 保留 `::before` 渐变边框效果（已有）
+- 增加内层高光层：顶部 `linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%)` 模拟玻璃光泽
+- 文字白色，`font-weight: 700`
+- hover: 背景亮度增强 + `box-shadow: 0 0 24px rgba(113,240,246,0.4)`
+- active: `scale(0.96)`
 
-**关键改动**：去掉 `isolation: isolate` 和 `z-index: -1`，改成内嵌 div 方案，彻底解决"看不见"问题。
+**改动位置**：`src/index.css` 的 `.glass-btn-v2` 样式。
 
-## 2. For You 轮播修复
+## 3. "明日再来"交互触发
+当前弹窗只有 `Try Surprise` 和 `Subscribe Now`。需要添加一个状态模拟 quota 用完的情况。
 
-当前问题：尺寸不适配、与输入框/导航遮挡、无切换动效。
+**方案**：添加一个 `quotaExhausted` state（默认 false），当为 true 时：
+- 主按钮文案改为 `Come Back Tomorrow`，点击后按钮轻微 shake 0.8s 然后关闭
+- 副标题改为 `Today's 500 free spots are gone.`
+- 加一个 shake keyframe 动画到 CSS
 
-修改：
-- 整体容器用 `max-height: 140px`，宽度限制在 `max-width: 900px` 居中
-- 5 个槽位改为绝对定位方案（不再用 flex），通过 `left` 百分比计算位置
-- 中间 `width: 30%`，第2/4 `width: 20%`，首尾 `width: 12%`
-- 首尾透视 `rotateY(±25deg) scale(0.8)`，第2/4 `rotateY(±12deg) scale(0.9)`
-- 左右箭头贴在容器两端，首尾视频距箭头 `16px`
-- 切换时所有卡片同时做 `transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)`，实现丝滑平移
-- 容器 `overflow: hidden` 防止溢出遮挡
+用户可以通过某个方式切换此状态（比如在弹窗内长按标题 3 秒触发，或先暂时加一个 dev toggle）。实际生产环境由后端控制。
 
-## 3. 弹窗内容改为全英文 Surprise Campaign 文案
+**改动位置**：`Home.tsx` AnnouncementModal + `src/index.css` 新增 `@keyframes shake`。
 
-按用户提供的文档重做弹窗内容：
+## 4. For You 轮播加大 + 水平滚动动效
+当前 `height: 140` 太小，且没有真正的滚动切换动画。
 
-- 标题 24px: **Unlock Surprise for Free Today**
-- 副标题 16px: **500 free daily spots for 8s storyboard creation**
-- 亮点列表 16px，每行前面有 ✓ icon（`#71F0F6` 色）+ 右侧标签（如 `UNLIMITED` / `FREE`）：
-  - **Use text, images, video, and audio together**
-  - **Edit, extend, or connect clips with AI** → FREE
-  - **Turn ideas into storyboards in seconds**
-  - **Subscribe to unlock Surprise for videos up to 1 minute**
-- 脚注 14px: **Free access resets daily. First come, first served.**
-- 底部两个按钮：
-  - 主按钮（渐变实心）: **Try Surprise** → 点击后关闭弹窗 + 自动切换模型到 Surprise
-  - 次按钮（暗色）: **Subscribe Now**
-- 保持当前配色/按钮样式/布局不变，只改文案和标签结构
+**修复**：
+- 容器高度改为 `220px`，`maxWidth: 1000px`
+- 中间卡片 `width: 34%`，第2/4 `20%`，首尾 `12%`
+- 点击左右箭头时用 `useState` + `key` 触发 CSS transition（当前已有 `transition: all 0.6s`，但 `key` 会阻止动画）
+- **关键修复**：去掉 `key={${centerIndex}-${slot.offset}}`，改为 `key={slot.offset}`，让 React 复用 DOM 元素，CSS transition 才会生效
+- 确保不与输入框和导航遮挡（`overflow: hidden` 已有）
 
-## 4. 模型选择器改为 3 项 + 能力适配
+**改动位置**：`Home.tsx` ForYouShowcase 组件（~第696-794行）。
 
-`MODEL_OPTIONS` 改为 3 项：
-1. **Surprise** — badge `Advanced`，desc: `Multimodal creation, editing, extension, and precise prompt control`
-2. **Kling 2.0** — badge `Pro`，desc: `Better character consistency and long-script scene understanding`
-3. **Standard** — badge `Recommended`，desc: `Balanced quality, speed, and control for daily creation`
+## 5. 弹窗关闭后模型选择闪烁效果
+点击 `Try Surprise` 后，模型选择器 pill 需要主题色光晕闪烁 5 次后消失。
 
-默认选中 **Standard**。
+**方案**：
+- 新增 state `modelPillFlash`，在 `handleTrySurprise` 中设为 true
+- `setTimeout(() => setModelPillFlash(false), 3000)` — 3秒后停止
+- 在 `ModelPillDropdown` 的 trigger 按钮上，当 flash 为 true 时加 CSS 动画类
+- 新增 `@keyframes glowPulse` 到 CSS：`box-shadow` 在 `0 0 0 4px rgba(113,240,246,0.4)` 和 `0 0 0 0` 之间闪烁
+- `animation: glowPulse 0.6s ease 5` — 闪 5 次后自动停止
 
-下拉选项中每项左侧恢复 icon（用 Sparkles/Film/Zap 等 lucide icon），选项前方不出现 `Select Mode`。
+**改动位置**：`Home.tsx`（传 flash prop 给 ModelPillDropdown）+ `src/index.css`（新增 keyframes）。
 
-`MODEL_CONFIG` 改为 3 项：
-- `surprise`: placeholder `Create, edit, or extend with text, images, video, and audio...`，CTA `Generate with Surprise`，maxRefs 9，支持视频/音频上传，lockCharacter false
-- `kling`: placeholder `Describe your story or paste your script...`，CTA `Direct Scene`，maxRefs 4，lockCharacter true，第一张图标 `Primary Character`
-- `standard`: placeholder `Describe your story...`，CTA `Generate`，maxRefs 3
+## 6. Inspiration Labs 卡片去掉 GlassButton，改为文字背后半透明蒙层
+当前每个 Lab 卡片底部右侧有一个 `GlassButton`（`Check It Out`）。
 
-时长按模型动态：Surprise `4s/5s/10s/15s`，Kling/Standard `5s/10s`。
+**修改**：
+- 删除 Lab 卡片中的 `GlassButton`（第591-596行）
+- 底部蒙层已有（第569-577行），但需要调整为：
+  - 蒙层高度自适应文字内容（不固定 `height: 136`）
+  - 上边缘改为渐变过渡：`background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.75) 100%)`
+  - 去掉 `boxShadow` 和 `backdropFilter`，改为纯半透明渐变
+  - 文字直接放在蒙层内，自然撑开高度
 
-输入框联动：切换模型时同步更新 placeholder、CTA、上传区、Lock Character 等 UI。
-
-## 5. 弹窗交互：Try Surprise 点击后联动
-
-点击 **Try Surprise**：
-1. 关闭弹窗
-2. 自动切换 `selectedModel` → `surprise`
-3. 输入框进入 Surprise 模式（placeholder / CTA / 素材区全部切换）
-4. 输入框上方短暂显示 success banner（4-6秒后消失）：`You've unlocked Surprise for today — create an 8s storyboard free.`
+**改动位置**：`Home.tsx` LABS 卡片渲染区（~第562-599行）。
 
 ---
 
 ## 涉及文件
 1. `src/pages/Home.tsx` — 主要改动
-2. `src/index.css` — `.glass-btn-v2` 样式改为内嵌 div 方案（或直接在组件内用 inline style 替代 CSS class）
+2. `src/index.css` — GlassButton 样式 + shake/glowPulse keyframes
 
