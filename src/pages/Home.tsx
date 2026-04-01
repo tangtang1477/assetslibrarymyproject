@@ -204,6 +204,8 @@ const Home = () => {
   const [showAtMenu, setShowAtMenu] = useState(false);
   const [agentThinking, setAgentThinking] = useState(false);
   const [surpriseBanner, setSurpriseBanner] = useState(false);
+  const [modelPillFlash, setModelPillFlash] = useState(false);
+  const [quotaExhausted, setQuotaExhausted] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
