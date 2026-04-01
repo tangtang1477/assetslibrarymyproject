@@ -535,7 +535,7 @@ const Home = () => {
                     className="flex h-16 w-16 items-center justify-center rounded-full transition-all"
                     style={{
                       background: link.bg,
-                      boxShadow: activeQuickLink === link.section ? "0 0 0 3px hsl(var(--foreground))" : "none",
+                      boxShadow: activeQuickLink === link.section ? "0 0 0 2px rgba(113,240,246,0.6)" : "none",
                     }}
                   >
                     <img
