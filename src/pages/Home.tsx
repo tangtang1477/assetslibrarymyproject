@@ -477,31 +477,6 @@ const Home = () => {
                       </div>
                     )}
                   </div>
-                    {/* @ mention popup */}
-                    {showAtMenu && (
-                      <div
-                        className="absolute left-0 z-50 rounded-xl overflow-hidden"
-                        style={{
-                          top: -8, transform: "translateY(-100%)",
-                          background: "rgba(20, 20, 20, 0.95)", backdropFilter: "blur(20px)",
-                          border: "1px solid rgba(255,255,255,0.1)", minWidth: 200,
-                        }}
-                      >
-                        {CHARACTERS.map((char) => (
-                          <button
-                            key={char.name}
-                            onClick={() => handleSelectCharacterFromAt(char.name)}
-                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-foreground/10 transition-colors text-left"
-                          >
-                            <div className="rounded-full overflow-hidden" style={{ width: 28, height: 28, flexShrink: 0 }}>
-                              <img src={char.avatar} alt={char.name} className="w-full h-full object-cover" />
-                            </div>
-                            <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 14 }}>{char.name}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
                 </div>
 
                 {/* Lock Character indicator */}
