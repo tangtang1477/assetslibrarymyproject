@@ -38,12 +38,12 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 
 /* ───── Quick‑link data ───── */
 const QUICK_LINKS = [
-  { label: "All", icon: iconAll, bg: "hsl(var(--quick-link-all))", section: "all" },
-  { label: "Toolkit", icon: iconTool, bg: "hsl(var(--quick-link-toolkit))", section: "toolkits" },
-  { label: "Lab", icon: iconAideo, bg: "hsl(var(--quick-link-lab))", section: "labs" },
-  { label: "Assets", icon: iconAssets, bg: "hsl(var(--primary))", section: "assets" },
-  { label: "AIdeo World", icon: iconAideo, bg: "hsl(var(--quick-link-aideo))", section: "aideo" },
-  { label: "Fun", icon: iconTool, bg: "hsl(var(--quick-link-fun))", section: "fun" },
+  { label: "All", icon: iconAll, bg: "linear-gradient(135deg, #1e3a5f, #2d5a8e)", section: "all" },
+  { label: "Toolkit", icon: iconTool, bg: "linear-gradient(135deg, #1a3352, #264d7a)", section: "toolkits" },
+  { label: "Lab", icon: iconAideo, bg: "linear-gradient(135deg, #162d4a, #1f4470)", section: "labs" },
+  { label: "Assets", icon: iconAssets, bg: "linear-gradient(135deg, #1b3557, #2a5285)", section: "assets" },
+  { label: "AIdeo World", icon: iconAideo, bg: "linear-gradient(135deg, #142840, #1c3d65)", section: "aideo" },
+  { label: "Fun", icon: iconTool, bg: "linear-gradient(135deg, #112238, #19365c)", section: "fun" },
 ];
 
 const LABS = [
