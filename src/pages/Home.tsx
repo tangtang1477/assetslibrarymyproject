@@ -984,7 +984,7 @@ const ModelPillDropdown = ({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className="relative flex h-[40px] items-center rounded-full transition-all duration-200"
+          className="relative flex h-[31px] items-center rounded-full transition-all duration-200"
           style={{
             padding: "0 14px",
             gap: 8,
