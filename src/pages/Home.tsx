@@ -424,22 +424,23 @@ const Home = () => {
 
                   {/* Real textarea input with @ support */}
                   <div className="relative flex-1">
-                    {/* Custom placeholder overlay for @角色名 */}
-                    {!inputText && (
-                      <div
-                        className="absolute inset-0 pointer-events-none flex items-start"
-                        style={{ paddingTop: 8 }}
-                      >
-                        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "hsl(var(--foreground) / 0.4)" }}>
-                          {config.placeholder}
+                   {/* Custom placeholder overlay for @角色名 */}
+                    <div
+                      className="absolute inset-0 pointer-events-none flex items-start"
+                      style={{ paddingTop: 8 }}
+                    >
+                      {selectedCharacter ? (
+                        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>
+                          @{selectedCharacter}
                         </span>
-                        {selectedCharacter && (
-                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6", marginLeft: 6 }}>
-                            @{selectedCharacter}
+                      ) : (
+                        !inputText && (
+                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "hsl(var(--foreground) / 0.4)" }}>
+                            {config.placeholder}
                           </span>
-                        )}
-                      </div>
-                    )}
+                        )
+                      )}
+                    </div>
                     <textarea
                       ref={textareaRef}
                       value={inputText}
