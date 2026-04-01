@@ -593,24 +593,29 @@ const Home = () => {
               {LABS.map((lab, index) => (
                 <div key={index} className="group relative flex-shrink-0 cursor-pointer overflow-hidden rounded-[10px]" style={{ width: 350, height: 384 }}>
                   <img src={lab.src} alt={lab.desc} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                  {/* Bottom gradient overlay with text INSIDE */}
+                  {/* Bottom gradient fade */}
                   <div
-                    className="absolute bottom-0 left-0 right-0 z-10 flex flex-col justify-end"
+                    className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none"
                     style={{
-                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0.78) 100%)",
+                      height: "50%",
+                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 100%)",
                       borderRadius: "0 0 10px 10px",
-                      padding: "48px 14px 14px",
                     }}
+                  />
+                  {/* Glass panel with text inside, at bottom */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 z-20"
+                    style={{ padding: "0 10px 10px" }}
                   >
-                    {/* Glass panel behind text */}
                     <div
                       style={{
-                        background: "rgba(255,255,255,0.06)",
-                        backdropFilter: "blur(12px)",
-                        WebkitBackdropFilter: "blur(12px)",
-                        borderRadius: 8,
+                        background: "rgba(255,255,255,0.08)",
+                        backdropFilter: "blur(16px)",
+                        WebkitBackdropFilter: "blur(16px)",
+                        borderRadius: 10,
                         padding: "10px 12px",
-                        border: "1px solid rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        boxShadow: "0 -8px 24px rgba(0,0,0,0.2)",
                       }}
                     >
                       <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "20px" }}>
