@@ -1,107 +1,89 @@
 
 
-# 首页重构计划（10项改动）
+# 首页 5 项重构计划
 
-## 概览
-根据用户 10 个需求点 + PDF 文档中的4阶梯模型体系，对 `src/pages/Home.tsx` 进行全面重构。
+## 1. GlassButton — 彻底按 artlist.io `::before` 边框技术重做
 
----
+当前 `.glass-btn-v2` 的 CSS 已经写了 `::before` + mask，但实际渲染可能因 `isolation: isolate` + `z-index: -1` 导致伪元素被吞掉（黑色背景下几乎不可见）。
 
-## 1. 视频 Banner 替换 + 下边缘模糊
-- 复制 `user-uploads://kling_20260304_...mp4` → `public/banner-video.mp4`
-- Banner 区域参考截图：圆角更大，底部加渐变黑色模糊遮罩（`linear-gradient(transparent 60%, black 100%)`），不再用整面暗色 overlay
-- 高度和圆角参考截图调整（约 `height: 400px`, `border-radius: 16px`）
+**修复方案**：不再依赖 `z-index: -1`，改用真实内嵌 div 模拟边框光效，确保在任何层级下都可见：
 
-## 2. 弹窗关闭按钮和图片重叠修复
-- `AnnouncementModal` 的 `X` 按钮从 `right:16, top:16` 调整到不与顶部图片重叠的位置
-- 方案：把关闭按钮移到弹窗容器右上角外侧（`right: -8, top: -8`），或在图片区上方留足 padding
+- 外层 `background: rgba(113,240,246,0.06)` + `border-radius: 20px` + `overflow: hidden` + `position: relative`
+- 内嵌一个绝对定位的边框层 div：
+  - `inset: 0`，`border-radius: inherit`，`padding: 1px`
+  - `background: linear-gradient(110.26deg, rgba(113,240,246,0.5) 4.24%, rgba(255,255,255,0) 64.28%), linear-gradient(0deg, rgba(58,58,57,0.6), rgba(113,240,246,0.6))`
+  - 用 CSS mask content-box exclude 实现只显示边框
+  - `pointer-events: none`
+- 文字层 `position: relative; z-index: 1`
+- hover: `box-shadow: 0 0 20px rgba(113,240,246,0.3)`
+- active: `transform: scale(0.96)`
+- **白色文字**（在深色玻璃边框上白色比蓝色更清晰），`font-weight: 700`
 
-## 3. GlassButton 样式彻底还原
-当前 CSS hover/active 已在 `src/index.css` 中定义（`.glass-btn:hover .glass-btn-glow`），但按钮可能仍不可见。
+统一 `GlassButton`、`MakePill`、`Subscribe Now`、`Check It Out` 全部用这套。
 
-根因分析：
-- `GlassButton` 和 `MakePill` 的 glow 层可能遮盖了文字
-- 需要确保文字层 `z-index: 2` 且 glow 层 `z-index: 1`
-- 外层 shell 的 `background: rgba(69,196,246,0.05)` 要确保可见
-- Check It Out 按钮在 lab 卡片底部，可能被 `backdrop-filter` 吞掉
+**关键改动**：去掉 `isolation: isolate` 和 `z-index: -1`，改成内嵌 div 方案，彻底解决"看不见"问题。
 
-修复：
-- GlassButton 内层 glow 加 `z-index: 1`
-- 文字层确保 `z-index: 2`（已有 `relative` + `zIndex: 2`）
-- 外层加 `border: 1px solid rgba(69,196,246,0.15)` 让按钮在默认态也可见
-- Lab 卡片的 Check It Out 确保在 `z-10` 之上
+## 2. For You 轮播修复
 
-## 4. For You 立体效果增强 + 缩小 + 丝滑轮播
-- 缩小整体高度让一屏能容下5个：中间 `height: 280px`，中间 `width: 35%`，第2/4 `width: 22%`，首尾 `width: 14%`
-- 首尾加更强的透视拉伸：`perspective(500px) rotateY(±25deg) scale(0.85)`
-- 第2/4：`perspective(700px) rotateY(±12deg)`
-- 添加 `transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)` 实现丝滑切换动画
+当前问题：尺寸不适配、与输入框/导航遮挡、无切换动效。
 
-## 5. 模型下拉框重做（4阶梯体系）
-按 PDF 文档改为4个选项，去掉 "Select Mode" 字样：
+修改：
+- 整体容器用 `max-height: 140px`，宽度限制在 `max-width: 900px` 居中
+- 5 个槽位改为绝对定位方案（不再用 flex），通过 `left` 百分比计算位置
+- 中间 `width: 30%`，第2/4 `width: 20%`，首尾 `width: 12%`
+- 首尾透视 `rotateY(±25deg) scale(0.8)`，第2/4 `rotateY(±12deg) scale(0.9)`
+- 左右箭头贴在容器两端，首尾视频距箭头 `16px`
+- 切换时所有卡片同时做 `transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)`，实现丝滑平移
+- 容器 `overflow: hidden` 防止溢出遮挡
 
-| Tab | 前端展示 | badge | desc |
-|-----|---------|-------|------|
-| 1 | ⚡ Fast-Gen | Free | Instant text-to-video, daily free credits |
-| 2 | AI Director | Standard | Character consistency, reference images, storyboarding |
-| 3 | 🎬 Story Agent | ✨ New | Script-driven Agent with character lock & auto scenes |
-| 4 | 🌪 Cinematic | Ultra | Cinema-grade physics, lighting & unlimited styles |
+## 3. 弹窗内容改为全英文 Surprise Campaign 文案
 
-- Seedance/Kling 后面加 NEW icon（用 `iconNewBadge`）
-- Standard 后面的 badge 改为 "MF"
-- 去掉下拉顶部 "Select Mode" 标题
+按用户提供的文档重做弹窗内容：
 
-## 6. 语言和时长下拉框修改
-- 缩小宽度：trigger `padding: 0 12px`，移除 icon（枚举项前不带 icon）
-- 语言扩展到36种（含中日韩英法德西葡意俄等常见语言）
-- 下拉内容区用 `max-height: 280px` + `overflow-y: auto` + 隐藏滚动条（`.hide-scrollbar`）
+- 标题 24px: **Unlock Surprise for Free Today**
+- 副标题 16px: **500 free daily spots for 8s storyboard creation**
+- 亮点列表 16px，每行前面有 ✓ icon（`#71F0F6` 色）+ 右侧标签（如 `UNLIMITED` / `FREE`）：
+  - **Use text, images, video, and audio together**
+  - **Edit, extend, or connect clips with AI** → FREE
+  - **Turn ideas into storyboards in seconds**
+  - **Subscribe to unlock Surprise for videos up to 1 minute**
+- 脚注 14px: **Free access resets daily. First come, first served.**
+- 底部两个按钮：
+  - 主按钮（渐变实心）: **Try Surprise** → 点击后关闭弹窗 + 自动切换模型到 Surprise
+  - 次按钮（暗色）: **Subscribe Now**
+- 保持当前配色/按钮样式/布局不变，只改文案和标签结构
 
-## 7. Enhance on 选中态颜色
-- 当下拉选项被选中时，文字颜色改为 `#71F0F6`（当前用的是 `text-primary`，需确认 CSS 变量 `--primary` 对应 `#71F0F6`）
+## 4. 模型选择器改为 3 项 + 能力适配
 
-## 8. 横竖比例切换滑块丝滑动画
-- `RatioToggle` 改成带滑块背景的切换：
-  - 在两个按钮后面加一个绝对定位的圆角背景 div
-  - 用 `transform: translateX()` + `transition: transform 0.3s ease` 实现丝滑滑动
-  - 选中态背景色 `hsl(var(--foreground) / 0.15)`
+`MODEL_OPTIONS` 改为 3 项：
+1. **Surprise** — badge `Advanced`，desc: `Multimodal creation, editing, extension, and precise prompt control`
+2. **Kling 2.0** — badge `Pro`，desc: `Better character consistency and long-script scene understanding`
+3. **Standard** — badge `Recommended`，desc: `Balanced quality, speed, and control for daily creation`
 
-## 9. 按文档做4阶梯模型适配
-`MODEL_CONFIG` 改为4项，切换模型时输入框同步变化：
+默认选中 **Standard**。
 
-| 模型 | placeholder | CTA | maxRefs | 特殊UI |
-|------|-----------|-----|---------|--------|
-| Fast-Gen | "Describe your scene..." | ⚡ Generate | 0 | 隐藏上传按钮 |
-| AI Director | "Describe your story..." | Generate | 3 | 5种风格，上传3图 |
-| Story Agent | "Paste your script, let the Agent do the rest..." | 🚀 Summon Agent | 4 | Lock Character 高亮，点击CTA有打字机效果 |
-| Cinematic | — | 🎟 Join Waitlist | 5 | 输入框锁定（毛玻璃不可输入），背景播放demo视频，中心悬浮闪烁按钮 |
+下拉选项中每项左侧恢复 icon（用 Sparkles/Film/Zap 等 lucide icon），选项前方不出现 `Select Mode`。
 
-- Cinematic(Ultra)选中时：
-  - 输入框变为半透明锁定状态
-  - 中心显示闪烁的 "Join Waitlist" 按钮
-  - 点击弹窗提示邀请好友
+`MODEL_CONFIG` 改为 3 项：
+- `surprise`: placeholder `Create, edit, or extend with text, images, video, and audio...`，CTA `Generate with Surprise`，maxRefs 9，支持视频/音频上传，lockCharacter false
+- `kling`: placeholder `Describe your story or paste your script...`，CTA `Direct Scene`，maxRefs 4，lockCharacter true，第一张图标 `Primary Character`
+- `standard`: placeholder `Describe your story...`，CTA `Generate`，maxRefs 3
 
-## 10. 输入框上方角色选择 + @功能
-- 在输入框上方添加角色列表：
-  - 横向排列6个角色：Sara, Neko, Cindy, Queen, Sam, Jason
-  - 每个角色：100x100 圆形头像 + 3px `#191E1F` 边框 + 底部名字（Arial 20px 白色）
-  - 角色间距 `gap: 35px`，居中显示
-  - 头像用 placeholder 色块（因为没有真实头像图片，用渐变色块代替）
-  - 选中态：边框变为 `#71F0F6`
-- 输入框内支持 `@` 触发：
-  - 用户输入 `@` 时在光标位置弹出角色选择浮层
-  - 选择后在输入中插入 `@角色名`
-  - 需要把 `<span>` placeholder 改成真正的 `<textarea>` 或 contentEditable
+时长按模型动态：Surprise `4s/5s/10s/15s`，Kling/Standard `5s/10s`。
+
+输入框联动：切换模型时同步更新 placeholder、CTA、上传区、Lock Character 等 UI。
+
+## 5. 弹窗交互：Try Surprise 点击后联动
+
+点击 **Try Surprise**：
+1. 关闭弹窗
+2. 自动切换 `selectedModel` → `surprise`
+3. 输入框进入 Surprise 模式（placeholder / CTA / 素材区全部切换）
+4. 输入框上方短暂显示 success banner（4-6秒后消失）：`You've unlocked Surprise for today — create an 8s storyboard free.`
 
 ---
 
 ## 涉及文件
 1. `src/pages/Home.tsx` — 主要改动
-2. `src/index.css` — 可能微调（已有 glass-btn 样式）
-3. `public/banner-video.mp4` — 替换为用户上传的视频
-
-## 技术要点
-- 所有下拉继续用 `Popover` portal 方案
-- For You 轮播用 CSS transition 而非 JS 动画库
-- 角色 `@` 功能需要把当前静态 placeholder 改成可交互的输入组件
-- Cinematic 模式的锁定态用 `pointer-events-none` + overlay 实现
+2. `src/index.css` — `.glass-btn-v2` 样式改为内嵌 div 方案（或直接在组件内用 inline style 替代 CSS class）
 
