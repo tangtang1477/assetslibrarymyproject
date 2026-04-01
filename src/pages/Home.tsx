@@ -655,27 +655,25 @@ const ForYouShowcase = () => {
   const getSlotStyle = (offset: number): React.CSSProperties => {
     const absOff = Math.abs(offset);
     if (absOff === 0) {
-      return { width: "30%", zIndex: 5, opacity: 1, transform: "scale(1)", filter: "none" };
+      return { width: "28%", zIndex: 5, opacity: 1, transform: "scale(1)", filter: "none" };
     }
     if (absOff === 1) {
       return {
-        width: "20%", zIndex: 3, opacity: 0.8,
-        transform: `perspective(600px) rotateY(${offset < 0 ? 15 : -15}deg) scale(0.92)`,
+        width: "18%", zIndex: 3, opacity: 0.75,
+        transform: `perspective(600px) rotateY(${offset < 0 ? 15 : -15}deg) scale(0.9)`,
       };
     }
     return {
-      width: "12%", zIndex: 1, opacity: 0.45,
-      transform: `perspective(400px) rotateY(${offset < 0 ? 30 : -30}deg) scale(0.8)`,
+      width: "10%", zIndex: 1, opacity: 0.4,
+      transform: `perspective(400px) rotateY(${offset < 0 ? 30 : -30}deg) scale(0.78)`,
     };
   };
 
   return (
     <div className="relative flex items-center" style={{ gap: 16 }}>
-      {/* Left arrow */}
       <CarouselArrow direction="left" onClick={prev} />
 
-      {/* Carousel container */}
-      <div className="flex-1 flex items-center justify-center" style={{ height: 200, gap: 6 }}>
+      <div className="flex-1 flex items-center justify-center" style={{ height: 160, gap: 4 }}>
         {slots.map((slot, i) => {
           const slotStyle = getSlotStyle(slot.offset);
           const isCenter = slot.offset === 0;
@@ -687,7 +685,7 @@ const ForYouShowcase = () => {
                 ...slotStyle,
                 aspectRatio: "16/9",
                 height: "auto",
-                transition: "all 0.5s cubic-bezier(0.22, 0.61, 0.36, 1)",
+                transition: "all 0.6s cubic-bezier(0.22, 0.61, 0.36, 1)",
               }}
               onMouseEnter={() => isCenter && setHoveredCenter(true)}
               onMouseLeave={() => isCenter && setHoveredCenter(false)}
@@ -698,7 +696,6 @@ const ForYouShowcase = () => {
                 className="w-full h-full object-cover"
                 style={{ aspectRatio: "16/9" }}
               />
-              {/* Position dots — only on center card, only on hover */}
               {isCenter && hoveredCenter && (
                 <div
                   className="absolute left-0 right-0 flex items-center justify-center"
@@ -709,7 +706,7 @@ const ForYouShowcase = () => {
                       key={j}
                       className="rounded-full"
                       style={{
-                        width: 6, height: 6,
+                        width: 5, height: 5,
                         background: "white",
                         opacity: j === centerIndex ? 1 : j === ((centerIndex - 1 + total) % total) || j === ((centerIndex + 1) % total) ? 0.5 : 0.25,
                       }}
@@ -722,7 +719,6 @@ const ForYouShowcase = () => {
         })}
       </div>
 
-      {/* Right arrow */}
       <CarouselArrow direction="right" onClick={next} />
     </div>
   );
