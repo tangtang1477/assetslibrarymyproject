@@ -489,7 +489,7 @@ const Home = () => {
 
                 {/* Input options bar */}
                 <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8, zIndex: 60 }}>
-                  <ModelPillDropdown value={selectedModel} onChange={setSelectedModel} />
+                  <ModelPillDropdown value={selectedModel} onChange={setSelectedModel} flash={modelPillFlash} />
                   <OptionPillDropdown
                     label={LANGUAGE_OPTIONS.find(o => o.value === selectedLang)?.label || "EN"}
                     options={LANGUAGE_OPTIONS}
