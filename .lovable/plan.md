@@ -1,79 +1,102 @@
 
+# 首页修订计划
 
-# 首页 6 项修复计划
+## 目标
+这次不做泛泛微调，而是直接修正 5 个“用户能感知到没改”的问题：模型 pill hover、For You 尺寸与水平切换、pill 闪烁光晕、GlassButton 默认态、明日再来触发方式。
 
-## 1. 右上角积分数量去掉背景
-`TopRightHeader` 中积分展示区（显示 `0` 的那个 div）当前有 `background: "hsl(var(--foreground) / 0.08)"` 和 `padding: "8px 16px"`。去掉 background，保留 icon + 数字即可。
+## 1. 模型选择 pill 补全 hover 态
+当前 `ModelPillDropdown` 只有 open / flash，没有 hover 态；用户 hover 时不会出现边框增强、背景提亮、外圈 glow。
 
-**改动位置**：`Home.tsx` 第 685 行，删除 `background` 和 `padding` 样式。
+实施：
+- 给触发按钮增加 hover 视觉层级：
+  - 背景从 `rgba(255,255,255,0.06)` 提升到 `rgba(113,240,246,0.10)`
+  - 边框变为 `rgba(113,240,246,0.38)`
+  - 外圈 glow 用柔和阴影，不用实心 ring
+- open 态与 hover 态区分：
+  - hover = 轻 glow
+  - open = 更强 glow + 更亮边框
+- 下拉项本身也补 hover：icon 微发光、右侧提示箭头或高亮层，避免只是 `hover:bg-white/5`
 
-## 2. GlassButton 参考截图中黄色玻璃按钮样式重做
-截图中的按钮特征：**实心填充渐变 + 圆润胶囊形 + 内部有光泽感**，不是纯边框按钮。
+## 2. For You 轮播重做为真正“水平切换”
+我核对了现状：虽然尺寸已经写成 220px，但卡片仍然是绝对定位静态 coverflow，没有“滑动经过”的运动感，所以用户会觉得根本没改。
 
-当前 `.glass-btn-v2` 只有微弱的 `rgba(113,240,246,0.06)` 底色 + `::before` 边框，在深色背景上几乎不可见。
+实施：
+- 保留 5 卡结构，但改为“轨道式”切换：
+  - 用一个 track 容器包住 5 张可见卡
+  - 点击左右箭头时，通过统一 transform/left 插值让所有卡片一起横向位移
+  - transition 用更丝滑的 cubic-bezier
+- 修正布局约束，避免遮挡：
+  - 整体放回箭头中间的安全区
+  - 最大高度控制在不压到输入框/下方导航的范围内
+  - 首尾卡与左右箭头固定 16px
+  - 中心卡尺寸明显大于两侧，但总高度不越界
+- 增加动画细节：
+  - 卡片切换时同时带轻微 scale / opacity / rotateY 过渡
+  - 禁止因 React 重建 DOM 导致“瞬移”
+- hover 圆点仅保留在中心卡内部底部 4px，不参与切换控制
 
-**修复方案**：改为类似截图的**实心渐变填充按钮**：
-- 背景：`linear-gradient(180deg, rgba(113,240,246,0.35) 0%, rgba(69,196,246,0.15) 100%)`
-- 保留 `::before` 渐变边框效果（已有）
-- 增加内层高光层：顶部 `linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%)` 模拟玻璃光泽
-- 文字白色，`font-weight: 700`
-- hover: 背景亮度增强 + `box-shadow: 0 0 24px rgba(113,240,246,0.4)`
-- active: `scale(0.96)`
+## 3. 模型 pill 闪烁改成“玻璃按钮同款光晕”
+当前 `glowPulse` 是实心 box-shadow 脉冲，观感偏硬，不是你要的“漂亮的光晕”。
 
-**改动位置**：`src/index.css` 的 `.glass-btn-v2` 样式。
+实施：
+- 把 `modelPillFlash` 的动画改成与玻璃按钮 hover 同风格：
+  - 以外发光为主，不加实心填充脉冲
+  - 颜色与主题青色一致
+  - glow 半径更大、更柔和，像 hover 到玻璃按钮时的高光
+- 动画规则：
+  - 5 次
+  - 每次由弱到强再回落
+  - 不改变按钮本体填充，只强化外圈和边框反光
+- `Try Surprise` 后仍然自动触发，3 秒左右结束
 
-## 3. "明日再来"交互触发
-当前弹窗只有 `Try Surprise` 和 `Subscribe Now`。需要添加一个状态模拟 quota 用完的情况。
+## 4. GlassButton 改成更像苹果液态玻璃
+我核对了当前 `.glass-btn-v2`：默认态确实偏淡，主体只有浅渐变底色 + 顶部 gloss，不够像“液态玻璃”。
 
-**方案**：添加一个 `quotaExhausted` state（默认 false），当为 true 时：
-- 主按钮文案改为 `Come Back Tomorrow`，点击后按钮轻微 shake 0.8s 然后关闭
-- 副标题改为 `Today's 500 free spots are gone.`
-- 加一个 shake keyframe 动画到 CSS
+实施：
+- 强化默认态，不等 hover 才可见：
+  - 提高主体填充存在感
+  - 增加更真实的内高光、底部冷色反射、边缘折射感
+  - 保留你当前青蓝配色，不改成黄色
+- 结构上改成三层观感：
+  1. 主体半透明液态填充
+  2. 渐变边框高光
+  3. 顶部高光 + 底部柔和 cyan glow
+- hover:
+  - 发光增强
+  - 边缘更亮
+  - 阴影更扩散
+- active:
+  - 按压缩放保留
+  - 发光同步略收缩
+- 统一应用到：
+  - `Check It Out`
+  - `Subscribe Now`
+  - `Make`
+  - 其他复用玻璃按钮的位置
 
-用户可以通过某个方式切换此状态（比如在弹窗内长按标题 3 秒触发，或先暂时加一个 dev toggle）。实际生产环境由后端控制。
+## 5. “明日再来”触发方式做成可见的 dev 入口
+当前代码里虽然有 `quotaExhausted`，但没有任何 UI 入口，所以用户不知道怎么触发。
 
-**改动位置**：`Home.tsx` AnnouncementModal + `src/index.css` 新增 `@keyframes shake`。
-
-## 4. For You 轮播加大 + 水平滚动动效
-当前 `height: 140` 太小，且没有真正的滚动切换动画。
-
-**修复**：
-- 容器高度改为 `220px`，`maxWidth: 1000px`
-- 中间卡片 `width: 34%`，第2/4 `20%`，首尾 `12%`
-- 点击左右箭头时用 `useState` + `key` 触发 CSS transition（当前已有 `transition: all 0.6s`，但 `key` 会阻止动画）
-- **关键修复**：去掉 `key={${centerIndex}-${slot.offset}}`，改为 `key={slot.offset}`，让 React 复用 DOM 元素，CSS transition 才会生效
-- 确保不与输入框和导航遮挡（`overflow: hidden` 已有）
-
-**改动位置**：`Home.tsx` ForYouShowcase 组件（~第696-794行）。
-
-## 5. 弹窗关闭后模型选择闪烁效果
-点击 `Try Surprise` 后，模型选择器 pill 需要主题色光晕闪烁 5 次后消失。
-
-**方案**：
-- 新增 state `modelPillFlash`，在 `handleTrySurprise` 中设为 true
-- `setTimeout(() => setModelPillFlash(false), 3000)` — 3秒后停止
-- 在 `ModelPillDropdown` 的 trigger 按钮上，当 flash 为 true 时加 CSS 动画类
-- 新增 `@keyframes glowPulse` 到 CSS：`box-shadow` 在 `0 0 0 4px rgba(113,240,246,0.4)` 和 `0 0 0 0` 之间闪烁
-- `animation: glowPulse 0.6s ease 5` — 闪 5 次后自动停止
-
-**改动位置**：`Home.tsx`（传 flash prop 给 ModelPillDropdown）+ `src/index.css`（新增 keyframes）。
-
-## 6. Inspiration Labs 卡片去掉 GlassButton，改为文字背后半透明蒙层
-当前每个 Lab 卡片底部右侧有一个 `GlassButton`（`Check It Out`）。
-
-**修改**：
-- 删除 Lab 卡片中的 `GlassButton`（第591-596行）
-- 底部蒙层已有（第569-577行），但需要调整为：
-  - 蒙层高度自适应文字内容（不固定 `height: 136`）
-  - 上边缘改为渐变过渡：`background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.75) 100%)`
-  - 去掉 `boxShadow` 和 `backdropFilter`，改为纯半透明渐变
-  - 文字直接放在蒙层内，自然撑开高度
-
-**改动位置**：`Home.tsx` LABS 卡片渲染区（~第562-599行）。
-
----
+实施：
+- 增加一个明确、可发现的测试入口，仅开发态展示：
+  - 方案优先：放在弹窗右上角关闭按钮附近，加一个小型文字切换入口
+  - 文案如：`Simulate exhausted`
+- 点击后：
+  - `quotaExhausted` 在 true/false 间切换
+  - 标题/副标题/主按钮文案即时联动
+- exhausted 态主按钮点击：
+  - 轻微 shake 0.8s
+  - 不切模型
+  - 然后关闭或保持，按你之前确认的方案执行
+- 这样你在预览里可以直接复现“Come Back Tomorrow”交互，不需要猜隐藏手势
 
 ## 涉及文件
-1. `src/pages/Home.tsx` — 主要改动
-2. `src/index.css` — GlassButton 样式 + shake/glowPulse keyframes
+- `src/pages/Home.tsx`
+- `src/index.css`
 
+## 技术细节
+- `ModelPillDropdown` 需要拆出 hover/open/flash 三套视觉状态，不能再只靠 inline style 的二元切换。
+- `ForYouShowcase` 需要从“静态绝对定位”升级到“带统一位移动画的轨道/槽位系统”，否则看起来不会像水平滚动播放。
+- `glowPulse` 需要重写，目标是柔光 halo，不是实心 ring。
+- `.glass-btn-v2` 默认态要增强液态玻璃层次：填充、折射、边缘、内高光、底部反射一起做。
+- `quotaExhausted` 需要一个显式 UI toggle，否则测试不可达。
