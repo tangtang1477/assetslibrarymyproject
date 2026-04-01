@@ -261,7 +261,9 @@ const Home = () => {
     setShowAnnouncement(false);
     setSelectedModel("surprise");
     setSurpriseBanner(true);
+    setModelPillFlash(true);
     setTimeout(() => setSurpriseBanner(false), 5000);
+    setTimeout(() => setModelPillFlash(false), 3000);
   };
 
   return (
