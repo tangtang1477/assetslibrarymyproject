@@ -570,14 +570,13 @@ const Home = () => {
                 <div key={index} className="group relative flex-shrink-0 cursor-pointer overflow-hidden rounded-[10px]" style={{ width: 350, height: 384 }}>
                   <img src={lab.src} alt={lab.desc} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                   <div
-                    className="absolute bottom-0 left-0 right-0"
+                    className="absolute bottom-0 left-0 right-0 z-10"
                     style={{
-                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.75) 100%)",
+                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.75) 100%)",
                       borderRadius: "0 0 10px 10px",
                       padding: "40px 12px 12px",
                     }}
-                  />
-                  <div className="absolute bottom-3 left-3 right-3 z-10">
+                  >
                     <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 15.6, lineHeight: "18px" }}>
                       {lab.desc}
                     </p>
