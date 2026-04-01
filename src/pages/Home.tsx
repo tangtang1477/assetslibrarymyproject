@@ -568,11 +568,9 @@ const Home = () => {
                   <div
                     className="absolute bottom-0 left-0 right-0"
                     style={{
-                      height: 136,
-                      background: "hsl(var(--background) / 0.05)",
-                      boxShadow: "inset 0px 0px 7.1px hsl(var(--foreground) / 0.25), inset 0px 7.1px 14.2px hsl(var(--foreground) / 0.15)",
-                      backdropFilter: "blur(12px)",
+                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.75) 100%)",
                       borderRadius: "0 0 10px 10px",
+                      padding: "40px 12px 12px",
                     }}
                   />
                   <div className="absolute bottom-3 left-3 right-3 z-10">
