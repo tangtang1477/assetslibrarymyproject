@@ -588,12 +588,6 @@ const Home = () => {
                       {lab.badge}
                     </span>
                   </div>
-                  {/* Check It Out button */}
-                  <div className="absolute bottom-3 right-3 z-20">
-                    <GlassButton style={{ width: 120, height: 32 }}>
-                      Check It Out
-                    </GlassButton>
-                  </div>
                 </div>
               ))}
             </div>
