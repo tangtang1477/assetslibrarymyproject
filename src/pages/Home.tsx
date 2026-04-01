@@ -1086,13 +1086,24 @@ const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ct
 );
 
 /* ───── Announcement Modal — Surprise Campaign ───── */
-const AnnouncementModal = ({ onClose, onTrySurprise }: { onClose: () => void; onTrySurprise: () => void }) => {
+const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted }: { onClose: () => void; onTrySurprise: () => void; quotaExhausted?: boolean }) => {
+  const [shaking, setShaking] = useState(false);
+
   const benefits = [
     { text: "Use text, images, video, and audio together", tag: "UNLIMITED" },
     { text: "Edit, extend, or connect clips with AI", tag: "FREE" },
     { text: "Turn ideas into storyboards in seconds", tag: null },
     { text: "Subscribe to unlock Surprise for videos up to 1 minute", tag: "PRO" },
   ];
+
+  const handlePrimaryClick = () => {
+    if (quotaExhausted) {
+      setShaking(true);
+      setTimeout(() => { setShaking(false); onClose(); }, 800);
+    } else {
+      onTrySurprise();
+    }
+  };
 
   return (
     <div
@@ -1134,7 +1145,9 @@ const AnnouncementModal = ({ onClose, onTrySurprise }: { onClose: () => void; on
           </h3>
 
           <p style={{ marginTop: 6, fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "rgba(255,255,255,0.7)" }}>
-            500 free daily spots for 8s storyboard creation
+            {quotaExhausted
+              ? "Today's 500 free spots are gone. Come back tomorrow or subscribe for longer access."
+              : "500 free daily spots for 8s storyboard creation"}
           </p>
 
           <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1167,17 +1180,21 @@ const AnnouncementModal = ({ onClose, onTrySurprise }: { onClose: () => void; on
           {/* Two buttons */}
           <div className="flex gap-3" style={{ marginTop: 20 }}>
             <button
-              onClick={onTrySurprise}
+              onClick={handlePrimaryClick}
               className="flex-1 flex items-center justify-center rounded-full font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.97]"
               style={{
                 height: 44,
-                background: "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
-                color: "#000",
+                background: quotaExhausted
+                  ? "rgba(255, 255, 255, 0.08)"
+                  : "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
+                color: quotaExhausted ? "rgba(255,255,255,0.6)" : "#000",
                 fontFamily: "Arial, sans-serif",
                 fontSize: 16,
+                border: quotaExhausted ? "1px solid rgba(255,255,255,0.1)" : "none",
+                animation: shaking ? "shake 0.5s ease" : "none",
               }}
             >
-              Try Surprise
+              {quotaExhausted ? "Come Back Tomorrow" : "Try Surprise"}
             </button>
             <button
               onClick={onClose}
