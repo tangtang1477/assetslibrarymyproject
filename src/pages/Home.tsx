@@ -735,30 +735,24 @@ const ForYouShowcase = () => {
   const prev = () => setCenterIndex((c) => ((c - 1) % total + total) % total);
   const next = () => setCenterIndex((c) => (c + 1) % total);
 
-  // Auto-play every 4s
   useEffect(() => {
     const timer = setInterval(next, 4000);
     return () => clearInterval(timer);
   }, []);
 
-  // Stable slot-based rendering: slots -2..+2, key is slot index (stable)
   const slots = [-2, -1, 0, 1, 2];
 
   const getSlotStyle = (slot: number, isHovered: boolean): React.CSSProperties => {
     const absSlot = Math.abs(slot);
-    // Card sizes
-    const width = absSlot === 0 ? 420 : absSlot === 1 ? 240 : 180;
-    const height = absSlot === 0 ? 260 : absSlot === 1 ? 210 : 170;
-    // 3D transforms
+    const width = absSlot === 0 ? 380 : absSlot === 1 ? 220 : 160;
+    const height = absSlot === 0 ? 220 : absSlot === 1 ? 180 : 150;
     const rotateY = absSlot === 0 ? 0 : absSlot === 1 ? (slot < 0 ? 22 : -22) : (slot < 0 ? 40 : -40);
     const scale = absSlot === 0 ? 1 : absSlot === 1 ? 0.88 : 0.78;
     const translateZ = absSlot === 0 ? 60 : absSlot === 1 ? -30 : -100;
-    // Horizontal spacing
-    const xOffset = absSlot === 0 ? 0 : absSlot === 1 ? (slot < 0 ? -280 : 280) : (slot < 0 ? -460 : 460);
+    const xOffset = absSlot === 0 ? 0 : absSlot === 1 ? (slot < 0 ? -260 : 260) : (slot < 0 ? -420 : 420);
     const opacity = absSlot === 0 ? 1 : absSlot === 1 ? 0.8 : 0.5;
     const zIndex = 10 - absSlot;
 
-    // Hover effect: slight lift + brighten for center, subtle for others
     const hoverScale = isHovered ? (absSlot === 0 ? 1.03 : scale + 0.02) : scale;
     const hoverTranslateY = isHovered ? -4 : 0;
 
@@ -788,7 +782,6 @@ const ForYouShowcase = () => {
   return (
     <div className="flex flex-col items-center" style={{ width: "100%" }}>
       <div className="relative flex items-center" style={{ width: "100%" }}>
-        {/* Left arrow */}
         <button
           onClick={prev}
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
@@ -802,8 +795,7 @@ const ForYouShowcase = () => {
           <ChevronLeft size={18} />
         </button>
 
-        {/* Carousel track */}
-        <div className="relative flex-1" style={{ height: 280, perspective: 1200 }}>
+        <div className="relative flex-1" style={{ height: 240, perspective: 1200 }}>
           {slots.map((slot) => {
             const idx = ((centerIndex + slot) % total + total) % total;
             const item = SHOWCASE_ITEMS[idx];
@@ -821,12 +813,34 @@ const ForYouShowcase = () => {
                   className="w-full h-full object-cover"
                   draggable={false}
                 />
+                {/* Dot indicators inside center card */}
+                {slot === 0 && (
+                  <div
+                    className="absolute left-0 right-0 flex items-center justify-center"
+                    style={{ bottom: 4, gap: 6, zIndex: 20 }}
+                  >
+                    {SHOWCASE_ITEMS.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={(e) => { e.stopPropagation(); setCenterIndex(i); }}
+                        className="rounded-full transition-all duration-300"
+                        style={{
+                          width: centerIndex === i ? 16 : 5,
+                          height: 5,
+                          background: centerIndex === i ? "#fff" : "rgba(255,255,255,0.4)",
+                          border: "none",
+                          cursor: "pointer",
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
                 {slot === 0 && (
                   <div
                     className="absolute bottom-0 left-0 right-0"
                     style={{
                       background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
-                      padding: "20px 14px 10px",
+                      padding: "20px 14px 18px",
                     }}
                   >
                     <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.9)", fontWeight: 600 }}>
@@ -839,7 +853,6 @@ const ForYouShowcase = () => {
           })}
         </div>
 
-        {/* Right arrow */}
         <button
           onClick={next}
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
@@ -852,24 +865,6 @@ const ForYouShowcase = () => {
         >
           <ChevronRight size={18} />
         </button>
-      </div>
-
-      {/* Dot indicators */}
-      <div className="flex items-center justify-center" style={{ marginTop: 16, gap: 8 }}>
-        {SHOWCASE_ITEMS.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCenterIndex(i)}
-            className="rounded-full transition-all duration-300"
-            style={{
-              width: centerIndex === i ? 20 : 6,
-              height: 6,
-              background: centerIndex === i ? "#71F0F6" : "rgba(255,255,255,0.25)",
-              border: "none",
-              cursor: "pointer",
-            }}
-          />
-        ))}
       </div>
     </div>
   );
