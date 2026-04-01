@@ -424,35 +424,43 @@ const Home = () => {
 
                   {/* Real textarea input with @ support */}
                   <div className="relative flex-1">
-                   {/* Custom placeholder overlay for @角色名 */}
-                    <div
-                      className="absolute inset-0 pointer-events-none flex items-start"
-                      style={{ paddingTop: 8 }}
-                    >
-                      {selectedCharacter ? (
-                        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>
-                          @{selectedCharacter}
+                   {/* Custom placeholder overlay */}
+                    {!inputText && !selectedCharacter && (
+                      <div
+                        className="absolute inset-0 pointer-events-none flex items-start"
+                        style={{ paddingTop: 8 }}
+                      >
+                        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "hsl(var(--foreground) / 0.4)" }}>
+                          {config.placeholder}
                         </span>
-                      ) : (
-                        !inputText && (
-                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "hsl(var(--foreground) / 0.4)" }}>
-                            {config.placeholder}
-                          </span>
-                        )
+                      </div>
+                    )}
+                    <div className="flex items-start" style={{ paddingTop: 8, gap: 0 }}>
+                      {/* @角色名 chip — always visible when character selected */}
+                      {selectedCharacter && (
+                        <span
+                          className="flex-shrink-0 select-none"
+                          style={{
+                            fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
+                            color: "#71F0F6", whiteSpace: "nowrap", pointerEvents: "none",
+                          }}
+                        >
+                          @{selectedCharacter}&nbsp;
+                        </span>
                       )}
+                      <textarea
+                        ref={textareaRef}
+                        value={inputText}
+                        onChange={handleInputChange}
+                        disabled={config.locked}
+                        className="flex-1 bg-transparent border-none outline-none resize-none text-foreground"
+                        style={{
+                          fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
+                          letterSpacing: "0.015em", height: 64,
+                          color: "hsl(var(--foreground) / 0.9)",
+                        }}
+                      />
                     </div>
-                    <textarea
-                      ref={textareaRef}
-                      value={inputText}
-                      onChange={handleInputChange}
-                      disabled={config.locked}
-                      className="w-full bg-transparent border-none outline-none resize-none text-foreground"
-                      style={{
-                        fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
-                        letterSpacing: "0.015em", height: 72, paddingTop: 8,
-                        color: "hsl(var(--foreground) / 0.9)",
-                      }}
-                    />
                     {/* @ mention popup */}
                     {showAtMenu && (
                       <div
@@ -535,7 +543,7 @@ const Home = () => {
             </div>
 
             {/* For You showcase */}
-            <div style={{ marginTop: 32, width: 990, marginLeft: "auto", marginRight: "auto" }}>
+            <div style={{ marginTop: 32, width: "100%" }}>
               <ForYouShowcase />
             </div>
 
@@ -585,24 +593,29 @@ const Home = () => {
               {LABS.map((lab, index) => (
                 <div key={index} className="group relative flex-shrink-0 cursor-pointer overflow-hidden rounded-[10px]" style={{ width: 350, height: 384 }}>
                   <img src={lab.src} alt={lab.desc} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                  {/* Bottom gradient overlay with text INSIDE */}
+                  {/* Bottom gradient fade */}
                   <div
-                    className="absolute bottom-0 left-0 right-0 z-10 flex flex-col justify-end"
+                    className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none"
                     style={{
-                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0.78) 100%)",
+                      height: "50%",
+                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 100%)",
                       borderRadius: "0 0 10px 10px",
-                      padding: "48px 14px 14px",
                     }}
+                  />
+                  {/* Glass panel with text inside, at bottom */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 z-20"
+                    style={{ padding: "0 10px 10px" }}
                   >
-                    {/* Glass panel behind text */}
                     <div
                       style={{
-                        background: "rgba(255,255,255,0.06)",
-                        backdropFilter: "blur(12px)",
-                        WebkitBackdropFilter: "blur(12px)",
-                        borderRadius: 8,
+                        background: "rgba(255,255,255,0.08)",
+                        backdropFilter: "blur(16px)",
+                        WebkitBackdropFilter: "blur(16px)",
+                        borderRadius: 10,
                         padding: "10px 12px",
-                        border: "1px solid rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        boxShadow: "0 -8px 24px rgba(0,0,0,0.2)",
                       }}
                     >
                       <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "20px" }}>
@@ -727,30 +740,24 @@ const ForYouShowcase = () => {
   const prev = () => setCenterIndex((c) => ((c - 1) % total + total) % total);
   const next = () => setCenterIndex((c) => (c + 1) % total);
 
-  // Auto-play every 4s
   useEffect(() => {
     const timer = setInterval(next, 4000);
     return () => clearInterval(timer);
   }, []);
 
-  // Stable slot-based rendering: slots -2..+2, key is slot index (stable)
   const slots = [-2, -1, 0, 1, 2];
 
   const getSlotStyle = (slot: number, isHovered: boolean): React.CSSProperties => {
     const absSlot = Math.abs(slot);
-    // Card sizes
-    const width = absSlot === 0 ? 420 : absSlot === 1 ? 240 : 180;
-    const height = absSlot === 0 ? 260 : absSlot === 1 ? 210 : 170;
-    // 3D transforms
+    const width = absSlot === 0 ? 380 : absSlot === 1 ? 220 : 160;
+    const height = absSlot === 0 ? 220 : absSlot === 1 ? 180 : 150;
     const rotateY = absSlot === 0 ? 0 : absSlot === 1 ? (slot < 0 ? 22 : -22) : (slot < 0 ? 40 : -40);
     const scale = absSlot === 0 ? 1 : absSlot === 1 ? 0.88 : 0.78;
     const translateZ = absSlot === 0 ? 60 : absSlot === 1 ? -30 : -100;
-    // Horizontal spacing
-    const xOffset = absSlot === 0 ? 0 : absSlot === 1 ? (slot < 0 ? -280 : 280) : (slot < 0 ? -460 : 460);
+    const xOffset = absSlot === 0 ? 0 : absSlot === 1 ? (slot < 0 ? -260 : 260) : (slot < 0 ? -420 : 420);
     const opacity = absSlot === 0 ? 1 : absSlot === 1 ? 0.8 : 0.5;
     const zIndex = 10 - absSlot;
 
-    // Hover effect: slight lift + brighten for center, subtle for others
     const hoverScale = isHovered ? (absSlot === 0 ? 1.03 : scale + 0.02) : scale;
     const hoverTranslateY = isHovered ? -4 : 0;
 
@@ -780,7 +787,6 @@ const ForYouShowcase = () => {
   return (
     <div className="flex flex-col items-center" style={{ width: "100%" }}>
       <div className="relative flex items-center" style={{ width: "100%" }}>
-        {/* Left arrow */}
         <button
           onClick={prev}
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
@@ -794,8 +800,7 @@ const ForYouShowcase = () => {
           <ChevronLeft size={18} />
         </button>
 
-        {/* Carousel track */}
-        <div className="relative flex-1" style={{ height: 280, perspective: 1200 }}>
+        <div className="relative flex-1" style={{ height: 240, perspective: 1200 }}>
           {slots.map((slot) => {
             const idx = ((centerIndex + slot) % total + total) % total;
             const item = SHOWCASE_ITEMS[idx];
@@ -813,12 +818,34 @@ const ForYouShowcase = () => {
                   className="w-full h-full object-cover"
                   draggable={false}
                 />
+                {/* Dot indicators inside center card */}
+                {slot === 0 && (
+                  <div
+                    className="absolute left-0 right-0 flex items-center justify-center"
+                    style={{ bottom: 4, gap: 6, zIndex: 20 }}
+                  >
+                    {SHOWCASE_ITEMS.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={(e) => { e.stopPropagation(); setCenterIndex(i); }}
+                        className="rounded-full transition-all duration-300"
+                        style={{
+                          width: centerIndex === i ? 16 : 5,
+                          height: 5,
+                          background: centerIndex === i ? "#fff" : "rgba(255,255,255,0.4)",
+                          border: "none",
+                          cursor: "pointer",
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
                 {slot === 0 && (
                   <div
                     className="absolute bottom-0 left-0 right-0"
                     style={{
                       background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
-                      padding: "20px 14px 10px",
+                      padding: "20px 14px 18px",
                     }}
                   >
                     <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.9)", fontWeight: 600 }}>
@@ -831,7 +858,6 @@ const ForYouShowcase = () => {
           })}
         </div>
 
-        {/* Right arrow */}
         <button
           onClick={next}
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
@@ -844,24 +870,6 @@ const ForYouShowcase = () => {
         >
           <ChevronRight size={18} />
         </button>
-      </div>
-
-      {/* Dot indicators */}
-      <div className="flex items-center justify-center" style={{ marginTop: 16, gap: 8 }}>
-        {SHOWCASE_ITEMS.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCenterIndex(i)}
-            className="rounded-full transition-all duration-300"
-            style={{
-              width: centerIndex === i ? 20 : 6,
-              height: 6,
-              background: centerIndex === i ? "#71F0F6" : "rgba(255,255,255,0.25)",
-              border: "none",
-              cursor: "pointer",
-            }}
-          />
-        ))}
       </div>
     </div>
   );
@@ -981,7 +989,7 @@ const ModelPillDropdown = ({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className="relative flex h-[40px] items-center rounded-full transition-all duration-200"
+          className="relative flex h-[31px] items-center rounded-full transition-all duration-200"
           style={{
             padding: "0 14px",
             gap: 8,
