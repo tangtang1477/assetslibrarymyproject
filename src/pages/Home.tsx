@@ -82,7 +82,7 @@ const MODEL_OPTIONS = [
   },
 ];
 
-const MODEL_ICONS: Record<string, React.FC<{ size?: number; className?: string; style?: React.CSSProperties }>> = {
+const MODEL_ICONS: Record<string, typeof Sparkles> = {
   sparkles: Sparkles,
   film: Film,
   zap: Zap,
