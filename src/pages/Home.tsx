@@ -38,12 +38,12 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 
 /* ───── Quick‑link data ───── */
 const QUICK_LINKS = [
-  { label: "All", icon: iconAll, bg: "hsl(var(--quick-link-all))", section: "all" },
-  { label: "Toolkit", icon: iconTool, bg: "hsl(var(--quick-link-toolkit))", section: "toolkits" },
-  { label: "Lab", icon: iconAideo, bg: "hsl(var(--quick-link-lab))", section: "labs" },
-  { label: "Assets", icon: iconAssets, bg: "hsl(var(--primary))", section: "assets" },
-  { label: "AIdeo World", icon: iconAideo, bg: "hsl(var(--quick-link-aideo))", section: "aideo" },
-  { label: "Fun", icon: iconTool, bg: "hsl(var(--quick-link-fun))", section: "fun" },
+  { label: "All", icon: iconAll, bg: "linear-gradient(135deg, #1e3a5f, #2d5a8e)", section: "all" },
+  { label: "Toolkit", icon: iconTool, bg: "linear-gradient(135deg, #1a3352, #264d7a)", section: "toolkits" },
+  { label: "Lab", icon: iconAideo, bg: "linear-gradient(135deg, #162d4a, #1f4470)", section: "labs" },
+  { label: "Assets", icon: iconAssets, bg: "linear-gradient(135deg, #1b3557, #2a5285)", section: "assets" },
+  { label: "AIdeo World", icon: iconAideo, bg: "linear-gradient(135deg, #142840, #1c3d65)", section: "aideo" },
+  { label: "Fun", icon: iconTool, bg: "linear-gradient(135deg, #112238, #19365c)", section: "fun" },
 ];
 
 const LABS = [
@@ -263,7 +263,7 @@ const Home = () => {
     setSurpriseBanner(true);
     setModelPillFlash(true);
     setTimeout(() => setSurpriseBanner(false), 5000);
-    setTimeout(() => setModelPillFlash(false), 3000);
+    setTimeout(() => setModelPillFlash(false), 6500);
   };
 
   return (
@@ -535,7 +535,7 @@ const Home = () => {
                     className="flex h-16 w-16 items-center justify-center rounded-full transition-all"
                     style={{
                       background: link.bg,
-                      boxShadow: activeQuickLink === link.section ? "0 0 0 3px hsl(var(--foreground))" : "none",
+                      boxShadow: activeQuickLink === link.section ? "0 0 0 2px rgba(113,240,246,0.6)" : "none",
                     }}
                   >
                     <img
@@ -570,14 +570,13 @@ const Home = () => {
                 <div key={index} className="group relative flex-shrink-0 cursor-pointer overflow-hidden rounded-[10px]" style={{ width: 350, height: 384 }}>
                   <img src={lab.src} alt={lab.desc} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                   <div
-                    className="absolute bottom-0 left-0 right-0"
+                    className="absolute bottom-0 left-0 right-0 z-10"
                     style={{
-                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.55) 30%, rgba(0,0,0,0.75) 100%)",
+                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.75) 100%)",
                       borderRadius: "0 0 10px 10px",
                       padding: "40px 12px 12px",
                     }}
-                  />
-                  <div className="absolute bottom-3 left-3 right-3 z-10">
+                  >
                     <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 15.6, lineHeight: "18px" }}>
                       {lab.desc}
                     </p>
@@ -689,7 +688,7 @@ const TopRightHeader = () => (
   </div>
 );
 
-/* ───── For‑You showcase – track-based horizontal slide ───── */
+/* ───── For‑You showcase – 3D coverflow with perspective ───── */
 const ForYouShowcase = () => {
   const [centerIndex, setCenterIndex] = useState(0);
   const total = SHOWCASE_ITEMS.length;
@@ -697,63 +696,60 @@ const ForYouShowcase = () => {
   const prev = () => setCenterIndex((c) => ((c - 1) % total + total) % total);
   const next = () => setCenterIndex((c) => (c + 1) % total);
 
-  // All items rendered in a single track that translates
-  // Each card: width = 180px, gap = 12px, center card = 280px
-  // Total visible: 2 small + 1 large center + 2 small
-  // We render all items and shift the track
+  // Positions: show 5 cards centered on centerIndex
+  // Each card gets a slot from -2 to +2 relative to center
+  const getSlotStyle = (slot: number): React.CSSProperties => {
+    const absSlot = Math.abs(slot);
+    // Sizes
+    const width = absSlot === 0 ? 380 : absSlot === 1 ? 200 : 160;
+    const height = absSlot === 0 ? 280 : absSlot === 1 ? 220 : 180;
+    // 3D transforms
+    const rotateY = slot < 0 ? 35 : slot > 0 ? -35 : 0;
+    const adjustedRotateY = absSlot === 1 ? (slot < 0 ? 18 : -18) : rotateY;
+    const scale = absSlot === 0 ? 1 : absSlot === 1 ? 0.9 : 0.82;
+    const translateZ = absSlot === 0 ? 0 : absSlot === 1 ? -80 : -140;
+    // Horizontal offset
+    const xOffset = absSlot === 0 ? 0 : absSlot === 1 ? (slot < 0 ? -220 : 220) : (slot < 0 ? -380 : 380);
+    const opacity = absSlot === 0 ? 1 : absSlot === 1 ? 0.75 : 0.45;
+    const zIndex = 10 - absSlot;
 
-  const cardWidth = 170;
-  const centerWidth = 300;
-  const gap = 10;
-  // track offset to center the current item
-  // Total items rendered in a continuous strip
-  // Each item is cardWidth except center which is centerWidth
-  // We'll use transform to position
+    return {
+      position: "absolute" as const,
+      width,
+      height,
+      left: "50%",
+      top: "50%",
+      opacity,
+      zIndex,
+      borderRadius: 12,
+      overflow: "hidden",
+      transform: `translate(-50%, -50%) translateX(${xOffset}px) perspective(1200px) rotateY(${adjustedRotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
+      transition: "all 0.65s cubic-bezier(0.33, 0, 0.2, 1)",
+      transformStyle: "preserve-3d" as const,
+    };
+  };
+
+  // Build visible slots: -2, -1, 0, 1, 2
+  const slots = [-2, -1, 0, 1, 2];
 
   return (
-    <div className="relative flex items-center justify-center" style={{ maxWidth: 1000, margin: "0 auto" }}>
+    <div className="relative flex items-center justify-center" style={{ maxWidth: 1100, margin: "0 auto" }}>
       <CarouselArrow direction="left" onClick={prev} />
 
-      <div className="relative overflow-hidden" style={{ flex: 1, height: 200, margin: "0 12px" }}>
-        <div
-          className="flex items-center"
-          style={{
-            height: "100%",
-            gap,
-            transition: "transform 0.55s cubic-bezier(0.25, 0.1, 0.25, 1)",
-            transform: `translateX(calc(50% - ${centerWidth / 2}px - ${centerIndex * (cardWidth + gap)}px))`,
-          }}
-        >
-          {SHOWCASE_ITEMS.map((item, i) => {
-            const distFromCenter = Math.abs(i - centerIndex);
-            // Handle wrap-around distance
-            const wrapDist = Math.min(distFromCenter, total - distFromCenter);
-            const isCenter = wrapDist === 0;
-            const scale = isCenter ? 1 : wrapDist === 1 ? 0.88 : 0.75;
-            const opacity = isCenter ? 1 : wrapDist === 1 ? 0.7 : 0.4;
-
-            return (
-              <div
-                key={i}
-                className="flex-shrink-0 overflow-hidden rounded-[10px]"
-                style={{
-                  width: isCenter ? centerWidth : cardWidth,
-                  height: isCenter ? "100%" : "78%",
-                  opacity,
-                  transform: `scale(${scale})`,
-                  transition: "all 0.55s cubic-bezier(0.25, 0.1, 0.25, 1)",
-                  zIndex: isCenter ? 5 : 5 - wrapDist,
-                }}
-              >
-                <img
-                  src={item.poster}
-                  alt={item.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            );
-          })}
-        </div>
+      <div className="relative" style={{ flex: 1, height: 280, margin: "0 16px" }}>
+        {slots.map((slot) => {
+          const idx = ((centerIndex + slot) % total + total) % total;
+          const item = SHOWCASE_ITEMS[idx];
+          return (
+            <div key={`${slot}-${idx}`} style={getSlotStyle(slot)}>
+              <img
+                src={item.poster}
+                alt={item.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          );
+        })}
       </div>
 
       <CarouselArrow direction="right" onClick={next} />
@@ -900,7 +896,7 @@ const ModelPillDropdown = ({
             background: triggerBg,
             border: triggerBorder,
             boxShadow: triggerShadow,
-            animation: flash ? "glowPulse 0.6s ease 5" : "none",
+            animation: flash ? "glowPulse 1.2s ease 5" : "none",
           }}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
