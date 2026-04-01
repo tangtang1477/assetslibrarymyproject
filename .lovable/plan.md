@@ -1,62 +1,48 @@
 
+目标：这次只修 3 个你刚指出的“明显没做对”的点，并按附件视频/你之前的要求严格落地，不再做模糊微调。
 
-# 首页 4 项修复计划
+## 1. For You：按附件视频重做宽度对齐、切换动效、hover 效果
+**现状问题**
+- 现在 `ForYouShowcase` 还在用独立的 `maxWidth: 1100`，没有和首页主内容栅格对齐，所以左右留白和整体宽度都不对。
+- 卡片 `key` 现在是 `key={`${slot}-${idx}`}`，切换时 React 会重建节点，动画看起来像跳位，不是视频里的丝滑横向经过。
+- 当前没有真正的 hover 反馈。
 
-## 1. For You 轮播 — 加大 + 3D 倾斜 + 丝滑水平切换动效
+**改法**
+- 把 For You 外层宽度改回和首页主内容同一对齐基准，不再单独居中一个错宽度的盒子。
+- 保留 5 卡 3D 结构，但改成“稳定槽位 + 只更新 transform”的写法，让切换时是连续横向位移，不再瞬移。
+- 按附件视频重新校准：中心卡尺寸、两侧卡尺寸、横向偏移、倾斜角度、层级、透明度、箭头与卡片间距。
+- 恢复 hover：卡片 hover 时有轻微抬升、提亮、边缘高光，中心卡 hover 最明显；箭头也保留明确 hover 态。
+- 切换动效仍然是水平滑动为主，3D 倾斜只是辅助，不会再出现“有倾斜但没轮播感”的问题。
 
-当前 `ForYouShowcase` 容器只有 `height: 200`，卡片太小；切换时虽有 `translateX` 但缺少 3D 透视倾斜效果。
+## 2. Labs：把底部文字真正放回渐变玻璃蒙层内部
+**现状问题**
+- 现在底部看起来只有一层渐变背景，不是你要的“跟随文字内容自适应的半透明玻璃蒙层”。
+- 你要的是：文字在蒙层里面，蒙层在文字背后，上边缘是渐变过渡。
 
-**修改**：
-- 容器高度改为 `280px`，`maxWidth: 1100px`
-- 外层加 `perspective: 1200px` 开启 3D
-- 中心卡 `width: 380px`，两侧 `width: 200px`，首尾 `width: 160px`
-- 3D 倾斜效果：
-  - 左侧卡片：`rotateY(35deg) scale(0.82)`，左偏移
-  - 右侧卡片：`rotateY(-35deg) scale(0.82)`，右偏移
-  - 中心卡：`rotateY(0) scale(1)`
-  - 第 2/4 位：`rotateY(±18deg) scale(0.9)`
-- 切换时使用 `transition: all 0.65s cubic-bezier(0.33, 0, 0.2, 1)` 实现丝滑平移
-- 保留圆角和 `overflow: hidden`
-- 左右箭头间距保持 `16px`
+**改法**
+- 底部先保留一层从透明到深色的渐变过渡层，负责和图片衔接。
+- 在这层里面再放一个真正承载文字的半透明玻璃蒙层：宽高随文案内容自适应，带圆角、半透明填充、轻微 blur。
+- 描述文字直接放进这个玻璃蒙层节点内部，不再让文字和蒙层视觉分离。
+- 保持 badge 独立，避免压坏底部文案层级。
 
-**关键**：用 `transform-style: preserve-3d` 让 3D 旋转生效，每张卡根据与 center 的距离计算 `rotateY` 和 `translateZ`。
+## 3. 角色选择：选中后在输入框 placeholder 尾部出现 `@角色名`
+**现状问题**
+- 现在上方角色头像只改了选中态，没有联动输入框提示。
+- textarea 还在用原生 `placeholder={config.placeholder}`，原生 placeholder 不能把后半段 `@角色名` 单独做样式，所以你要的效果不会出现。
 
-## 2. Inspiration Labs 卡片底部恢复半透明玻璃蒙层
+**改法**
+- 改成“自定义空态占位层”：
+  - 输入为空且没选角色：显示原 placeholder。
+  - 输入为空且已选角色：显示 `原 placeholder + @角色名`。
+- `@角色名` 单独用主题色高亮，和普通 placeholder 分层排版，做到你要的“placeholder 后面跟一个 @角色名”的效果。
+- 用户一旦开始输入，这层占位提示立即隐藏，不污染真实输入内容。
+- 顶部角色选择和输入 `@` 后弹出的角色菜单继续共用同一个 `selectedCharacter` 状态，避免交互不一致。
 
-当前第 573-579 行的蒙层 div 仍然存在，但文字在它之外（第 580-584 行），导致蒙层与文字分离，视觉上蒙层不可见或不对。
-
-**修改**：
-- 把文字放回蒙层 div 内部，蒙层自适应文字高度
-- 蒙层样式：`background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.75) 100%)`
-- `padding: 40px 12px 12px`，文字在蒙层内自然撑开
-- 删除第 580-584 行的独立文字 div，合并进蒙层
-
-## 3. glowPulse 光晕闪烁放慢
-
-当前 `animation: glowPulse 0.6s ease 5` — 0.6s 一次太快。
-
-**修改**：
-- `glowPulse` 动画时长从 `0.6s` 改为 `1.2s`
-- 总闪烁 5 次，总时长约 6 秒
-- `setTimeout` 从 3000 改为 6500（`1.2s * 5 + 余量`）
-- 保持柔光 halo 不变
-
-## 4. 快速导览配色统一为深蓝渐变
-
-当前 QUICK_LINKS 用了 5 种不同的蓝绿色 CSS 变量。统一改为深蓝色系渐变，更沉稳高级。
-
-**修改**：
-- 将 6 个快速导览圆形背景改为统一的深蓝色调，但每个略有渐变差异以保持区分度
-- 配色方案：使用深蓝 → 靛蓝渐变，每个圆圈用不同角度或微调色相
-  - All: `linear-gradient(135deg, #1e3a5f, #2d5a8e)`
-  - Toolkit: `linear-gradient(135deg, #1a3352, #264d7a)`
-  - Lab: `linear-gradient(135deg, #162d4a, #1f4470)`
-  - Assets: `linear-gradient(135deg, #1b3557, #2a5285)`
-  - AIdeo World: `linear-gradient(135deg, #142840, #1c3d65)`
-  - Fun: `linear-gradient(135deg, #112238, #19365c)`
-- 直接在 QUICK_LINKS 数组中把 `bg` 改为渐变字符串，渲染时用 `background` 而非 `backgroundColor`
+## 技术细节
+- For You 的核心修正点是：去掉会打断动画的动态 key，改为稳定 slot key，只更新每个槽位的 `transform / opacity / zIndex`。
+- Labs 的核心修正点是：不再只改背景，而是把“文字节点”和“玻璃蒙层节点”重新做成父子结构。
+- 角色 placeholder 的核心修正点是：不能继续依赖原生 placeholder，必须换成可控的 overlay 占位层才能单独渲染 `@角色名`。
 
 ## 涉及文件
-1. `src/pages/Home.tsx` — ForYouShowcase 3D 重做、Labs 蒙层修复、快速导览配色、glowPulse 时长
-2. `src/index.css` — 无需改动（glowPulse keyframes 不变，只改组件内引用的 duration）
-
+- `src/pages/Home.tsx`：ForYouShowcase、Labs 卡片底部结构、角色选择与输入框 placeholder 联动
+- `src/index.css`：如需补充 For You / hover / 玻璃蒙层的共享动画样式，会一并整理到这里
