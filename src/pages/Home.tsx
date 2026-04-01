@@ -1038,43 +1038,40 @@ const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ct
   </button>
 );
 
-/* ───── Announcement Modal (lighter frosted glass) ───── */
+/* ───── Announcement Modal (suno-style: image top, two buttons bottom) ───── */
 const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center"
-      style={{ background: "rgba(0, 0, 0, 0.5)" }}
+      style={{ background: "rgba(0, 0, 0, 0.6)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="relative"
+        className="relative overflow-hidden"
         style={{
           width: 480,
-          background: "hsl(var(--background) / 0.05)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
+          background: "#1a1a1a",
           borderRadius: 20,
-          padding: 24,
           border: "1px solid rgba(255, 255, 255, 0.06)",
-          boxShadow: "inset 0px 0px 7.3px rgba(255, 255, 255, 0.15), inset 0px 7.3px 14.6px rgba(255, 255, 255, 0.08), inset 0px 0.4px 0.49px rgba(255, 255, 255, 0.12), 0 24px 80px rgba(0,0,0,0.5)",
+          boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
         }}
       >
-        {/* Close button — no background, just X */}
+        {/* Close button — just X, positioned on image */}
         <button
           onClick={onClose}
-          className="absolute z-20 flex items-center justify-center transition-all hover:opacity-100"
-          style={{ right: 16, top: 16, opacity: 0.6 }}
+          className="absolute z-30 flex h-10 w-10 items-center justify-center rounded-full transition-all hover:opacity-100"
+          style={{ right: 12, top: 12, opacity: 0.7, background: "rgba(0,0,0,0.5)" }}
         >
-          <X size={20} className="text-foreground" />
+          <X size={18} className="text-foreground" />
         </button>
 
-        {/* Hero image */}
-        <div className="overflow-hidden rounded-[12px]" style={{ height: 200 }}>
+        {/* Hero image — full width, no padding */}
+        <div style={{ height: 260 }}>
           <img src={bannerBg} alt="Announcement" className="w-full h-full object-cover" />
         </div>
 
         {/* Content */}
-        <div style={{ marginTop: 20 }}>
+        <div style={{ padding: "20px 24px 24px" }}>
           <h3
             className="font-bold text-foreground"
             style={{ fontFamily: "Arial, sans-serif", fontSize: 22, lineHeight: "28px" }}
@@ -1082,36 +1079,39 @@ const AnnouncementModal = ({ onClose }: { onClose: () => void }) => {
             The Most Powerful <span style={{ color: "#71F0F6" }}>Model 2.0</span> is Here
           </h3>
 
-          <div className="flex flex-col gap-3" style={{ marginTop: 16 }}>
-            {[
-              { highlight: "10x faster", text: " video generation with enhanced AI engine" },
-              { highlight: "Cinema-grade", text: " quality output at up to 4K resolution" },
-              { highlight: "Multi-scene", text: " storytelling with intelligent transitions" },
-              { highlight: "Voice & Music", text: " auto-generation for complete productions" },
-            ].map((item, i) => (
-              <div key={i} className="flex items-start gap-2.5">
-                <div
-                  className="flex-shrink-0 flex items-center justify-center rounded-full mt-0.5"
-                  style={{ width: 18, height: 18, background: "rgba(113, 240, 246, 0.15)" }}
-                >
-                  <Check size={12} style={{ color: "#71F0F6" }} />
-                </div>
-                <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "20px", color: "hsl(var(--foreground) / 0.7)" }}>
-                  <span className="font-bold" style={{ color: "#71F0F6" }}>{item.highlight}</span>
-                  {item.text}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <p style={{ marginTop: 16, fontFamily: "Arial, sans-serif", fontSize: 12, lineHeight: "18px", color: "hsl(var(--foreground) / 0.4)" }}>
-            Available now for all subscribers. Free users get 3 trial generations.
+          <p style={{ marginTop: 12, fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.6)" }}>
+            v2.0 is our best, most expressive model yet. With AI Director, Story Agent and Cinematic mode, v2.0 gives you brand-new ways to create videos uniquely yours.
           </p>
 
-          <div className="flex justify-end" style={{ marginTop: 20 }}>
-            <GlassButton onClick={onClose} style={{ width: "100%", height: 44 }}>
-              Get Started
-            </GlassButton>
+          {/* Two buttons — primary "Try It" + dark "Subscribe" */}
+          <div className="flex gap-3" style={{ marginTop: 20 }}>
+            <button
+              onClick={onClose}
+              className="flex-1 flex items-center justify-center rounded-full font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.97]"
+              style={{
+                height: 44,
+                background: "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
+                color: "#000",
+                fontFamily: "Arial, sans-serif",
+                fontSize: 15,
+              }}
+            >
+              Try It Now
+            </button>
+            <button
+              onClick={onClose}
+              className="flex-1 flex items-center justify-center rounded-full font-bold transition-all duration-200 hover:bg-foreground/15 active:scale-[0.97]"
+              style={{
+                height: 44,
+                background: "rgba(255, 255, 255, 0.08)",
+                color: "hsl(var(--foreground) / 0.8)",
+                fontFamily: "Arial, sans-serif",
+                fontSize: 15,
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              Subscribe
+            </button>
           </div>
         </div>
       </div>
