@@ -569,18 +569,32 @@ const Home = () => {
               {LABS.map((lab, index) => (
                 <div key={index} className="group relative flex-shrink-0 cursor-pointer overflow-hidden rounded-[10px]" style={{ width: 350, height: 384 }}>
                   <img src={lab.src} alt={lab.desc} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                  {/* Bottom gradient overlay with text INSIDE */}
                   <div
-                    className="absolute bottom-0 left-0 right-0 z-10"
+                    className="absolute bottom-0 left-0 right-0 z-10 flex flex-col justify-end"
                     style={{
-                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.6) 30%, rgba(0,0,0,0.75) 100%)",
+                      background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0.78) 100%)",
                       borderRadius: "0 0 10px 10px",
-                      padding: "40px 12px 12px",
+                      padding: "48px 14px 14px",
                     }}
                   >
-                    <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 15.6, lineHeight: "18px" }}>
-                      {lab.desc}
-                    </p>
+                    {/* Glass panel behind text */}
+                    <div
+                      style={{
+                        background: "rgba(255,255,255,0.06)",
+                        backdropFilter: "blur(12px)",
+                        WebkitBackdropFilter: "blur(12px)",
+                        borderRadius: 8,
+                        padding: "10px 12px",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      <p className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "20px" }}>
+                        {lab.desc}
+                      </p>
+                    </div>
                   </div>
+                  {/* Badge */}
                   <div
                     className="absolute flex items-center justify-center"
                     style={{ left: 18, top: 14, width: 41, height: 21, background: "hsl(var(--primary))", borderRadius: 5, transform: "matrix(1, 0, -0.17, 0.98, 0, 0)" }}
