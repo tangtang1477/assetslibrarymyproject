@@ -424,11 +424,26 @@ const Home = () => {
 
                   {/* Real textarea input with @ support */}
                   <div className="relative flex-1">
+                    {/* Custom placeholder overlay for @角色名 */}
+                    {!inputText && (
+                      <div
+                        className="absolute inset-0 pointer-events-none flex items-start"
+                        style={{ paddingTop: 8 }}
+                      >
+                        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "hsl(var(--foreground) / 0.4)" }}>
+                          {config.placeholder}
+                        </span>
+                        {selectedCharacter && (
+                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6", marginLeft: 6 }}>
+                            @{selectedCharacter}
+                          </span>
+                        )}
+                      </div>
+                    )}
                     <textarea
                       ref={textareaRef}
                       value={inputText}
                       onChange={handleInputChange}
-                      placeholder={config.placeholder}
                       disabled={config.locked}
                       className="w-full bg-transparent border-none outline-none resize-none text-foreground"
                       style={{
@@ -437,6 +452,31 @@ const Home = () => {
                         color: "hsl(var(--foreground) / 0.9)",
                       }}
                     />
+                    {/* @ mention popup */}
+                    {showAtMenu && (
+                      <div
+                        className="absolute left-0 z-50 rounded-xl overflow-hidden"
+                        style={{
+                          top: -8, transform: "translateY(-100%)",
+                          background: "rgba(20, 20, 20, 0.95)", backdropFilter: "blur(20px)",
+                          border: "1px solid rgba(255,255,255,0.1)", minWidth: 200,
+                        }}
+                      >
+                        {CHARACTERS.map((char) => (
+                          <button
+                            key={char.name}
+                            onClick={() => handleSelectCharacterFromAt(char.name)}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-foreground/10 transition-colors text-left"
+                          >
+                            <div className="rounded-full overflow-hidden" style={{ width: 28, height: 28, flexShrink: 0 }}>
+                              <img src={char.avatar} alt={char.name} className="w-full h-full object-cover" />
+                            </div>
+                            <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 14 }}>{char.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                     {/* @ mention popup */}
                     {showAtMenu && (
                       <div
