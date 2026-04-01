@@ -1083,8 +1083,10 @@ const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ct
 );
 
 /* ───── Announcement Modal — Surprise Campaign ───── */
-const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted }: { onClose: () => void; onTrySurprise: () => void; quotaExhausted?: boolean }) => {
+const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExhausted }: { onClose: () => void; onTrySurprise: () => void; quotaExhausted?: boolean }) => {
   const [shaking, setShaking] = useState(false);
+  const [localExhausted, setLocalExhausted] = useState(initialExhausted ?? false);
+  const quotaExhausted = localExhausted;
 
   const benefits = [
     { text: "Use text, images, video, and audio together", tag: "UNLIMITED" },
@@ -1118,14 +1120,28 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted }: { onClose
           boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
         }}
       >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute z-30 flex h-8 w-8 items-center justify-center transition-opacity hover:opacity-100"
-          style={{ right: 12, top: 12, opacity: 0.6 }}
-        >
-          <X size={16} className="text-foreground" />
-        </button>
+        {/* Close button + Dev toggle */}
+        <div className="absolute z-30 flex items-center" style={{ right: 12, top: 12, gap: 8 }}>
+          <button
+            onClick={() => setLocalExhausted(!localExhausted)}
+            className="rounded-full px-2.5 py-1 text-[11px] font-bold transition-all hover:opacity-100"
+            style={{
+              background: localExhausted ? "rgba(255,100,100,0.2)" : "rgba(255,255,255,0.08)",
+              color: localExhausted ? "#ff6b6b" : "rgba(255,255,255,0.4)",
+              border: `1px solid ${localExhausted ? "rgba(255,100,100,0.3)" : "rgba(255,255,255,0.1)"}`,
+              fontFamily: "Arial, sans-serif",
+            }}
+          >
+            {localExhausted ? "Exhausted ✓" : "Simulate exhausted"}
+          </button>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center transition-opacity hover:opacity-100"
+            style={{ opacity: 0.6 }}
+          >
+            <X size={16} className="text-foreground" />
+          </button>
+        </div>
 
         {/* Hero image */}
         <div style={{ height: 220 }}>
