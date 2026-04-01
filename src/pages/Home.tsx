@@ -890,10 +890,11 @@ const OptionPillDropdown = ({
 
 /* ───── Model dropdown (3 models with icons + card style) ───── */
 const ModelPillDropdown = ({
-  value, onChange,
+  value, onChange, flash,
 }: {
   value: string;
   onChange: (v: string) => void;
+  flash?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const selected = MODEL_OPTIONS.find(o => o.value === value);
