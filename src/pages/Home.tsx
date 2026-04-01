@@ -689,101 +689,71 @@ const TopRightHeader = () => (
   </div>
 );
 
-/* ───── For‑You showcase – 5 slots coverflow ───── */
+/* ───── For‑You showcase – track-based horizontal slide ───── */
 const ForYouShowcase = () => {
   const [centerIndex, setCenterIndex] = useState(0);
-  const [hoveredCenter, setHoveredCenter] = useState(false);
   const total = SHOWCASE_ITEMS.length;
-
-  const getSlotIndex = (offset: number) => ((centerIndex + offset) % total + total) % total;
 
   const prev = () => setCenterIndex((c) => ((c - 1) % total + total) % total);
   const next = () => setCenterIndex((c) => (c + 1) % total);
 
-  // Absolute position based layout: 5 slots within arrows
-  const getSlotStyle = (offset: number): React.CSSProperties => {
-    const absOff = Math.abs(offset);
-    // Positions as percentage from left edge of container
-    // Container is between arrows. Slots: [-2, -1, 0, 1, 2]
-    // Layout: |16px| slot-2 | slot-1 | slot0 | slot1 | slot2 |16px|
-    const widths = [12, 20, 34, 20, 12]; // percentages
-    const positions = [1, 14, 34, 68, 88]; // left% approx
-    const idx = offset + 2;
+  // All items rendered in a single track that translates
+  // Each card: width = 180px, gap = 12px, center card = 280px
+  // Total visible: 2 small + 1 large center + 2 small
+  // We render all items and shift the track
 
-    const baseStyle: React.CSSProperties = {
-      position: "absolute" as const,
-      width: `${widths[idx]}%`,
-      left: `${positions[idx]}%`,
-      top: "50%",
-      transform: "translateY(-50%)",
-      transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-    };
-
-    if (absOff === 0) {
-      return { ...baseStyle, zIndex: 5, opacity: 1, transform: "translateY(-50%) scale(1)" };
-    }
-    if (absOff === 1) {
-      return {
-        ...baseStyle, zIndex: 3, opacity: 0.75,
-        transform: `translateY(-50%) perspective(600px) rotateY(${offset < 0 ? 15 : -15}deg) scale(0.9)`,
-      };
-    }
-    return {
-      ...baseStyle, zIndex: 1, opacity: 0.4,
-      transform: `translateY(-50%) perspective(400px) rotateY(${offset < 0 ? 30 : -30}deg) scale(0.78)`,
-    };
-  };
-
-  const slots = [-2, -1, 0, 1, 2].map((offset) => ({
-    ...SHOWCASE_ITEMS[getSlotIndex(offset)],
-    offset,
-  }));
+  const cardWidth = 170;
+  const centerWidth = 300;
+  const gap = 10;
+  // track offset to center the current item
+  // Total items rendered in a continuous strip
+  // Each item is cardWidth except center which is centerWidth
+  // We'll use transform to position
 
   return (
     <div className="relative flex items-center justify-center" style={{ maxWidth: 1000, margin: "0 auto" }}>
       <CarouselArrow direction="left" onClick={prev} />
 
-      <div className="relative overflow-hidden" style={{ flex: 1, height: 220, margin: "0 16px" }}>
-        {slots.map((slot) => {
-          const slotStyle = getSlotStyle(slot.offset);
-          const isCenter = slot.offset === 0;
-          return (
-            <div
-              key={slot.offset}
-              className="overflow-hidden rounded-[8px]"
-              style={{
-                ...slotStyle,
-                aspectRatio: "16/9",
-              }}
-              onMouseEnter={() => isCenter && setHoveredCenter(true)}
-              onMouseLeave={() => isCenter && setHoveredCenter(false)}
-            >
-              <img
-                src={slot.poster}
-                alt={slot.title}
-                className="w-full h-full object-cover"
-              />
-              {isCenter && hoveredCenter && (
-                <div
-                  className="absolute left-0 right-0 flex items-center justify-center"
-                  style={{ bottom: 4, gap: 4 }}
-                >
-                  {SHOWCASE_ITEMS.map((_, j) => (
-                    <div
-                      key={j}
-                      className="rounded-full"
-                      style={{
-                        width: 5, height: 5,
-                        background: "white",
-                        opacity: j === centerIndex ? 1 : j === ((centerIndex - 1 + total) % total) || j === ((centerIndex + 1) % total) ? 0.5 : 0.25,
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+      <div className="relative overflow-hidden" style={{ flex: 1, height: 200, margin: "0 12px" }}>
+        <div
+          className="flex items-center"
+          style={{
+            height: "100%",
+            gap,
+            transition: "transform 0.55s cubic-bezier(0.25, 0.1, 0.25, 1)",
+            transform: `translateX(calc(50% - ${centerWidth / 2}px - ${centerIndex * (cardWidth + gap)}px))`,
+          }}
+        >
+          {SHOWCASE_ITEMS.map((item, i) => {
+            const distFromCenter = Math.abs(i - centerIndex);
+            // Handle wrap-around distance
+            const wrapDist = Math.min(distFromCenter, total - distFromCenter);
+            const isCenter = wrapDist === 0;
+            const scale = isCenter ? 1 : wrapDist === 1 ? 0.88 : 0.75;
+            const opacity = isCenter ? 1 : wrapDist === 1 ? 0.7 : 0.4;
+
+            return (
+              <div
+                key={i}
+                className="flex-shrink-0 overflow-hidden rounded-[10px]"
+                style={{
+                  width: isCenter ? centerWidth : cardWidth,
+                  height: isCenter ? "100%" : "78%",
+                  opacity,
+                  transform: `scale(${scale})`,
+                  transition: "all 0.55s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                  zIndex: isCenter ? 5 : 5 - wrapDist,
+                }}
+              >
+                <img
+                  src={item.poster}
+                  alt={item.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <CarouselArrow direction="right" onClick={next} />
