@@ -702,30 +702,41 @@ const TopRightHeader = () => (
   </div>
 );
 
-/* ───── For‑You showcase – 3D coverflow with perspective ───── */
+/* ───── For‑You showcase – 3D coverflow, page-width aligned ───── */
 const ForYouShowcase = () => {
   const [centerIndex, setCenterIndex] = useState(0);
+  const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
   const total = SHOWCASE_ITEMS.length;
 
   const prev = () => setCenterIndex((c) => ((c - 1) % total + total) % total);
   const next = () => setCenterIndex((c) => (c + 1) % total);
 
-  // Positions: show 5 cards centered on centerIndex
-  // Each card gets a slot from -2 to +2 relative to center
-  const getSlotStyle = (slot: number): React.CSSProperties => {
+  // Auto-play every 4s
+  useEffect(() => {
+    const timer = setInterval(next, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Stable slot-based rendering: slots -2..+2, key is slot index (stable)
+  const slots = [-2, -1, 0, 1, 2];
+
+  const getSlotStyle = (slot: number, isHovered: boolean): React.CSSProperties => {
     const absSlot = Math.abs(slot);
-    // Sizes
-    const width = absSlot === 0 ? 380 : absSlot === 1 ? 200 : 160;
-    const height = absSlot === 0 ? 280 : absSlot === 1 ? 220 : 180;
+    // Card sizes
+    const width = absSlot === 0 ? 420 : absSlot === 1 ? 240 : 180;
+    const height = absSlot === 0 ? 260 : absSlot === 1 ? 210 : 170;
     // 3D transforms
-    const rotateY = slot < 0 ? 35 : slot > 0 ? -35 : 0;
-    const adjustedRotateY = absSlot === 1 ? (slot < 0 ? 18 : -18) : rotateY;
-    const scale = absSlot === 0 ? 1 : absSlot === 1 ? 0.9 : 0.82;
-    const translateZ = absSlot === 0 ? 0 : absSlot === 1 ? -80 : -140;
-    // Horizontal offset
-    const xOffset = absSlot === 0 ? 0 : absSlot === 1 ? (slot < 0 ? -220 : 220) : (slot < 0 ? -380 : 380);
-    const opacity = absSlot === 0 ? 1 : absSlot === 1 ? 0.75 : 0.45;
+    const rotateY = absSlot === 0 ? 0 : absSlot === 1 ? (slot < 0 ? 22 : -22) : (slot < 0 ? 40 : -40);
+    const scale = absSlot === 0 ? 1 : absSlot === 1 ? 0.88 : 0.78;
+    const translateZ = absSlot === 0 ? 60 : absSlot === 1 ? -30 : -100;
+    // Horizontal spacing
+    const xOffset = absSlot === 0 ? 0 : absSlot === 1 ? (slot < 0 ? -280 : 280) : (slot < 0 ? -460 : 460);
+    const opacity = absSlot === 0 ? 1 : absSlot === 1 ? 0.8 : 0.5;
     const zIndex = 10 - absSlot;
+
+    // Hover effect: slight lift + brighten for center, subtle for others
+    const hoverScale = isHovered ? (absSlot === 0 ? 1.03 : scale + 0.02) : scale;
+    const hoverTranslateY = isHovered ? -4 : 0;
 
     return {
       position: "absolute" as const,
@@ -735,57 +746,89 @@ const ForYouShowcase = () => {
       top: "50%",
       opacity,
       zIndex,
-      borderRadius: 12,
+      borderRadius: 14,
       overflow: "hidden",
-      transform: `translate(-50%, -50%) translateX(${xOffset}px) perspective(1200px) rotateY(${adjustedRotateY}deg) translateZ(${translateZ}px) scale(${scale})`,
+      cursor: "pointer",
+      transform: `translate(-50%, -50%) translateX(${xOffset}px) translateY(${hoverTranslateY}px) perspective(1200px) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${hoverScale})`,
       transition: "all 0.65s cubic-bezier(0.33, 0, 0.2, 1)",
       transformStyle: "preserve-3d" as const,
+      boxShadow: isHovered && absSlot === 0
+        ? "0 8px 32px rgba(113,240,246,0.2), 0 0 0 1px rgba(113,240,246,0.15)"
+        : absSlot === 0
+          ? "0 4px 20px rgba(0,0,0,0.4)"
+          : "0 2px 12px rgba(0,0,0,0.3)",
+      filter: isHovered ? "brightness(1.1)" : absSlot > 0 ? "brightness(0.85)" : "none",
     };
   };
 
-  // Build visible slots: -2, -1, 0, 1, 2
-  const slots = [-2, -1, 0, 1, 2];
-
   return (
-    <div className="relative flex items-center justify-center" style={{ maxWidth: 1100, margin: "0 auto" }}>
-      <CarouselArrow direction="left" onClick={prev} />
+    <div className="relative flex items-center" style={{ width: "100%" }}>
+      {/* Left arrow */}
+      <button
+        onClick={prev}
+        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
+          bg-foreground/10 text-foreground/70
+          hover:bg-foreground/20 hover:text-foreground hover:scale-110
+          active:bg-foreground/30 active:scale-95
+          transition-all duration-200"
+        style={{ marginRight: 12 }}
+        aria-label="Previous"
+      >
+        <ChevronLeft size={18} />
+      </button>
 
-      <div className="relative" style={{ flex: 1, height: 280, margin: "0 16px" }}>
+      {/* Carousel track */}
+      <div className="relative flex-1" style={{ height: 280, perspective: 1200 }}>
         {slots.map((slot) => {
           const idx = ((centerIndex + slot) % total + total) % total;
           const item = SHOWCASE_ITEMS[idx];
+          const isHovered = hoveredSlot === slot;
           return (
-            <div key={`${slot}-${idx}`} style={getSlotStyle(slot)}>
+            <div
+              key={`slot-${slot}`}
+              style={getSlotStyle(slot, isHovered)}
+              onMouseEnter={() => setHoveredSlot(slot)}
+              onMouseLeave={() => setHoveredSlot(null)}
+            >
               <img
                 src={item.poster}
                 alt={item.title}
                 className="w-full h-full object-cover"
+                draggable={false}
               />
+              {/* Title overlay on center card */}
+              {slot === 0 && (
+                <div
+                  className="absolute bottom-0 left-0 right-0"
+                  style={{
+                    background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
+                    padding: "20px 14px 10px",
+                  }}
+                >
+                  <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.9)", fontWeight: 600 }}>
+                    {item.title}
+                  </span>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
-      <CarouselArrow direction="right" onClick={next} />
+      {/* Right arrow */}
+      <button
+        onClick={next}
+        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
+          bg-foreground/10 text-foreground/70
+          hover:bg-foreground/20 hover:text-foreground hover:scale-110
+          active:bg-foreground/30 active:scale-95
+          transition-all duration-200"
+        style={{ marginLeft: 12 }}
+        aria-label="Next"
+      >
+        <ChevronRight size={18} />
+      </button>
     </div>
-  );
-};
-
-/* ───── Carousel arrow ───── */
-const CarouselArrow = ({ direction, onClick }: { direction: "left" | "right"; onClick: () => void }) => {
-  const Icon = direction === "left" ? ChevronLeft : ChevronRight;
-  return (
-    <button
-      onClick={onClick}
-      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full
-        bg-foreground/10 text-foreground/70
-        hover:bg-foreground/20 hover:text-foreground
-        active:bg-foreground/30 active:scale-95
-        transition-all duration-200"
-      aria-label={direction === "left" ? "Previous" : "Next"}
-    >
-      <Icon size={16} />
-    </button>
   );
 };
 
