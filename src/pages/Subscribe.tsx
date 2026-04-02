@@ -99,7 +99,7 @@ const Subscribe = () => {
                 color: "#71F0F6",
               }}
             >
-              The Road to 1 Million: Celebration Sale!
+              MovieFlow Epic Sale: Unlock Seedance 2.0 & Bonus Time!
             </span>
             <span
               style={{
