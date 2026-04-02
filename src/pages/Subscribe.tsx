@@ -258,52 +258,56 @@ const Subscribe = () => {
           {/* Period toggle */}
           <div className="flex justify-center" style={{ marginTop: 48 }}>
             <div
-              className="flex items-center"
+              className="relative flex items-center"
               style={{
-                padding: "4px 4px 4px 20px",
-                gap: 16,
+                padding: 4,
+                gap: 0,
                 background: "#000000",
                 border: "1px solid rgba(255, 255, 255, 0.2)",
                 borderRadius: 100,
                 height: 46,
+                width: 172,
               }}
             >
+              {/* Sliding white pill */}
+              <div
+                className="absolute"
+                style={{
+                  width: period === "monthly" ? 78 : 78,
+                  height: 38,
+                  top: 4,
+                  left: period === "monthly" ? 4 : 90,
+                  background: "#FFFFFF",
+                  borderRadius: 100,
+                  transition: "left 0.3s ease",
+                }}
+              />
               <button
                 onClick={() => setPeriod("monthly")}
-                className="transition-all"
+                className="relative z-10 flex items-center justify-center transition-colors"
                 style={{
                   fontFamily: "'SF Pro', Arial, sans-serif",
                   fontWeight: 400,
                   fontSize: 14,
                   lineHeight: "22px",
                   color: period === "monthly" ? "#000" : "#FFFFFF",
-                  background: period === "monthly" ? "#FFFFFF" : "transparent",
-                  borderRadius: 100,
-                  padding: period === "monthly" ? "8px 16px" : "0",
-                  height: period === "monthly" ? 38 : "auto",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  width: 86,
+                  height: 38,
                 }}
               >
                 Monthly
               </button>
               <button
                 onClick={() => setPeriod("annual")}
-                className="transition-all"
+                className="relative z-10 flex items-center justify-center transition-colors"
                 style={{
                   fontFamily: "'SF Pro', Arial, sans-serif",
                   fontWeight: 400,
                   fontSize: 14,
                   lineHeight: "22px",
                   color: period === "annual" ? "#000" : "#FFFFFF",
-                  background: period === "annual" ? "#FFFFFF" : "transparent",
-                  borderRadius: 100,
-                  padding: "8px 16px",
+                  width: 78,
                   height: 38,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
                 }}
               >
                 Annual
