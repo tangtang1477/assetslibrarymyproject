@@ -1,57 +1,114 @@
 # 4项修改计划
 
-## 1. @ 下拉框层级 + 选中后交互修正 + 输入框自适应
+## 1. @ 下拉框修正 + 输入框滚动结构重组
 
-**问题**：下拉框被 ForYou 遮挡；选中后 @ 符号残留；placeholder 和缩略图垂直错位；输入框高度固定。
+**问题**：@ 下拉框被遮挡；位置固定不跟随 @ 字符；输入框整体滚动而非仅 prompt 部分滚动。
 
-**改法（`Home.tsx`）**：
+**改法（`src/pages/Home.tsx`）**：
 
-- **z-index**：素材引用浮层 `z-[100]` → `z-[9999]`，确保最上层
-- **选中后逻辑**：`handleReferenceAsset` 中，选中素材后从 `inputText` 里移除末尾的 `@` 字符（`setInputText(prev => prev.replace(/@$/, ""))`）
-- **垂直居中**：Row 2 的 flex 容器加 `items-center`，引用缩略图和 placeholder/textarea 在同一行垂直居中对齐。检查 textarea 的 `lineHeight` 与缩略图 `height: 28px` 匹配
-- **输入框自适应高度**：去掉 textarea 固定 `height: 56`，改为 `minHeight: 28, height: "auto"`，textarea 用 `rows={1}` + JS 自动撑高。外层容器加 `maxHeight: 800, overflowY: "auto"` + `hide-scrollbar`
+### 下拉框跟随 @ 定位
 
-## 2. 小圆点定位器移入中心卡片内部
+- 在 `handleInputChange` 中，当检测到 `@` 时，用 `textareaRef.current` 的 `selectionStart` 获取光标位置，结合 textarea 的位置计算 @ 字符的像素坐标
+- 简化方案：创建一个隐藏的 mirror `<span>` 元素，将 textarea 中 `@` 之前的文本放入其中，测量其宽度作为下拉框的 `left` 偏移
+- 下拉框 `position: absolute`，`top` 为当前行下方（约 `lineHeight + 4px`），`left` 与 @ 字符左对齐
+- `z-index: 99999` 确保不被任何元素遮挡
 
-**问题**：圆点在轮播区域下方 `marginTop: 12` 位置。
+### 输入框结构重组 — 固定顶部素材位和底部工具栏，中间 prompt 区可滚动
 
-**改法**：
+- 外层容器去掉 `overflowY: auto`，改为 `display: flex; flexDirection: column`，`maxHeight: 1600px`
+- **顶部**（固定）：素材上传格子（Row 1），`flex-shrink: 0`
+- **中间**（可滚动）：引用缩略图 + textarea 区域，`flex: 1; overflowY: auto; hide-scrollbar`
+- **底部**（固定）：筛选项 + Make 按钮栏，改为 `position: relative`（从 `absolute bottom: 8` 改为 flex 布局底部），`flex-shrink: 0`
 
-- 将 dot 指示器从轮播容器下方移到中心卡片的 absolute 子元素内
-- `position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%)`
-- 移除外层 `marginTop: 12` 的 dot 容器
-- 存入记忆，以后无论如何不许修改这个小圆点定位器
+## 2. 弹窗的文案部分修改
 
-## 3. 卡片尺寸层级 — 首尾最小、二四中等、中心最大
+副标题：8s修改为15s
 
-**问题**：当前只有 center vs non-center 两档（220 vs 190）。
+正文：for videos up to 1 minutes修改为 for making whole video
 
-**改法**：三档尺寸
+## 3. For You 轮播 — 尺寸梯度加大 + 间距统一 + 切换动效修复
 
-- `slotPos === 2`（中心）：height 220, scale 1.08
-- `slotPos === 1 || slotPos === 3`（二四）：height 200, scale 1.0
-- `slotPos === 0 || slotPos === 4`（首尾）：height 180, scale 0.92
-- opacity 也分三档：1 / 0.85 / 0.65
+**问题**：中间尺寸和最小尺寸区别不明显；间距不一致；切换有闪烁。
 
-## 4. 3D 透视 + 切换滑动效果
+**改法（`src/pages/Home.tsx` — `ForYouShowcase`）**：
 
-**问题**：缺少 3D 立体感和丝滑切换。
+### 尺寸梯度加大
 
-**改法**：
+- 中心（slot 2）：`height: 220, scale: 1.08` — 不变
+- 中间（slot 1/3）：`height: 185, scale: 0.95`（原 200/1.0 → 185/0.95）
+- 首尾（slot 0/4）：`height: 155, scale: 0.82`（原 180/0.92 → 155/0.82）
+- opacity: `1 / 0.78 / 0.55`（原 0.85/0.65 → 差距加大）
 
-- 外层容器加 `perspective: 1200px`
-- 根据 slotPos 计算 `rotateY`：
-  - slot 0: `rotateY(35deg)` + `translateZ(-80px)`
-  - slot 1: `rotateY(15deg)` + `translateZ(-30px)`
-  - slot 2: `rotateY(0)` + `translateZ(40px)`（中心前凸）
-  - slot 3: `rotateY(-15deg)` + `translateZ(-30px)`
-  - slot 4: `rotateY(-35deg)` + `translateZ(-80px)`
-- transition: `all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)`
-- 切换时使用 `key={startIndex}` 保持动画连续性，不重新挂载
+### 箭头距页面边缘更近
+
+- 去掉箭头外层 gap，箭头直接贴近页面左右（gap 改为 `padding: 0 8px`）
+
+### 修复切换闪烁
+
+- **关键**：去掉 `key={startIndex-slotPos}`，改为 `key={slotPos}`（固定 key），让 React 复用 DOM 节点而非重新挂载，这样 CSS transition 才能生效
+- 图片 src 的切换通过 `visibleIndices` 数据驱动，不触发 DOM 重建
+- 保持 `transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)`
+
+### 间距统一
+
+- `gap: 12` 保持不变，但确保 `flex-1` 让 5 张卡片均分宽度
+
+## 4. 右上角功能区重组 + 积分详情 + 购买弹窗
+
+**问题**：左下角4个icon需要转移到右上角，需要积分详情下拉框和购买弹窗。
+
+### 删除 Sidebar 底部 icon
+
+- `src/components/Sidebar.tsx`：删除 `bottom-6` 的4个 icon（Subscribe、Profile、Notice、More）
+
+### 右上角布局重组（`TopRightHeader` 组件）
+
+从左到右排列：
+
+1. **Free Credit** — 礼物 icon + 文字，pill 样式（已有）无需改变
+2. **当前积分** — 四角星 icon + 数字 `427` + 下拉箭头 `ChevronUp/Down`，点击展开积分详情
+3. **通知** — 铃铛 icon（已有）
+4. **更多** — `iconMore` icon
+5. **Subscribe Now** — glass button（已有）
+6. **个人头像** — `iconProfile` icon，圆形
+
+### 积分详情下拉框（新组件 `CreditPanel`）
+
+参考图一，从积分按钮下方弹出：
+
+- **头部**：`Available Credits` + 大号数字 `427` + `Buy Credits` 按钮（右侧）
+- **分割线**
+- **Credit History** 标题
+- **列表项**：每项包含左侧（名称 + 日期 + 可选标签），右侧（正负积分，绿色正/红色负）
+  - 示例数据：Seedance2.0Fast -75, +68 Daily Free Credits 等
+- 样式：白色圆角卡片，`width: 380px`，`border-radius: 16px`，深色主题适配（暗色背景 `rgba(28,30,34,0.98)`）
+- 三态：点击箭头展开/收起，hover 列表项高亮
+
+### 购买积分弹窗（新组件 `BuyCreditsModal`）
+
+参考图二，居中弹窗：
+
+- 标题：`Buy Credits` + 右上角关闭 X
+- **3×3 网格**（实际 3行，前两行3个，第三行左侧1个输入框）：
+  - Row 1：100/$1, 500/$5, 1000/$10
+  - Row 2：2000/$20, 5000/$50, 10000/$100
+  - Row 3 左侧：Custom 输入框（用户自填数量）
+- 每个选项卡片：四角星 icon + 大号积分数 + 小号价格
+- 选中态：青色描边 + 浅青色背景（参考图二第一个选中的 500）
+- 三态交互：normal（浅灰背景）/ hover（轻微亮度提升）/ selected（青色描边+浅青bg）
+- 底部：全宽黑色 `Buy Now` 大按钮
+- 弹窗 `width: 520px`，`border-radius: 20px`，暗色背景
+
+### 交互链路
+
+- 点击积分区的箭头 → 展开/收起 `CreditPanel`
+- 在 `CreditPanel` 点击 `Buy Credits` → 打开 `BuyCreditsModal`
+- 在 `BuyCreditsModal` 选择档位 → 点击 Buy Now（模拟交互）
 
 ## 涉及文件
 
 
-| 文件                   | 操作                                    |
-| -------------------- | ------------------------------------- |
-| `src/pages/Home.tsx` | ForYou 3D 透视改造、dot 移入卡片、@ 交互修正、输入框自适应 |
+| 文件                           | 操作                                                    |
+| ---------------------------- | ----------------------------------------------------- |
+| `src/pages/Home.tsx`         | 大改 — 输入框结构重组、@ 定位、ForYou 修复、TopRightHeader 重组、积分/购买组件 |
+| `src/components/Sidebar.tsx` | 小改 — 删除底部4个 icon                                      |
