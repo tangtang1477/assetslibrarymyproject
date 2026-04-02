@@ -90,24 +90,18 @@ const MODEL_ICONS: Record<string, typeof Sparkles> = {
 
 type ModelConfigType = {
   placeholder: string;
-  cta: string;
-  ctaIcon?: string;
   maxRefs: number;
   styleCount: number;
-  lockCharacter: boolean;
   agentThinking: boolean;
   hideUpload?: boolean;
-  locked?: boolean;
   timeOptions: { label: string; value: string }[];
 };
 
 const MODEL_CONFIG: Record<string, ModelConfigType> = {
   surprise: {
     placeholder: "Create, edit, or extend with text, images, video, and audio...",
-    cta: "Generate with Surprise",
     maxRefs: 9,
     styleCount: 0,
-    lockCharacter: false,
     agentThinking: false,
     timeOptions: [
       { label: "4s", value: "4s" },
@@ -118,10 +112,8 @@ const MODEL_CONFIG: Record<string, ModelConfigType> = {
   },
   kling: {
     placeholder: "Describe your story or paste your script...",
-    cta: "Direct Scene",
     maxRefs: 4,
     styleCount: 5,
-    lockCharacter: true,
     agentThinking: false,
     timeOptions: [
       { label: "5s", value: "5s" },
@@ -130,10 +122,8 @@ const MODEL_CONFIG: Record<string, ModelConfigType> = {
   },
   standard: {
     placeholder: "Describe your story...",
-    cta: "Generate",
     maxRefs: 3,
     styleCount: 5,
-    lockCharacter: false,
     agentThinking: false,
     timeOptions: [
       { label: "5s", value: "5s" },
