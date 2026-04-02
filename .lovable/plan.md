@@ -1,98 +1,68 @@
-# 8项修改计划
+# 5项修改计划
 
-## 1. Asset Library 页 — 筛选项和内容卡片位置上移对齐
+## 1. For You 轮播改造
 
-**问题**：从 My Project 切换到 Asset Library 时，Type 筛选按钮和下方内容卡片的垂直位置与 My Project 页的 AIdeo/Toolkit 按钮和瀑布流不一致，有明显跳动。
+**当前问题**：5个视频gap不均匀、未铺满页面、小圆点是拉长形、默认自动轮播、无缩放滑动效果。
 
-**改法**：`AssetFilterBar` 当前的渲染结构已经在 `TabBar` 的 `children` slot 内（`marginTop: 32` 位置），和 My Project 的 AIdeo/Toolkit 按钮共用同一个容器，理论上位置应该一致。检查 `AssetFilterBar` 内是否有额外 margin/padding 造成偏移，确保 `AssetFilterBar` 的第一行按钮和 AIdeo/Toolkit 按钮的顶边完全对齐。下方 `AssetLibrary` 内容也在同一个 `paddingTop: 32` 容器中，确认无额外间距。
+**改法** — `ForYouShowcase` 组件重写：
 
-**改后锁定**：在 memory 中记录此位置不可再改动。
+- 展示 5 个卡片，宽度铺满整个页面（减去左右箭头+16px间距），5个卡片之间 gap 相等
+- 首尾卡片距离左右箭头间距 16px
+- 删除 `setInterval` 自动轮播，仅点击左右箭头切换
+- 小圆点指示器改为：仅 hover 轮播区域或切换操作时显示（淡入淡出），所有圆点尺寸一致（6px圆形），当前位置圆点亮度更高（纯白），其他为半透明白
+- 点击箭头时做丝滑的缩小放大滑动动效（中心卡片放大、两侧卡片缩小，transition 0.5s cubic-bezier）
+- 存入记忆，锁定此行为
 
-## 2. Home 页 — banner 视频去圆角，与页面同宽
+## 2. 素材区移入输入框内部 + @ 交互修正
 
-**问题**：视频 banner 有 `borderRadius: 16` 和 `left: 9, right: 9` 的内边距。
-
-**改法**：
-
-- 去掉 `borderRadius: 16` → `borderRadius: 0`
-- 改为 `left: 0, right: 0`（或直接从 `left-9 right-9` 改为 `left-0 right-0`）使视频与页面同宽
-- 其他不变
-
-## 3. 输入框筛选项 — 加回 icon
-
-**问题**：`OptionPillDropdown` 没有渲染 icon，虽然已有 `iconLanguage`、`iconEnhance`、`iconTime` 等图片导入。
+**当前问题**：素材区在输入框上方；@选中态有青色色块；placeholder和素材不在同一行；输入@不显示字符只显示下拉框；下拉框在上方且太大太透明。
 
 **改法**：
 
-- `OptionPillDropdown` 组件接收 `icon` prop（已在 interface 中声明但未使用）
-- 在按钮内 label 前加上 `{icon && <img src={icon} ... />}`
-- 调用处传入对应 icon：语言→`iconLanguage`，增强→`iconEnhance`，时间→`iconTime`
-- 只加 icon，其他不改
+- 素材位移到输入框内部第一行（`px-6 pt-4`区域），选中引用后（点击素材位右下角的@键和在placeholder后输入@下拉选择）会在下一行同一位置出现已引用素材缩略图
+-  placeholder 和已引用素材缩略图在同一行内排列，这两者都在素材位的下一行
+- 点击素材右下角@后选中态：仅保留青色描边（`border: 2px solid #71F0F6`），去掉@键后面的青色色块（`background: "#71F0F6"` 的小块删除）
+- 输入@时：正确在输入框中显示@字符，同时在@字符下方弹出引用列表
+- 引用列表下拉框改造：出现在输入框内部@文字下方（而非输入框外），背景改为不透明深色（`rgba(20,20,22,0.98)`），z-index 提高，添加三态交互（normal / hover / active）
+- 在下拉框中点击素材也会在 placeholder 后出现该素材缩略图，键盘点击delete键就可以删除该素材
 
-## 4. 弹窗 Subscribe Now → 跳转订阅页
+## 3. Make 按钮文案改为四角星 + "18/s"
 
-**问题**：弹窗非耗尽态的 "Subscribe Now" 按钮只是关闭弹窗，没有跳转。
+**当前问题**：`MakePill` 当前显示 "Make" + Sparkles icon。
 
-**改法**：在 `AnnouncementModal` 的第二个按钮（非耗尽态显示 "Subscribe Now"）和耗尽态的第一个按钮（"Subscribe Now"）的 onClick 中加入 `navigate("/subscribe")`。需要将 `navigate` 传入 modal 或在 modal 内使用 `useNavigate`。
+**改法**：
 
-## 5. 订阅页 — Pro/Enterprise 色块位置 + Custom Amount 对齐
+- 将 Make + Sparkles icon 放前面，后面添加文字`18/s`
+- 保持 `padding: 8px 16px`
 
-**色块位置**：当前 Pro 色块 `left: 656.06`、Enterprise 色块 `left: 987.63`，需要调整使其分别居中对齐到第3、4张卡片后方。卡片在 `1273.22px` 宽容器中，每张卡 `278.52px`，间距 `(1273.22 - 278.52*4) / 3 ≈ 53.05px`。第3张卡片 left = 2*(278.52+53.05) = 663.14，第4张 = 994.7。色块需要水平居中到卡片，但是视觉效果应该是上边更宽，左右下边距更窄，调整 left 值使色块中心对准卡片中心。
+## 4. Surprise → Seedance 2.0 文案替换
 
-**Custom Amount 对齐**：当前 Custom Amount 输入框 `right: 64` 定位，但需要其左侧与上方 +100 按钮的左侧边框对齐。改为使用统一的 left 定位，或把两行放入同一个 flex 容器中 left 对齐。
+**改法**：全局替换 `Home.tsx` 中所有 "Surprise" 文案：
 
-## 6. Monthly/Annual 切换滑块平滑移动
+- `MODEL_OPTIONS[0].label`: "Surprise" → "Seedance 2.0"
+- 弹窗标题: "Meet Seedance 2.0 — The Most Powerful Video Model on MovieFlow"
+- 弹窗副标题： "MovieFlow now supports Seedance 2.0, with 50,000 free daily spots for 8s clip creation."
+- "Try Surprise" 按钮 → "Try Seedance 2.0"
+- `handleTrySurprise` 中 `setSelectedModel("surprise")` 保持不变（仅文案变）
+- `config.placeholder` 中 "Surprise" → "Seedance 2.0"
 
-**问题**：当前没有真正的滑块，是直接切换按钮 background。
+## 5. 右上角消息通知
 
-**改法**：改为真正的滑块实现（类似 `RatioToggle` 的做法）：
+**改法**：
 
-- 容器内放一个 absolute 白色药丸作为滑块
-- 根据 `period` 状态计算滑块 `left` 值
-- Monthly 选中时滑块左侧距容器左侧 4px
-- 用 `transition: left 0.3s ease` 实现平滑滑动
-- 两个按钮文字颜色根据选中态切换
-
-## 7. Make 按钮 padding 改为 8px/16px
-
-**问题**：当前 `MakePill` 用 `px-[10px]`。
-
-**改法**：改为 `padding: "8px 16px"`，同时调整 height auto。
-
-## 8. 输入框素材区大改造
-
-**删除**：
-
-- 输入框内倾斜的素材上传按钮（`transform: rotate(-5.76deg)` 的那个）
-
-**素材展示移到输入框上方**：
-
-- 已上传素材在输入框上方的横排展示（保留当前的 `uploadedAssets` 网格）
-- hover 时右上角出现白色半透明删除键，右下角出现青色 71F0F6`@` 键，做出具体的删除和引用效果交互：点击删除后该素材消失，点击右下角@键后在placeholder后显示小尺寸的素材缩略图同时素材位改素材中心默认态出现青色的@标识表示该素材已经被引用，如果用户在placeholder处删除已引用的图片那么默认态出现的青色的@标识消失
-- 点击图片本身弹出放大预览（透明遮罩 + 大图，右上角有删除键关闭预览）
-- 点击 `@` 后在 placeholder 处出现该素材小图
-
-**已引用素材在输入框内的展示**：
-
-- 去掉名字和外部容器，只在placeholder后显示小尺寸的素材缩略图
-- 用户可用键盘 Delete 键删除已引用的图片
-
-`**@` 弹出列表改造**：
-
-- 宽度和内容自适应（不再全宽），出现在placeholder**下方**而非上方
-- 中文部分替换为英文，标题"素材引用"替换为英文
-
-**Placeholder 移到下行**：
-
-- placeholder 文字和引用的素材小图在同一行，与素材位对齐
+- 添加状态 `showNotification`，点击 Make 按钮时设为 true
+- 通知面板出现在页面右上角（fixed定位，`top: 80px, right: 32px`），参考截图样式：
+  - 白色/浅色圆角卡片，标题 "Notification" + "New" 徽标
+  - 内容：Your video is in progress. We’ll notify you when it’s ready.
+  - 右上角有关闭按钮
+- 出现动效：从右侧丝滑滑入（`slideInRight` + `fadeIn`），200-300ms
+- 出现后固定在右上角，手动关闭
+- 点击右下角铃铛icon也会在icon右侧8px的位置出现一样的消息列表
 
 ## 涉及文件
 
 
-| 文件                                | 操作                                           |
-| --------------------------------- | -------------------------------------------- |
-| `src/pages/Home.tsx`              | 大改 — banner圆角、icon加回、素材区重构、Make padding、弹窗跳转 |
-| `src/pages/Subscribe.tsx`         | 改 — 色块位置、Custom Amount对齐、Monthly/Annual滑块    |
-| `src/components/AssetLibrary.tsx` | 小改 — 确认筛选项位置对齐                               |
-| `src/components/TabBar.tsx`       | 可能微调 — 确保 children slot 无额外间距                |
-| `mem://index.md`                  | 记录 Asset Library 位置锁定规则                      |
+| 文件                              | 操作                                                |
+| ------------------------------- | ------------------------------------------------- |
+| `src/pages/Home.tsx`            | 大改 — ForYou重写、素材区移入、Make文案、Surprise→Seedance、通知组件 |
+| `mem://design/for-you-carousel` | 新建 — 锁定 ForYou 行为规则                               |
