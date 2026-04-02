@@ -957,13 +957,11 @@ const OptionPillDropdown = ({
 };
 
 /* ───── Model dropdown (3 models with icons + card style) ───── */
-const ModelPillDropdown = ({
-  value, onChange, flash,
-}: {
+const ModelPillDropdown = forwardRef<HTMLButtonElement, {
   value: string;
   onChange: (v: string) => void;
   flash?: boolean;
-}) => {
+}>(({ value, onChange, flash }, ref) => {
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
   const selected = MODEL_OPTIONS.find(o => o.value === value);
@@ -991,6 +989,7 @@ const ModelPillDropdown = ({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
+          ref={ref}
           className="relative flex h-[31px] items-center rounded-full transition-all duration-200"
           style={{
             padding: "0 14px",
@@ -998,7 +997,7 @@ const ModelPillDropdown = ({
             background: triggerBg,
             border: triggerBorder,
             boxShadow: triggerShadow,
-            animation: flash ? "glowPulse 0.6s ease 5, glowBurst 0.3s ease 1" : "none",
+            animation: flash ? "surpriseGlow 1.5s ease-in-out 3" : "none",
           }}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
