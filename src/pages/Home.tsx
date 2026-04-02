@@ -1371,7 +1371,7 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
     { text: "Use text, images, video, and audio together", tag: "UNLIMITED" },
     { text: "Edit, extend, or connect clips with AI", tag: "FREE" },
     { text: "Turn ideas into storyboards in seconds", tag: null },
-    { text: "Subscribe to unlock Seedance 2.0 for videos up to 1 minute", tag: "PRO" },
+    { text: "Subscribe to unlock Seedance 2.0 for making whole video", tag: "PRO" },
   ];
 
   const handlePrimaryClick = () => {
