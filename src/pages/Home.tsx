@@ -260,12 +260,23 @@ const Home = () => {
 
   const [popupFlyOut, setPopupFlyOut] = useState(false);
 
+  // Calculate model selector position for fly-out target
+  const getModelPillPosition = () => {
+    if (!modelPillRef.current) return { x: 0, y: 0 };
+    const rect = modelPillRef.current.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  };
+
+  const [flyTarget, setFlyTarget] = useState<{ x: number; y: number } | null>(null);
+
   const handleTrySurprise = () => {
-    // Start the fly-out animation (popup shrinks & flies into model selector)
+    const target = getModelPillPosition();
+    setFlyTarget(target);
     setPopupFlyOut(true);
     setTimeout(() => {
       setShowAnnouncement(false);
       setPopupFlyOut(false);
+      setFlyTarget(null);
       setSelectedModel("surprise");
       setModelPillFlash(true);
       setTimeout(() => setModelPillFlash(false), 6500);
