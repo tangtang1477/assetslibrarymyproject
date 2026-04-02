@@ -228,9 +228,20 @@ const Home = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
     setInputText(val);
-    // Show @ panel when user types @, but keep the @ character visible
     if (val.endsWith("@") && uploadedAssets.length > 0) {
       setShowAssetPanel(true);
+      requestAnimationFrame(() => {
+        if (mirrorRef.current && textareaRef.current) {
+          const atIdx = val.lastIndexOf("@");
+          const textBefore = val.substring(0, atIdx);
+          const lastLine = textBefore.split("\n").pop() || "";
+          mirrorRef.current.textContent = lastLine;
+          const left = Math.min(mirrorRef.current.offsetWidth, textareaRef.current.clientWidth - 200);
+          const linesBefore = (textBefore.match(/\n/g) || []).length;
+          const top = (linesBefore + 1) * 28 + 4;
+          setAtPosition({ left: Math.max(0, left), top });
+        }
+      });
     } else if (!val.includes("@")) {
       setShowAssetPanel(false);
     }
