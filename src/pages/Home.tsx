@@ -1168,7 +1168,7 @@ const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ct
 );
 
 /* ───── Announcement Modal — Surprise Campaign ───── */
-const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExhausted }: { onClose: () => void; onTrySurprise: () => void; quotaExhausted?: boolean }) => {
+const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExhausted, flyOut }: { onClose: () => void; onTrySurprise: () => void; quotaExhausted?: boolean; flyOut?: boolean }) => {
   const [shaking, setShaking] = useState(false);
   const [localExhausted, setLocalExhausted] = useState(initialExhausted ?? false);
   const quotaExhausted = localExhausted;
@@ -1189,11 +1189,25 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
     }
   };
 
+  /* fly-out: popup shrinks and moves toward bottom-left (model selector area) then fades */
+  const flyOutStyle: React.CSSProperties = flyOut
+    ? {
+        transform: "scale(0.08) translate(-320px, 340px)",
+        opacity: 0,
+        transition: "transform 0.65s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.55s ease 0.15s",
+        pointerEvents: "none",
+      }
+    : {
+        transform: "scale(1) translate(0, 0)",
+        opacity: 1,
+        transition: "transform 0.35s ease, opacity 0.25s ease",
+      };
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center"
-      style={{ background: "rgba(0, 0, 0, 0.6)" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{ background: flyOut ? "rgba(0,0,0,0)" : "rgba(0, 0, 0, 0.6)", transition: "background 0.5s ease" }}
+      onClick={(e) => { if (e.target === e.currentTarget && !flyOut) onClose(); }}
     >
       <div
         className="relative overflow-hidden"
@@ -1203,6 +1217,7 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
           borderRadius: 20,
           border: "1px solid rgba(255, 255, 255, 0.06)",
           boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+          ...flyOutStyle,
         }}
       >
         {/* Close button + Dev toggle */}
@@ -1237,15 +1252,15 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
         <div style={{ padding: "20px 24px 24px" }}>
           <h3
             className="font-bold text-foreground"
-            style={{ fontFamily: "Arial, sans-serif", fontSize: 24, lineHeight: "30px" }}
+            style={{ fontFamily: "Arial, sans-serif", fontSize: 22, lineHeight: "28px" }}
           >
-            Unlock <span style={{ color: "#71F0F6" }}>Surprise</span> for Free Today
+            Meet <span style={{ color: "#71F0F6" }}>Surprise</span> — MovieFlow's Next-Gen In-House Video Model
           </h3>
 
-          <p style={{ marginTop: 6, fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "rgba(255,255,255,0.7)" }}>
+          <p style={{ marginTop: 6, fontFamily: "Arial, sans-serif", fontSize: 15, lineHeight: "22px", color: "rgba(255,255,255,0.7)" }}>
             {quotaExhausted
               ? "Today's 500 free spots are gone. Come back tomorrow or subscribe for longer access."
-              : "500 free daily spots for 8s storyboard creation"}
+              : "More flexible than Seedance, with 500 free daily spots for 15s storyboard creation"}
           </p>
 
           <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1275,7 +1290,7 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
             Free access resets daily. First come, first served.
           </p>
 
-          {/* Two buttons */}
+          {/* Buttons — exhausted: both same style; normal: gradient primary + ghost secondary */}
           <div className="flex gap-3" style={{ marginTop: 20 }}>
             <button
               onClick={handlePrimaryClick}
@@ -1285,7 +1300,7 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
                 background: quotaExhausted
                   ? "rgba(255, 255, 255, 0.08)"
                   : "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
-                color: quotaExhausted ? "rgba(255,255,255,0.6)" : "#000",
+                color: quotaExhausted ? "rgba(255,255,255,0.8)" : "#000",
                 fontFamily: "Arial, sans-serif",
                 fontSize: 16,
                 border: quotaExhausted ? "1px solid rgba(255,255,255,0.1)" : "none",
@@ -1296,11 +1311,11 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
             </button>
             <button
               onClick={onClose}
-              className="flex-1 flex items-center justify-center rounded-full font-bold transition-all duration-200 hover:bg-foreground/15 active:scale-[0.97]"
+              className="flex-1 flex items-center justify-center rounded-full font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.97]"
               style={{
                 height: 44,
                 background: "rgba(255, 255, 255, 0.08)",
-                color: "hsl(var(--foreground) / 0.8)",
+                color: "rgba(255,255,255,0.8)",
                 fontFamily: "Arial, sans-serif",
                 fontSize: 16,
                 border: "1px solid rgba(255,255,255,0.1)",
