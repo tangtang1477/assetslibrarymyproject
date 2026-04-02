@@ -522,6 +522,7 @@ const Home = () => {
                 <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8, zIndex: 60 }}>
                   <ModelPillDropdown ref={modelPillRef} value={selectedModel} onChange={setSelectedModel} flash={modelPillFlash} />
                   <OptionPillDropdown
+                    icon={iconLanguage}
                     label={LANGUAGE_OPTIONS.find(o => o.value === selectedLang)?.label || "EN"}
                     options={LANGUAGE_OPTIONS}
                     value={selectedLang}
@@ -530,6 +531,7 @@ const Home = () => {
                     narrow
                   />
                   <OptionPillDropdown
+                    icon={iconEnhance}
                     label={ENHANCE_OPTIONS.find(o => o.value === selectedEnhance)?.label || "Enhance on"}
                     options={ENHANCE_OPTIONS}
                     value={selectedEnhance}
@@ -537,6 +539,7 @@ const Home = () => {
                     highlightSelected
                   />
                   <OptionPillDropdown
+                    icon={iconTime}
                     label={config.timeOptions.find(o => o.value === selectedTime)?.label || config.timeOptions[0].label}
                     options={config.timeOptions}
                     value={selectedTime}
