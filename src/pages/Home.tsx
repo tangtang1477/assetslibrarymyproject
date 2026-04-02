@@ -208,6 +208,7 @@ const Home = () => {
   const [quotaExhausted, setQuotaExhausted] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const modelPillRef = useRef<HTMLButtonElement>(null);
 
   const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.standard;
 
