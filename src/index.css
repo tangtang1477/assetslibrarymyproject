@@ -161,6 +161,15 @@
     }
   }
 
+  @keyframes surpriseGlow {
+    0%, 100% {
+      box-shadow: 0 0 4px 1px rgba(113,240,246,0.1);
+    }
+    50% {
+      box-shadow: 0 0 24px 8px rgba(113,240,246,0.65), 0 0 56px 16px rgba(113,240,246,0.2);
+    }
+  }
+
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-8px); }
     to { opacity: 1; transform: translateY(0); }

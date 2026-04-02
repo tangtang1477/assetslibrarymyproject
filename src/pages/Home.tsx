@@ -208,6 +208,7 @@ const Home = () => {
   const [quotaExhausted, setQuotaExhausted] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const modelPillRef = useRef<HTMLButtonElement>(null);
 
   const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.standard;
 
@@ -259,12 +260,23 @@ const Home = () => {
 
   const [popupFlyOut, setPopupFlyOut] = useState(false);
 
+  // Calculate model selector position for fly-out target
+  const getModelPillPosition = () => {
+    if (!modelPillRef.current) return { x: 0, y: 0 };
+    const rect = modelPillRef.current.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  };
+
+  const [flyTarget, setFlyTarget] = useState<{ x: number; y: number } | null>(null);
+
   const handleTrySurprise = () => {
-    // Start the fly-out animation (popup shrinks & flies into model selector)
+    const target = getModelPillPosition();
+    setFlyTarget(target);
     setPopupFlyOut(true);
     setTimeout(() => {
       setShowAnnouncement(false);
       setPopupFlyOut(false);
+      setFlyTarget(null);
       setSelectedModel("surprise");
       setModelPillFlash(true);
       setTimeout(() => setModelPillFlash(false), 6500);
@@ -501,7 +513,7 @@ const Home = () => {
 
                 {/* Input options bar */}
                 <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8, zIndex: 60 }}>
-                  <ModelPillDropdown value={selectedModel} onChange={setSelectedModel} flash={modelPillFlash} />
+                  <ModelPillDropdown ref={modelPillRef} value={selectedModel} onChange={setSelectedModel} flash={modelPillFlash} />
                   <OptionPillDropdown
                     label={LANGUAGE_OPTIONS.find(o => o.value === selectedLang)?.label || "EN"}
                     options={LANGUAGE_OPTIONS}
@@ -697,6 +709,7 @@ const Home = () => {
           onTrySurprise={handleTrySurprise}
           quotaExhausted={quotaExhausted}
           flyOut={popupFlyOut}
+          flyTarget={flyTarget}
         />
       )}
     </div>
@@ -944,13 +957,11 @@ const OptionPillDropdown = ({
 };
 
 /* ───── Model dropdown (3 models with icons + card style) ───── */
-const ModelPillDropdown = ({
-  value, onChange, flash,
-}: {
+const ModelPillDropdown = forwardRef<HTMLButtonElement, {
   value: string;
   onChange: (v: string) => void;
   flash?: boolean;
-}) => {
+}>(({ value, onChange, flash }, ref) => {
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
   const selected = MODEL_OPTIONS.find(o => o.value === value);
@@ -978,6 +989,7 @@ const ModelPillDropdown = ({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
+          ref={ref}
           className="relative flex h-[31px] items-center rounded-full transition-all duration-200"
           style={{
             padding: "0 14px",
@@ -985,7 +997,7 @@ const ModelPillDropdown = ({
             background: triggerBg,
             border: triggerBorder,
             boxShadow: triggerShadow,
-            animation: flash ? "glowPulse 0.6s ease 5, glowBurst 0.3s ease 1" : "none",
+            animation: flash ? "surpriseGlow 1.5s ease-in-out 3" : "none",
           }}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
@@ -1067,7 +1079,8 @@ const ModelPillDropdown = ({
       </PopoverContent>
     </Popover>
   );
-};
+});
+ModelPillDropdown.displayName = "ModelPillDropdown";
 
 /* ───── Ratio toggle ───── */
 const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) => {
@@ -1168,10 +1181,11 @@ const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ct
 );
 
 /* ───── Announcement Modal — Surprise Campaign ───── */
-const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExhausted, flyOut }: { onClose: () => void; onTrySurprise: () => void; quotaExhausted?: boolean; flyOut?: boolean }) => {
+const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExhausted, flyOut, flyTarget }: { onClose: () => void; onTrySurprise: () => void; quotaExhausted?: boolean; flyOut?: boolean; flyTarget?: { x: number; y: number } | null }) => {
   const [shaking, setShaking] = useState(false);
   const [localExhausted, setLocalExhausted] = useState(initialExhausted ?? false);
   const quotaExhausted = localExhausted;
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const benefits = [
     { text: "Use text, images, video, and audio together", tag: "UNLIMITED" },
@@ -1189,10 +1203,22 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
     }
   };
 
-  /* fly-out: popup shrinks and moves toward bottom-left (model selector area) then fades */
+  /* fly-out: popup shrinks and flies precisely into the model selector pill */
+  const getFlyOutTransform = () => {
+    if (!flyTarget || !modalRef.current) return "scale(0.05) translate(-300px, 300px)";
+    const modalRect = modalRef.current.getBoundingClientRect();
+    const modalCenterX = modalRect.left + modalRect.width / 2;
+    const modalCenterY = modalRect.top + modalRect.height / 2;
+    // When scale is 0.05, the visual center stays at (modalCenterX, modalCenterY)
+    // We need translate to move the scaled center to flyTarget
+    const dx = (flyTarget.x - modalCenterX) / 0.05;
+    const dy = (flyTarget.y - modalCenterY) / 0.05;
+    return `scale(0.05) translate(${dx}px, ${dy}px)`;
+  };
+
   const flyOutStyle: React.CSSProperties = flyOut
     ? {
-        transform: "scale(0.08) translate(-320px, 340px)",
+        transform: getFlyOutTransform(),
         opacity: 0,
         transition: "transform 0.65s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.55s ease 0.15s",
         pointerEvents: "none",
@@ -1210,6 +1236,7 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
       onClick={(e) => { if (e.target === e.currentTarget && !flyOut) onClose(); }}
     >
       <div
+        ref={modalRef}
         className="relative overflow-hidden"
         style={{
           width: 480,
@@ -1290,7 +1317,7 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
             Free access resets daily. First come, first served.
           </p>
 
-          {/* Buttons — exhausted: both same style; normal: gradient primary + ghost secondary */}
+          {/* Buttons — exhausted: Subscribe Now gets gradient (same as Try Surprise); normal: gradient primary + ghost secondary */}
           <div className="flex gap-3" style={{ marginTop: 20 }}>
             <button
               onClick={handlePrimaryClick}
@@ -1298,30 +1325,32 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
               style={{
                 height: 44,
                 background: quotaExhausted
-                  ? "rgba(255, 255, 255, 0.08)"
+                  ? "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)"
                   : "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
-                color: quotaExhausted ? "rgba(255,255,255,0.8)" : "#000",
+                color: "#000",
                 fontFamily: "Arial, sans-serif",
                 fontSize: 16,
-                border: quotaExhausted ? "1px solid rgba(255,255,255,0.1)" : "none",
+                border: "none",
                 animation: shaking ? "shake 0.5s ease" : "none",
               }}
             >
-              {quotaExhausted ? "Come Back Tomorrow" : "Try Surprise"}
+              {quotaExhausted ? "Subscribe Now" : "Try Surprise"}
             </button>
             <button
               onClick={onClose}
               className="flex-1 flex items-center justify-center rounded-full font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.97]"
               style={{
                 height: 44,
-                background: "rgba(255, 255, 255, 0.08)",
-                color: "rgba(255,255,255,0.8)",
+                background: quotaExhausted
+                  ? "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)"
+                  : "rgba(255, 255, 255, 0.08)",
+                color: quotaExhausted ? "#000" : "rgba(255,255,255,0.8)",
                 fontFamily: "Arial, sans-serif",
                 fontSize: 16,
-                border: "1px solid rgba(255,255,255,0.1)",
+                border: quotaExhausted ? "none" : "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              Subscribe Now
+              {quotaExhausted ? "Come Back Tomorrow" : "Subscribe Now"}
             </button>
           </div>
         </div>
