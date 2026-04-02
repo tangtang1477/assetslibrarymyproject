@@ -1,96 +1,98 @@
+# 8项修改计划
 
+## 1. Asset Library 页 — 筛选项和内容卡片位置上移对齐
 
-# 首页输入区改造 + 订阅页 + Make按钮统一 + Kling付费引导
+**问题**：从 My Project 切换到 Asset Library 时，Type 筛选按钮和下方内容卡片的垂直位置与 My Project 页的 AIdeo/Toolkit 按钮和瀑布流不一致，有明显跳动。
 
-## 1. 新建订阅页 `/subscribe`
+**改法**：`AssetFilterBar` 当前的渲染结构已经在 `TabBar` 的 `children` slot 内（`marginTop: 32` 位置），和 My Project 的 AIdeo/Toolkit 按钮共用同一个容器，理论上位置应该一致。检查 `AssetFilterBar` 内是否有额外 margin/padding 造成偏移，确保 `AssetFilterBar` 的第一行按钮和 AIdeo/Toolkit 按钮的顶边完全对齐。下方 `AssetLibrary` 内容也在同一个 `paddingTop: 32` 容器中，确认无额外间距。
 
-**新建文件 `src/pages/Subscribe.tsx`**
+**改后锁定**：在 memory 中记录此位置不可再改动。
 
-按照提供的 CSS 严格还原：
+## 2. Home 页 — banner 视频去圆角，与页面同宽
 
-- **外层容器**：`width: 1622px`，`height: 914px`，`overflow-y: scroll` + `hide-scrollbar`，居中于页面
-- **Banner 区**：`1491px × 176px`，`padding: 32px 64px`，`gap: 16px`，`border-radius: 32px`，`background: rgba(113,240,246,0.05)` + `box-shadow: inset 0px 0px 80px 15px rgba(113,240,246,0.2)`
-  - 标题 "The Road to 1 Million: Celebration Sale!" — 24px bold，`#71F0F6`
-  - 副文 + 限时信息 — 16px bold，`#FFFFFF`
-- **Credit Purchase 区**：`1491px × 158px`，同背景+圆角
-  - "Need more credits?" — 20px bold
-  - 说明文字 — 16px bold，60% 白
-  - 底部 "$0.01 per credit" — 14px SF Pro bold
-  - 右侧金额按钮组（+100/$1, +500/$5, +1000/$10）— 各 `86~99px × 38px`，DIN Alternate 14px bold
-  - Custom Amount 输入框 `197×38` + Buy 按钮 `89×38`（青色 `#71F0F6`）
-- **Period 切换**：`172×46`，黑底圆角100，Monthly 文字 + Annual 白色药丸
-- **"Tailored for all"** 标题 — 20px SF Pro bold
-- **"Premium Perks"** 副标题 — 16px SF Pro 400，60% 白
-- **4 张套餐卡片**：在 `1473×626` 深灰容器（`#252828`，`border-radius: 17.68px`）内
-  - 卡片 `278.52×498.68`，间距均分
-  - 背景色分别 `#1C2020`、`#252E2F`、`#000`、`#000`
-  - 第3/4张后面分别有 `292.66×532.28` 的青色/紫色装饰条
-  - Subscribe Now 按钮 `227×44`，蓝色光晕模糊，文字 `#71F0F6`
-  - 青色小标签 `80×17.68`（`#71F0F6`，圆角 4.42）
-- **三态交互**：按钮和卡片都有 normal / hover / active（pressed）三种状态
-- **右上角退出按钮**：X 图标，点击 `navigate(-1)` 返回上一页
+**问题**：视频 banner 有 `borderRadius: 16` 和 `left: 9, right: 9` 的内边距。
 
-**路由注册**：`App.tsx` 加 `<Route path="/subscribe" element={<Subscribe />} />`
+**改法**：
 
-**Sidebar 钻石图标**：修改 `Sidebar.tsx`，让 `iconSubscribe` 按钮 `onClick={() => navigate("/subscribe")}`
+- 去掉 `borderRadius: 16` → `borderRadius: 0`
+- 改为 `left: 0, right: 0`（或直接从 `left-9 right-9` 改为 `left-0 right-0`）使视频与页面同宽
+- 其他不变
 
-## 2. 输入框区域大改造
+## 3. 输入框筛选项 — 加回 icon
+
+**问题**：`OptionPillDropdown` 没有渲染 icon，虽然已有 `iconLanguage`、`iconEnhance`、`iconTime` 等图片导入。
+
+**改法**：
+
+- `OptionPillDropdown` 组件接收 `icon` prop（已在 interface 中声明但未使用）
+- 在按钮内 label 前加上 `{icon && <img src={icon} ... />}`
+- 调用处传入对应 icon：语言→`iconLanguage`，增强→`iconEnhance`，时间→`iconTime`
+- 只加 icon，其他不改
+
+## 4. 弹窗 Subscribe Now → 跳转订阅页
+
+**问题**：弹窗非耗尽态的 "Subscribe Now" 按钮只是关闭弹窗，没有跳转。
+
+**改法**：在 `AnnouncementModal` 的第二个按钮（非耗尽态显示 "Subscribe Now"）和耗尽态的第一个按钮（"Subscribe Now"）的 onClick 中加入 `navigate("/subscribe")`。需要将 `navigate` 传入 modal 或在 modal 内使用 `useNavigate`。
+
+## 5. 订阅页 — Pro/Enterprise 色块位置 + Custom Amount 对齐
+
+**色块位置**：当前 Pro 色块 `left: 656.06`、Enterprise 色块 `left: 987.63`，需要调整使其分别居中对齐到第3、4张卡片后方。卡片在 `1273.22px` 宽容器中，每张卡 `278.52px`，间距 `(1273.22 - 278.52*4) / 3 ≈ 53.05px`。第3张卡片 left = 2*(278.52+53.05) = 663.14，第4张 = 994.7。色块需要水平居中到卡片，但是视觉效果应该是上边更宽，左右下边距更窄，调整 left 值使色块中心对准卡片中心。
+
+**Custom Amount 对齐**：当前 Custom Amount 输入框 `right: 64` 定位，但需要其左侧与上方 +100 按钮的左侧边框对齐。改为使用统一的 left 定位，或把两行放入同一个 flex 容器中 left 对齐。
+
+## 6. Monthly/Annual 切换滑块平滑移动
+
+**问题**：当前没有真正的滑块，是直接切换按钮 background。
+
+**改法**：改为真正的滑块实现（类似 `RatioToggle` 的做法）：
+
+- 容器内放一个 absolute 白色药丸作为滑块
+- 根据 `period` 状态计算滑块 `left` 值
+- Monthly 选中时滑块左侧距容器左侧 4px
+- 用 `transition: left 0.3s ease` 实现平滑滑动
+- 两个按钮文字颜色根据选中态切换
+
+## 7. Make 按钮 padding 改为 8px/16px
+
+**问题**：当前 `MakePill` 用 `px-[10px]`。
+
+**改法**：改为 `padding: "8px 16px"`，同时调整 height auto。
+
+## 8. 输入框素材区大改造
 
 **删除**：
-- 角色选择列表（`CHARACTERS` 区域 + `Character Cast List` 整块）
-- `@` 弹出角色菜单
-- `selectedCharacter` 相关逻辑
-- Lock Character 组件
 
-**新增素材引用功能**：
+- 输入框内倾斜的素材上传按钮（`transform: rotate(-5.76deg)` 的那个）
 
-状态新增：
-- `uploadedAssets: { id, name, thumbnail }[]` — 模拟已上传素材（最多9个）
-- `referencedAssets: number[]` — 已引用的素材 ID 列表
-- `showAssetPanel: boolean` — 素材引用浮层是否展开
+**素材展示移到输入框上方**：
 
-**素材位区域**（替代原来角色选择的位置）：
-- 在输入框上方显示已上传素材的缩略图网格
-- 每个素材位是一个小方块（圆角8px），点击 `+` 模拟上传（每次点击增加一个素材，使用现有 asset-char 图片，名称"图片1"~"图片9"）
-- 最多 9 个
-- 被引用的素材显示紫色 `@` 徽标
+- 已上传素材在输入框上方的横排展示（保留当前的 `uploadedAssets` 网格）
+- hover 时右上角出现白色半透明删除键，右下角出现青色 71F0F6`@` 键，做出具体的删除和引用效果交互：点击删除后该素材消失，点击右下角@键后在placeholder后显示小尺寸的素材缩略图同时素材位改素材中心默认态出现青色的@标识表示该素材已经被引用，如果用户在placeholder处删除已引用的图片那么默认态出现的青色的@标识消失
+- 点击图片本身弹出放大预览（透明遮罩 + 大图，右上角有删除键关闭预览）
+- 点击 `@` 后在 placeholder 处出现该素材小图
 
-**已引用素材区**（输入框上方）：
-- 已引用的素材以小卡片/标签形式水平排列
-- 每个卡片包含：缩略图 + 名称 + `×` 删除按钮 + 紫色 `@` 胶囊徽标
-- 删除时淡出 + 轻微缩小动效
+**已引用素材在输入框内的展示**：
 
-**`@` 触发浮层**：
-- 用户在输入框输入 `@` 时，在输入框上方展开"素材引用"浮层
-- 浮层样式：浅色半透明背景、大圆角（16px）、弱阴影、弱边界
-- 标题"素材引用"弱化显示
-- 列表中每项：左侧缩略图 + 右侧"图片N"名称，大触控块
-- 展开动效：opacity 淡入 + 轻微 y 轴上浮（`translateY(8px) → 0`），200ms
-- 选中后：素材加入已引用区，浮层自然收起
-- 吸附动效：选中时卡片有轻微的落位过渡
+- 去掉名字和外部容器，只在placeholder后显示小尺寸的素材缩略图
+- 用户可用键盘 Delete 键删除已引用的图片
 
-## 3. Make 按钮文案统一
+`**@` 弹出列表改造**：
 
-修改 `MakePill` 组件：
-- 所有模型的右下角按钮文案统一显示 **"Make"**
-- 去掉 `10/s` 积分消耗显示
-- 不再从 `config.cta` 取文案
+- 宽度和内容自适应（不再全宽），出现在placeholder**下方**而非上方
+- 中文部分替换为英文，标题"素材引用"替换为英文
 
-## 4. Kling 模型付费引导
+**Placeholder 移到下行**：
 
-- 删除 `config.lockCharacter` 和 Lock Character 组件（已在第2步删除）
-- 删除 `config.locked` 相关逻辑
-- 当 `selectedModel === "kling"` 时：
-  - MakePill 文案变为 **"Subscribe Now"**
-  - 点击 MakePill → `navigate("/subscribe")`
-  - 去掉积分消耗显示
+- placeholder 文字和引用的素材小图在同一行，与素材位对齐
 
 ## 涉及文件
 
-| 文件 | 操作 |
-|------|------|
-| `src/pages/Subscribe.tsx` | 新建 — 完整订阅页 |
-| `src/pages/Home.tsx` | 大改 — 删角色选择、加素材引用、Make 统一、Kling 引导 |
-| `src/components/Sidebar.tsx` | 小改 — 钻石图标跳转 `/subscribe` |
-| `src/App.tsx` | 小改 — 加 `/subscribe` 路由 |
 
+| 文件                                | 操作                                           |
+| --------------------------------- | -------------------------------------------- |
+| `src/pages/Home.tsx`              | 大改 — banner圆角、icon加回、素材区重构、Make padding、弹窗跳转 |
+| `src/pages/Subscribe.tsx`         | 改 — 色块位置、Custom Amount对齐、Monthly/Annual滑块    |
+| `src/components/AssetLibrary.tsx` | 小改 — 确认筛选项位置对齐                               |
+| `src/components/TabBar.tsx`       | 可能微调 — 确保 children slot 无额外间距                |
+| `mem://index.md`                  | 记录 Asset Library 位置锁定规则                      |
