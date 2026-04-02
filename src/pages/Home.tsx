@@ -29,6 +29,10 @@ import iconNewBadge from "@/assets/icon-new-badge.svg";
 import iconGift from "@/assets/icon-gift.svg";
 import iconCredit from "@/assets/icon-credit.svg";
 import iconNotice from "@/assets/icon-notice.svg";
+import iconMore from "@/assets/icon-more.svg";
+import iconProfile from "@/assets/icon-profile.svg";
+import CreditPanel from "@/components/CreditPanel";
+import BuyCreditsModal from "@/components/BuyCreditsModal";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 /* ───── Quick‑link data ───── */
