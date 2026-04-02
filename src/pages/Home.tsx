@@ -1208,8 +1208,8 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
 
   const handlePrimaryClick = () => {
     if (quotaExhausted) {
-      setShaking(true);
-      setTimeout(() => { setShaking(false); onClose(); }, 800);
+      navigate("/subscribe");
+      onClose();
     } else {
       onTrySurprise();
     }
