@@ -28,12 +28,6 @@ import iconTime from "@/assets/icon-time.svg";
 import iconNewBadge from "@/assets/icon-new-badge.svg";
 import iconGift from "@/assets/icon-gift.svg";
 import iconCredit from "@/assets/icon-credit.svg";
-import avatarSara from "@/assets/avatar-sara.jpg";
-import avatarNeko from "@/assets/avatar-neko.jpg";
-import avatarCindy from "@/assets/avatar-cindy.jpg";
-import avatarQueen from "@/assets/avatar-queen.jpg";
-import avatarSam from "@/assets/avatar-sam.jpg";
-import avatarJason from "@/assets/avatar-jason.jpg";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 /* ───── Quick‑link data ───── */
