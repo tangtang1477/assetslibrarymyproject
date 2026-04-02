@@ -1079,7 +1079,8 @@ const ModelPillDropdown = forwardRef<HTMLButtonElement, {
       </PopoverContent>
     </Popover>
   );
-};
+});
+ModelPillDropdown.displayName = "ModelPillDropdown";
 
 /* ───── Ratio toggle ───── */
 const RatioIcon = ({ ratio, selected }: { ratio: string; selected?: boolean }) => {
