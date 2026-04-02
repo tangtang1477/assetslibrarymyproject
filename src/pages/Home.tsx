@@ -1317,7 +1317,7 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
             Free access resets daily. First come, first served.
           </p>
 
-          {/* Buttons — exhausted: both same style; normal: gradient primary + ghost secondary */}
+          {/* Buttons — exhausted: Subscribe Now gets gradient (same as Try Surprise); normal: gradient primary + ghost secondary */}
           <div className="flex gap-3" style={{ marginTop: 20 }}>
             <button
               onClick={handlePrimaryClick}
@@ -1325,30 +1325,32 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
               style={{
                 height: 44,
                 background: quotaExhausted
-                  ? "rgba(255, 255, 255, 0.08)"
+                  ? "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)"
                   : "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)",
-                color: quotaExhausted ? "rgba(255,255,255,0.8)" : "#000",
+                color: "#000",
                 fontFamily: "Arial, sans-serif",
                 fontSize: 16,
-                border: quotaExhausted ? "1px solid rgba(255,255,255,0.1)" : "none",
+                border: "none",
                 animation: shaking ? "shake 0.5s ease" : "none",
               }}
             >
-              {quotaExhausted ? "Come Back Tomorrow" : "Try Surprise"}
+              {quotaExhausted ? "Subscribe Now" : "Try Surprise"}
             </button>
             <button
               onClick={onClose}
               className="flex-1 flex items-center justify-center rounded-full font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.97]"
               style={{
                 height: 44,
-                background: "rgba(255, 255, 255, 0.08)",
-                color: "rgba(255,255,255,0.8)",
+                background: quotaExhausted
+                  ? "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)"
+                  : "rgba(255, 255, 255, 0.08)",
+                color: quotaExhausted ? "#000" : "rgba(255,255,255,0.8)",
                 fontFamily: "Arial, sans-serif",
                 fontSize: 16,
-                border: "1px solid rgba(255,255,255,0.1)",
+                border: quotaExhausted ? "none" : "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              Subscribe Now
+              {quotaExhausted ? "Come Back Tomorrow" : "Subscribe Now"}
             </button>
           </div>
         </div>
