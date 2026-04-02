@@ -1236,6 +1236,7 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
       onClick={(e) => { if (e.target === e.currentTarget && !flyOut) onClose(); }}
     >
       <div
+        ref={modalRef}
         className="relative overflow-hidden"
         style={{
           width: 480,
