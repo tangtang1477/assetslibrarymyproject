@@ -182,10 +182,13 @@ const Home = () => {
   const [selectedRatio, setSelectedRatio] = useState("16:9");
   const [activeQuickLink, setActiveQuickLink] = useState("all");
   const [showAnnouncement, setShowAnnouncement] = useState(true);
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
   const [inputText, setInputText] = useState("");
-  const [showAtMenu, setShowAtMenu] = useState(false);
   const [agentThinking, setAgentThinking] = useState(false);
+  
+  // Asset reference system
+  const [uploadedAssets, setUploadedAssets] = useState<{ id: number; name: string; thumbnail: string }[]>([]);
+  const [referencedAssets, setReferencedAssets] = useState<number[]>([]);
+  const [showAssetPanel, setShowAssetPanel] = useState(false);
   
   const [modelPillFlash, setModelPillFlash] = useState(false);
   const [quotaExhausted, setQuotaExhausted] = useState(false);
@@ -195,7 +198,6 @@ const Home = () => {
 
   const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.standard;
 
-  // When model changes, sync time to first available option
   useEffect(() => {
     const timeOpts = config.timeOptions;
     if (!timeOpts.find(t => t.value === selectedTime)) {
@@ -221,20 +223,37 @@ const Home = () => {
     const val = e.target.value;
     setInputText(val);
     if (val.endsWith("@")) {
-      setShowAtMenu(true);
-    } else {
-      setShowAtMenu(false);
+      setShowAssetPanel(true);
+      setInputText(prev => prev.replace(/@$/, ""));
     }
   };
 
-  const handleSelectCharacterFromAt = (name: string) => {
-    setInputText(prev => prev.replace(/@$/, `@${name} `));
-    setShowAtMenu(false);
-    setSelectedCharacter(name);
-    textareaRef.current?.focus();
+  const handleUploadAsset = () => {
+    if (uploadedAssets.length >= 9) return;
+    const newId = uploadedAssets.length + 1;
+    setUploadedAssets(prev => [...prev, {
+      id: newId,
+      name: `图片${newId}`,
+      thumbnail: MOCK_ASSET_THUMBS[(newId - 1) % MOCK_ASSET_THUMBS.length],
+    }]);
+  };
+
+  const handleReferenceAsset = (assetId: number) => {
+    if (!referencedAssets.includes(assetId)) {
+      setReferencedAssets(prev => [...prev, assetId]);
+    }
+    setShowAssetPanel(false);
+  };
+
+  const handleRemoveReference = (assetId: number) => {
+    setReferencedAssets(prev => prev.filter(id => id !== assetId));
   };
 
   const handleCTA = () => {
+    if (selectedModel === "kling") {
+      navigate("/subscribe");
+      return;
+    }
     if (config.agentThinking) {
       setAgentThinking(true);
       setTimeout(() => setAgentThinking(false), 3000);
