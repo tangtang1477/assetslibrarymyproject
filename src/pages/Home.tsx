@@ -257,13 +257,18 @@ const Home = () => {
     }
   };
 
+  const [popupFlyOut, setPopupFlyOut] = useState(false);
+
   const handleTrySurprise = () => {
-    setShowAnnouncement(false);
-    setSelectedModel("surprise");
-    setSurpriseBanner(true);
-    setModelPillFlash(true);
-    setTimeout(() => setSurpriseBanner(false), 5000);
-    setTimeout(() => setModelPillFlash(false), 6500);
+    // Start the fly-out animation (popup shrinks & flies into model selector)
+    setPopupFlyOut(true);
+    setTimeout(() => {
+      setShowAnnouncement(false);
+      setPopupFlyOut(false);
+      setSelectedModel("surprise");
+      setModelPillFlash(true);
+      setTimeout(() => setModelPillFlash(false), 6500);
+    }, 700);
   };
 
   return (
