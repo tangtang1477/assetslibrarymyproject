@@ -356,32 +356,6 @@ const Subscribe = () => {
               borderRadius: 17.68,
             }}
           >
-            {/* Decorative accent bars behind cards 3 & 4 */}
-            <div
-              className="absolute"
-              style={{
-                width: 292.66,
-                height: 532.28,
-                left: 656.06,
-                top: -27.41,
-                background: "#71F0F6",
-                borderRadius: 13.26,
-                zIndex: 0,
-              }}
-            />
-            <div
-              className="absolute"
-              style={{
-                width: 292.66,
-                height: 532.28,
-                left: 987.63,
-                top: -27.41,
-                background: "#BA71F6",
-                borderRadius: 13.26,
-                zIndex: 0,
-              }}
-            />
-
             {/* Cards row */}
             <div
               className="absolute"
@@ -393,6 +367,31 @@ const Subscribe = () => {
                 transform: "translateX(-50%)",
               }}
             >
+              {/* Decorative accent bars behind cards 3 & 4 */}
+              <div
+                className="absolute"
+                style={{
+                  width: 292.66,
+                  height: 532.28,
+                  left: 663.14 + (278.52 - 292.66) / 2,
+                  top: -27.41,
+                  background: "#71F0F6",
+                  borderRadius: 13.26,
+                  zIndex: 0,
+                }}
+              />
+              <div
+                className="absolute"
+                style={{
+                  width: 292.66,
+                  height: 532.28,
+                  left: 994.7 + (278.52 - 292.66) / 2,
+                  top: -27.41,
+                  background: "#BA71F6",
+                  borderRadius: 13.26,
+                  zIndex: 0,
+                }}
+              />
               {TIERS.map((tier, i) => {
                 const isSelected = selectedTier === i;
                 const isHovered = hoveredTier === i;
