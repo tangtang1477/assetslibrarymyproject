@@ -346,47 +346,50 @@ const Home = () => {
               </p>
             </div>
 
-            {/* Character Cast List */}
-            <div className="flex items-center mt-6" style={{ gap: 20, width: 990, marginLeft: "auto", marginRight: "auto" }}>
-              {CHARACTERS.map((char) => (
-                <button
-                  key={char.name}
-                  className="flex flex-col items-center transition-all hover:opacity-90 active:scale-95"
-                  style={{ gap: 6 }}
-                  onClick={() => setSelectedCharacter(selectedCharacter === char.name ? null : char.name)}
+            {/* Asset upload slots */}
+            <div className="flex items-center mt-6" style={{ gap: 10, width: 990, marginLeft: "auto", marginRight: "auto" }}>
+              {uploadedAssets.map((asset) => (
+                <div
+                  key={asset.id}
+                  className="relative flex-shrink-0 rounded-lg overflow-hidden cursor-pointer group"
+                  style={{ width: 48, height: 48, border: referencedAssets.includes(asset.id) ? "2px solid #BA71F6" : "2px solid rgba(255,255,255,0.1)" }}
+                  onClick={() => {
+                    if (referencedAssets.includes(asset.id)) {
+                      handleRemoveReference(asset.id);
+                    } else {
+                      handleReferenceAsset(asset.id);
+                    }
+                  }}
                 >
-                  <div
-                    className="rounded-full flex-shrink-0 overflow-hidden"
-                    style={{
-                      width: 48, height: 48,
-                      border: selectedCharacter === char.name ? "2px solid #71F0F6" : "2px solid #191E1F",
-                      transition: "border-color 0.2s ease",
-                    }}
-                  >
-                    <img src={char.avatar} alt={char.name} className="w-full h-full object-cover" loading="lazy" />
-                  </div>
-                  <span
-                    className="text-center"
-                    style={{
-                      fontFamily: "Arial, sans-serif", fontSize: 12, lineHeight: "14px",
-                      color: selectedCharacter === char.name ? "#71F0F6" : "hsl(var(--foreground) / 0.7)",
-                      transition: "color 0.2s ease",
-                    }}
-                  >
-                    {char.name}
-                  </span>
-                </button>
+                  <img src={asset.thumbnail} alt={asset.name} className="w-full h-full object-cover" />
+                  {referencedAssets.includes(asset.id) && (
+                    <div className="absolute top-0 right-0 rounded-bl-md" style={{ background: "#BA71F6", padding: "1px 4px" }}>
+                      <span style={{ fontSize: 9, fontWeight: 700, color: "#fff" }}>@</span>
+                    </div>
+                  )}
+                </div>
               ))}
+              {uploadedAssets.length < 9 && (
+                <button
+                  onClick={handleUploadAsset}
+                  className="flex-shrink-0 flex items-center justify-center rounded-lg transition-all hover:bg-[rgba(255,255,255,0.08)] active:scale-95"
+                  style={{
+                    width: 48, height: 48,
+                    border: "2px dashed rgba(255,255,255,0.15)",
+                    background: "rgba(255,255,255,0.03)",
+                  }}
+                >
+                  <Plus size={18} style={{ color: "rgba(255,255,255,0.4)" }} />
+                </button>
+              )}
             </div>
-
-            {/* (surprise banner removed) */}
 
             {/* Input box */}
             <div className="mt-6 flex w-full justify-center">
               <div
                 className="relative w-[990px] rounded-[25px]"
                 style={{
-                  height: 159,
+                  minHeight: 159,
                   background: "hsl(var(--background) / 0.05)",
                   boxShadow:
                     "inset 0px 0px 7.3px hsl(var(--foreground) / 0.25), inset 0px 7.3px 14.6px hsl(var(--foreground) / 0.15), inset 0px 0.4px 0.49px hsl(var(--foreground) / 0.2), inset 0px 0px 0.9px hsl(var(--foreground) / 0.12)",
@@ -394,15 +397,74 @@ const Home = () => {
                   WebkitBackdropFilter: "blur(12.6px)",
                 }}
               >
-                {/* Cinematic locked overlay */}
-                {config.locked && (
-                  <div className="absolute inset-0 z-20 flex items-center justify-center rounded-[25px]"
-                    style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
-                    <video src="/banner-video.mp4" autoPlay loop muted playsInline
-                      className="absolute inset-0 w-full h-full object-cover rounded-[25px] opacity-30" />
-                    <GlassButton style={{ padding: "12px 28px", animation: "pulse 2s infinite", zIndex: 30 }}>
-                      🎟 Join Waitlist
-                    </GlassButton>
+                {/* Referenced assets tags */}
+                {referencedAssets.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 px-6 pt-3">
+                    {referencedAssets.map((assetId) => {
+                      const asset = uploadedAssets.find(a => a.id === assetId);
+                      if (!asset) return null;
+                      return (
+                        <div
+                          key={asset.id}
+                          className="flex items-center gap-1.5 rounded-full transition-all duration-200"
+                          style={{
+                            padding: "3px 8px 3px 3px",
+                            background: "rgba(186, 113, 246, 0.1)",
+                            border: "1px solid rgba(186, 113, 246, 0.25)",
+                          }}
+                        >
+                          <img src={asset.thumbnail} alt={asset.name} className="rounded-full" style={{ width: 20, height: 20, objectFit: "cover" }} />
+                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.8)" }}>{asset.name}</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: "#BA71F6", padding: "0 3px", background: "rgba(186,113,246,0.15)", borderRadius: 4 }}>@</span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleRemoveReference(asset.id); }}
+                            className="flex items-center justify-center hover:opacity-100 transition-opacity"
+                            style={{ opacity: 0.5, marginLeft: 2 }}
+                          >
+                            <X size={12} className="text-foreground" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Asset reference panel (@ trigger) */}
+                {showAssetPanel && uploadedAssets.length > 0 && (
+                  <div
+                    className="absolute left-6 right-6 z-50 rounded-2xl overflow-hidden"
+                    style={{
+                      top: -8,
+                      transform: "translateY(-100%)",
+                      background: "rgba(30, 32, 35, 0.95)",
+                      backdropFilter: "blur(20px)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                      animation: "assetPanelIn 0.2s ease-out",
+                    }}
+                  >
+                    <div style={{ padding: "12px 16px 8px" }}>
+                      <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)" }}>素材引用</span>
+                    </div>
+                    {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).map((asset) => (
+                      <button
+                        key={asset.id}
+                        onClick={() => handleReferenceAsset(asset.id)}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[rgba(255,255,255,0.06)] transition-colors text-left"
+                      >
+                        <img src={asset.thumbnail} alt={asset.name} className="rounded-lg" style={{ width: 36, height: 36, objectFit: "cover", flexShrink: 0 }} />
+                        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, color: "rgba(255,255,255,0.85)" }}>{asset.name}</span>
+                      </button>
+                    ))}
+                    <div style={{ padding: "4px 16px 12px" }}>
+                      <button
+                        onClick={() => setShowAssetPanel(false)}
+                        className="w-full text-center py-2 rounded-lg hover:bg-[rgba(255,255,255,0.06)] transition-colors"
+                        style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)" }}
+                      >
+                        取消
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -410,6 +472,7 @@ const Home = () => {
                   {/* Upload button */}
                   {!config.hideUpload && (
                     <div
+                      onClick={handleUploadAsset}
                       className="mr-3 flex h-[50px] w-10 flex-shrink-0 items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
                       style={{
                         background: "hsl(var(--foreground) / 0.05)",
@@ -424,80 +487,28 @@ const Home = () => {
                     </div>
                   )}
 
-                  {/* Real textarea input with @ support */}
+                  {/* Textarea */}
                   <div className="relative flex-1">
-                   {/* Custom placeholder overlay */}
-                    {!inputText && !selectedCharacter && (
-                      <div
-                        className="absolute inset-0 pointer-events-none flex items-start"
-                        style={{ paddingTop: 8 }}
-                      >
+                    {!inputText && (
+                      <div className="absolute inset-0 pointer-events-none flex items-start" style={{ paddingTop: 8 }}>
                         <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "hsl(var(--foreground) / 0.4)" }}>
                           {config.placeholder}
                         </span>
                       </div>
                     )}
-                    <div className="flex items-start" style={{ paddingTop: 8, gap: 0 }}>
-                      {/* @角色名 chip — always visible when character selected */}
-                      {selectedCharacter && (
-                        <span
-                          className="flex-shrink-0 select-none"
-                          style={{
-                            fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
-                            color: "#71F0F6", whiteSpace: "nowrap", pointerEvents: "none",
-                          }}
-                        >
-                          @{selectedCharacter}&nbsp;
-                        </span>
-                      )}
-                      <textarea
-                        ref={textareaRef}
-                        value={inputText}
-                        onChange={handleInputChange}
-                        disabled={config.locked}
-                        className="flex-1 bg-transparent border-none outline-none resize-none text-foreground"
-                        style={{
-                          fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
-                          letterSpacing: "0.015em", height: 64,
-                          color: "hsl(var(--foreground) / 0.9)",
-                        }}
-                      />
-                    </div>
-                    {/* @ mention popup */}
-                    {showAtMenu && (
-                      <div
-                        className="absolute left-0 z-50 rounded-xl overflow-hidden"
-                        style={{
-                          top: -8, transform: "translateY(-100%)",
-                          background: "rgba(20, 20, 20, 0.95)", backdropFilter: "blur(20px)",
-                          border: "1px solid rgba(255,255,255,0.1)", minWidth: 200,
-                        }}
-                      >
-                        {CHARACTERS.map((char) => (
-                          <button
-                            key={char.name}
-                            onClick={() => handleSelectCharacterFromAt(char.name)}
-                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-foreground/10 transition-colors text-left"
-                          >
-                            <div className="rounded-full overflow-hidden" style={{ width: 28, height: 28, flexShrink: 0 }}>
-                              <img src={char.avatar} alt={char.name} className="w-full h-full object-cover" />
-                            </div>
-                            <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 14 }}>{char.name}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    <textarea
+                      ref={textareaRef}
+                      value={inputText}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent border-none outline-none resize-none text-foreground"
+                      style={{
+                        fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
+                        letterSpacing: "0.015em", height: 64, paddingTop: 8,
+                        color: "hsl(var(--foreground) / 0.9)",
+                      }}
+                    />
                   </div>
                 </div>
-
-                {/* Lock Character indicator */}
-                {config.lockCharacter && (
-                  <div className="absolute right-6 top-4 flex items-center gap-1.5 rounded-full px-3 py-1 cursor-pointer hover:opacity-80 transition-opacity"
-                    style={{ background: "rgba(113, 240, 246, 0.1)", border: "1px solid rgba(113, 240, 246, 0.3)" }}>
-                    <Lock size={12} style={{ color: "#71F0F6" }} />
-                    <span style={{ fontSize: 12, color: "#71F0F6", fontFamily: "Arial, sans-serif", fontWeight: 700 }}>Lock Character</span>
-                  </div>
-                )}
 
                 {/* Agent thinking indicator */}
                 {agentThinking && (
@@ -539,7 +550,10 @@ const Home = () => {
                     narrow
                   />
                   <RatioToggle value={selectedRatio} onChange={setSelectedRatio} />
-                  <MakePill ctaText={config.cta} ctaIcon={config.ctaIcon} onClick={handleCTA} />
+                  <MakePill
+                    ctaText={selectedModel === "kling" ? "Subscribe Now" : "Make"}
+                    onClick={handleCTA}
+                  />
                 </div>
               </div>
             </div>
