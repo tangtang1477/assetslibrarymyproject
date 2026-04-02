@@ -288,8 +288,8 @@ const Home = () => {
         <div className="relative px-9 pt-6" style={{ minHeight: 800 }}>
           {/* Video banner background */}
           <div
-            className="absolute left-9 right-9 top-0 overflow-hidden"
-            style={{ height: 400, borderRadius: 16 }}
+            className="absolute left-0 right-0 top-0 overflow-hidden"
+            style={{ height: 400, borderRadius: 0 }}
           >
             <video
               src="/banner-video.mp4"
