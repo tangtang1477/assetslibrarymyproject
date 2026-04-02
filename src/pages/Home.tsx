@@ -564,6 +564,48 @@ const Home = () => {
               </div>
             </div>
 
+            {/* @ mention dropdown — fixed position, top layer */}
+            {showAssetPanel && uploadedAssets.length > 0 && (
+              <div
+                className="rounded-xl overflow-hidden"
+                style={{
+                  position: 'fixed',
+                  top: dropdownPos.top,
+                  left: dropdownPos.left,
+                  zIndex: 99999,
+                  background: "rgba(20,20,22,0.98)",
+                  backdropFilter: "blur(20px)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                  animation: "assetPanelIn 0.2s ease-out",
+                  minWidth: 180,
+                }}
+              >
+                <div style={{ padding: "10px 14px 6px" }}>
+                  <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.4)" }}>Asset Reference</span>
+                </div>
+                {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).map((asset) => (
+                  <button
+                    key={asset.id}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleReferenceAsset(asset.id)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 transition-colors text-left"
+                    style={{ background: "transparent" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <img src={asset.thumbnail} alt={asset.name} className="rounded-md" style={{ width: 28, height: 28, objectFit: "cover", flexShrink: 0 }} />
+                    <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.85)", whiteSpace: "nowrap" }}>Image {asset.id}</span>
+                  </button>
+                ))}
+                {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).length === 0 && (
+                  <div style={{ padding: "8px 14px 12px" }}>
+                    <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>All assets referenced</span>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* For You showcase */}
             <div style={{ marginTop: 32, width: "100%" }}>
               <ForYouShowcase />
