@@ -985,7 +985,7 @@ const ModelPillDropdown = ({
             background: triggerBg,
             border: triggerBorder,
             boxShadow: triggerShadow,
-            animation: flash ? "glowPulse 1.2s ease 5" : "none",
+            animation: flash ? "glowPulse 0.6s ease 5, glowBurst 0.3s ease 1" : "none",
           }}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
