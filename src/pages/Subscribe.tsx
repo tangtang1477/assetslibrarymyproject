@@ -118,7 +118,7 @@ const Subscribe = () => {
                 fontWeight: 700,
                 fontSize: 16,
                 lineHeight: "24px",
-                color: "#FFFFFF",
+                color: "rgba(255, 255, 255, 0.5)",
               }}
             >
               ⏳ Claim your massive bonuses: Get +6 Free Ultra months with Creator 2-Year, +3 Free months with Ultra Annual, or +1 Free month with Pro Annual.
