@@ -1464,7 +1464,7 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
           <p style={{ marginTop: 6, fontFamily: "Arial, sans-serif", fontSize: 15, lineHeight: "22px", color: "rgba(255,255,255,0.7)" }}>
             {quotaExhausted
               ? "Today's free spots are gone. Come back tomorrow or subscribe for longer access."
-              : "MovieFlow now supports Seedance 2.0, with 50,000 free daily spots for 8s clip creation."}
+              : "MovieFlow now supports Seedance 2.0, with 50,000 free daily spots for 15s clip creation."}
           </p>
 
           <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>

@@ -143,21 +143,6 @@ const Sidebar = ({ activePage }: SidebarProps) => {
         })}
       </div>
 
-      {/* Bottom icons */}
-      <div className="absolute bottom-6 left-7 flex flex-col items-center gap-4">
-        <button className="w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity" onClick={() => navigate("/subscribe")}>
-          <img src={iconSubscribe} alt="Subscribe" className="w-6 h-6" />
-        </button>
-        <button className="w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity">
-          <img src={iconProfile} alt="Profile" className="w-7 h-7" />
-        </button>
-        <button className="w-6 h-6 flex items-center justify-center hover:opacity-80 transition-opacity">
-          <img src={iconNotice} alt="Notifications" className="w-5 h-5" />
-        </button>
-        <button className="w-6 h-6 flex items-center justify-center hover:opacity-80 transition-opacity">
-          <img src={iconMore} alt="More" className="w-5 h-5" />
-        </button>
-      </div>
     </div>
   );
 };
