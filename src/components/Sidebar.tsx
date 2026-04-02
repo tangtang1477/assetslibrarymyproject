@@ -145,7 +145,7 @@ const Sidebar = ({ activePage }: SidebarProps) => {
 
       {/* Bottom icons */}
       <div className="absolute bottom-6 left-7 flex flex-col items-center gap-4">
-        <button className="w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity">
+        <button className="w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity" onClick={() => navigate("/subscribe")}>
           <img src={iconSubscribe} alt="Subscribe" className="w-6 h-6" />
         </button>
         <button className="w-8 h-8 flex items-center justify-center hover:opacity-80 transition-opacity">
