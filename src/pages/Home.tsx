@@ -1346,11 +1346,13 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
               {quotaExhausted ? "Subscribe Now" : "Try Surprise"}
             </button>
             <button
-              onClick={onClose}
+              onClick={() => { onClose(); navigate("/subscribe"); }}
               className="flex-1 flex items-center justify-center rounded-full font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.97]"
               style={{
                 height: 44,
-                background: "rgba(255, 255, 255, 0.08)",
+                background: quotaExhausted
+                  ? "rgba(255, 255, 255, 0.08)"
+                  : "rgba(255, 255, 255, 0.08)",
                 color: "rgba(255,255,255,0.8)",
                 fontFamily: "Arial, sans-serif",
                 fontSize: 16,
