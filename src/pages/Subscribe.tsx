@@ -110,7 +110,7 @@ const Subscribe = () => {
                 color: "#FFFFFF",
               }}
             >
-              We're approaching 1,000,000 creators. Lock in our biggest annual savings before we hit the milestone.
+              Level up: Upgrade to annual plans to unlock exclusive access to Seedance 2.0 (above Ultra Annual) and Kling 3.0 (above Pro Annual).
             </span>
             <span
               style={{
