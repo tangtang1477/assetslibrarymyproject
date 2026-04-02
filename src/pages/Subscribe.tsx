@@ -179,86 +179,79 @@ const Subscribe = () => {
               $0.01 per credit｜Instant delivery｜Never expires
             </span>
 
-            {/* Credit amount buttons */}
+            {/* Credit amount buttons + Custom + Buy — aligned in one column */}
             <div
-              className="absolute flex items-center"
+              className="absolute flex flex-col"
               style={{
                 right: 64,
                 top: 32,
                 gap: 16,
               }}
             >
-              {CREDIT_OPTIONS.map((opt) => (
+              <div className="flex items-center" style={{ gap: 16 }}>
+                {CREDIT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSelectedCredit(selectedCredit === opt.value ? null : opt.value)}
+                    className="flex items-center justify-center transition-all duration-150 hover:brightness-125 active:scale-95"
+                    style={{
+                      height: 38,
+                      padding: "8px 16px",
+                      background: selectedCredit === opt.value ? "rgba(113, 240, 246, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                      border: selectedCredit === opt.value ? "1px solid rgba(113, 240, 246, 0.4)" : "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: 8,
+                      fontFamily: "'DIN Alternate', Arial, sans-serif",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      lineHeight: "22px",
+                      color: selectedCredit === opt.value ? "#71F0F6" : "#FFFFFF",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center" style={{ gap: 16 }}>
+                <div className="relative" style={{ width: 197, height: 38 }}>
+                  <input
+                    type="text"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                    className="w-full h-full bg-transparent outline-none"
+                    style={{
+                      background: "rgba(255, 255, 255, 0.05)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: 8,
+                      padding: "0 16px",
+                      fontFamily: "'SF Pro', Arial, sans-serif",
+                      fontWeight: 400,
+                      fontSize: 14,
+                      lineHeight: "22px",
+                      color: "#FFFFFF",
+                    }}
+                    placeholder="Custom Amount"
+                  />
+                </div>
                 <button
-                  key={opt.value}
-                  onClick={() => setSelectedCredit(selectedCredit === opt.value ? null : opt.value)}
-                  className="flex items-center justify-center transition-all duration-150 hover:brightness-125 active:scale-95"
+                  className="flex items-center justify-center transition-all duration-150 hover:brightness-110 active:scale-95"
                   style={{
+                    width: 89,
                     height: 38,
-                    padding: "8px 16px",
-                    background: selectedCredit === opt.value ? "rgba(113, 240, 246, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                    border: selectedCredit === opt.value ? "1px solid rgba(113, 240, 246, 0.4)" : "1px solid rgba(255, 255, 255, 0.1)",
+                    padding: "8px 32px",
+                    background: "#71F0F6",
+                    border: "1px solid rgba(113, 240, 246, 0.2)",
                     borderRadius: 8,
-                    fontFamily: "'DIN Alternate', Arial, sans-serif",
-                    fontWeight: 700,
-                    fontSize: 14,
-                    lineHeight: "22px",
-                    color: selectedCredit === opt.value ? "#71F0F6" : "#FFFFFF",
-                  }}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Custom + Buy */}
-            <div
-              className="absolute flex items-center"
-              style={{
-                right: 64,
-                top: 88,
-                gap: 16,
-              }}
-            >
-              <div className="relative" style={{ width: 197, height: 38 }}>
-                <input
-                  type="text"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                  className="w-full h-full bg-transparent outline-none"
-                  style={{
-                    background: "rgba(255, 255, 255, 0.05)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    borderRadius: 8,
-                    padding: "0 16px",
                     fontFamily: "'SF Pro', Arial, sans-serif",
                     fontWeight: 400,
                     fontSize: 14,
                     lineHeight: "22px",
-                    color: "#FFFFFF",
+                    color: "#000000",
+                    textShadow: "0px 0px 2.5px rgba(0, 0, 0, 0.15)",
                   }}
-                  placeholder="Custom Amount"
-                />
+                >
+                  Buy
+                </button>
               </div>
-              <button
-                className="flex items-center justify-center transition-all duration-150 hover:brightness-110 active:scale-95"
-                style={{
-                  width: 89,
-                  height: 38,
-                  padding: "8px 32px",
-                  background: "#71F0F6",
-                  border: "1px solid rgba(113, 240, 246, 0.2)",
-                  borderRadius: 8,
-                  fontFamily: "'SF Pro', Arial, sans-serif",
-                  fontWeight: 400,
-                  fontSize: 14,
-                  lineHeight: "22px",
-                  color: "#000000",
-                  textShadow: "0px 0px 2.5px rgba(0, 0, 0, 0.15)",
-                }}
-              >
-                Buy
-              </button>
             </div>
           </div>
 
