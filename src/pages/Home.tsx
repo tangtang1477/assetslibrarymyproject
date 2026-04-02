@@ -477,13 +477,22 @@ const Home = () => {
                       <textarea
                         ref={textareaRef}
                         value={inputText}
-                        onChange={handleInputChange}
+                        onChange={(e) => {
+                          handleInputChange(e);
+                          // Auto-resize
+                          const el = e.target;
+                          el.style.height = "auto";
+                          el.style.height = el.scrollHeight + "px";
+                        }}
                         onKeyDown={handleKeyDown}
-                        className="w-full bg-transparent border-none outline-none resize-none text-foreground"
+                        rows={1}
+                        className="w-full bg-transparent border-none outline-none resize-none text-foreground hide-scrollbar"
                         style={{
                           fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px",
-                          letterSpacing: "0.015em", height: 56,
+                          letterSpacing: "0.015em", minHeight: 28, height: "auto",
                           color: "hsl(var(--foreground) / 0.9)",
+                          maxHeight: 400,
+                          overflowY: "auto",
                         }}
                       />
                     </div>
