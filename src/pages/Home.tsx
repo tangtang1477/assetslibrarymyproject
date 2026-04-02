@@ -1209,11 +1209,9 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
     const modalRect = modalRef.current.getBoundingClientRect();
     const modalCenterX = modalRect.left + modalRect.width / 2;
     const modalCenterY = modalRect.top + modalRect.height / 2;
-    // When scale is 0.05, the visual center stays at (modalCenterX, modalCenterY)
-    // We need translate to move the scaled center to flyTarget
-    const dx = (flyTarget.x - modalCenterX) / 0.05;
-    const dy = (flyTarget.y - modalCenterY) / 0.05;
-    return `scale(0.05) translate(${dx}px, ${dy}px)`;
+    const dx = flyTarget.x - modalCenterX;
+    const dy = flyTarget.y - modalCenterY;
+    return `translate(${dx}px, ${dy}px) scale(0.05)`;
   };
 
   const flyOutStyle: React.CSSProperties = flyOut
@@ -1341,13 +1339,11 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
               className="flex-1 flex items-center justify-center rounded-full font-bold transition-all duration-200 hover:brightness-110 active:scale-[0.97]"
               style={{
                 height: 44,
-                background: quotaExhausted
-                  ? "linear-gradient(135deg, #71F0F6 0%, #45C4F6 50%, #3BB8E8 100%)"
-                  : "rgba(255, 255, 255, 0.08)",
-                color: quotaExhausted ? "#000" : "rgba(255,255,255,0.8)",
+                background: "rgba(255, 255, 255, 0.08)",
+                color: "rgba(255,255,255,0.8)",
                 fontFamily: "Arial, sans-serif",
                 fontSize: 16,
-                border: quotaExhausted ? "none" : "1px solid rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
               {quotaExhausted ? "Come Back Tomorrow" : "Subscribe Now"}
