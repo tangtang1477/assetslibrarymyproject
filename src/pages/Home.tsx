@@ -244,6 +244,20 @@ const Home = () => {
     setReferencedAssets(prev => prev.filter(id => id !== assetId));
   };
 
+  const handleDeleteAsset = (assetId: number) => {
+    setUploadedAssets(prev => prev.filter(a => a.id !== assetId));
+    setReferencedAssets(prev => prev.filter(id => id !== assetId));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Delete" || e.key === "Backspace") {
+      if (!inputText && referencedAssets.length > 0) {
+        e.preventDefault();
+        setReferencedAssets(prev => prev.slice(0, -1));
+      }
+    }
+  };
+
   const handleCTA = () => {
     if (selectedModel === "kling") {
       navigate("/subscribe");
