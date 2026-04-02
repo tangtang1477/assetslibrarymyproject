@@ -244,6 +244,8 @@ const Home = () => {
     if (!referencedAssets.includes(assetId)) {
       setReferencedAssets(prev => [...prev, assetId]);
     }
+    // Remove trailing @ from input text
+    setInputText(prev => prev.replace(/@$/, ""));
     setShowAssetPanel(false);
   };
 
