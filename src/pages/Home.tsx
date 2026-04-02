@@ -158,15 +158,8 @@ const RATIO_OPTIONS = [
   { label: "9:16", value: "9:16" },
 ];
 
-/* ───── Character cast list ───── */
-const CHARACTERS = [
-  { name: "Sara", avatar: avatarSara },
-  { name: "Neko", avatar: avatarNeko },
-  { name: "Cindy", avatar: avatarCindy },
-  { name: "Queen", avatar: avatarQueen },
-  { name: "Sam", avatar: avatarSam },
-  { name: "Jason", avatar: avatarJason },
-];
+/* ───── Mock asset thumbnails ───── */
+const MOCK_ASSET_THUMBS = [assetChar1, assetChar2, assetChar3, assetChar4, assetChar5, assetChar6, assetChar7, assetChar1, assetChar2];
 
 /* ───── For‑You showcase videos (7 items) ───── */
 const SHOWCASE_ITEMS = [
