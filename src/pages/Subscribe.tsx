@@ -176,7 +176,7 @@ const Subscribe = () => {
                 color: "rgba(255, 255, 255, 0.5)",
               }}
             >
-              $0.01 per credit｜Instant delivery｜Never expires
+              <span style={{ color: "#FFFFFF" }}>$0.01</span> per credit｜Instant delivery｜Never expires
             </span>
 
             {/* Credit amount buttons + Custom + Buy — aligned in one column */}
