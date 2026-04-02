@@ -181,7 +181,6 @@ const Home = () => {
   const [selectedRatio, setSelectedRatio] = useState("16:9");
   const [activeQuickLink, setActiveQuickLink] = useState("all");
   const [showAnnouncement, setShowAnnouncement] = useState(true);
-  const [inputText, setInputText] = useState("");
   const [agentThinking, setAgentThinking] = useState(false);
   
   // Asset reference system
@@ -189,18 +188,18 @@ const Home = () => {
   const [referencedAssets, setReferencedAssets] = useState<number[]>([]);
   const [showAssetPanel, setShowAssetPanel] = useState(false);
   const [previewAsset, setPreviewAsset] = useState<{ id: number; name: string; thumbnail: string } | null>(null);
+  const [editorEmpty, setEditorEmpty] = useState(true);
   
   const [modelPillFlash, setModelPillFlash] = useState(false);
   const [quotaExhausted, setQuotaExhausted] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notifications, setNotifications] = useState<{ id: number; text: string; time: string }[]>([]);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const modelPillRef = useRef<HTMLButtonElement>(null);
-  const assetPanelRef = useRef<HTMLDivElement>(null);
-  const mirrorRef = useRef<HTMLSpanElement>(null);
-  const [atPosition, setAtPosition] = useState({ left: 0, top: 28 });
+  const savedRangeRef = useRef<Range | null>(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
 
   const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.standard;
 
@@ -225,26 +224,36 @@ const Home = () => {
     }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setInputText(val);
-    if (val.endsWith("@") && uploadedAssets.length > 0) {
-      setShowAssetPanel(true);
-      requestAnimationFrame(() => {
-        if (mirrorRef.current && textareaRef.current) {
-          const atIdx = val.lastIndexOf("@");
-          const textBefore = val.substring(0, atIdx);
-          const lastLine = textBefore.split("\n").pop() || "";
-          mirrorRef.current.textContent = lastLine;
-          const left = Math.min(mirrorRef.current.offsetWidth, textareaRef.current.clientWidth - 200);
-          const linesBefore = (textBefore.match(/\n/g) || []).length;
-          const top = (linesBefore + 1) * 28 + 4;
-          setAtPosition({ left: Math.max(0, left), top });
-        }
-      });
-    } else if (!val.includes("@")) {
-      setShowAssetPanel(false);
+  const syncReferencedAssets = () => {
+    if (!editorRef.current) return;
+    const imgs = editorRef.current.querySelectorAll('img[data-asset-id]');
+    const currentIds = Array.from(imgs).map(img => Number((img as HTMLImageElement).dataset.assetId));
+    setReferencedAssets(currentIds);
+    const isEmpty = !editorRef.current.textContent?.trim() && !editorRef.current.querySelector('img');
+    setEditorEmpty(isEmpty);
+  };
+
+  const handleEditorInput = () => {
+    syncReferencedAssets();
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount || !editorRef.current) return;
+    const range = sel.getRangeAt(0);
+    const node = range.startContainer;
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent || '';
+      const offset = range.startOffset;
+      if (offset > 0 && text[offset - 1] === '@' && uploadedAssets.length > 0) {
+        const tempRange = document.createRange();
+        tempRange.setStart(node, offset - 1);
+        tempRange.setEnd(node, offset);
+        const rect = tempRange.getBoundingClientRect();
+        setDropdownPos({ top: rect.bottom + 4, left: rect.left });
+        savedRangeRef.current = range.cloneRange();
+        setShowAssetPanel(true);
+        return;
+      }
     }
+    setShowAssetPanel(false);
   };
 
   const handleUploadAsset = () => {
@@ -258,30 +267,71 @@ const Home = () => {
   };
 
   const handleReferenceAsset = (assetId: number) => {
-    if (!referencedAssets.includes(assetId)) {
-      setReferencedAssets(prev => [...prev, assetId]);
-    }
-    // Remove trailing @ from input text
-    setInputText(prev => prev.replace(/@$/, ""));
-    setShowAssetPanel(false);
-  };
+    const asset = uploadedAssets.find(a => a.id === assetId);
+    if (!asset || !editorRef.current) { setShowAssetPanel(false); return; }
 
-  const handleRemoveReference = (assetId: number) => {
-    setReferencedAssets(prev => prev.filter(id => id !== assetId));
+    // Restore saved selection
+    const sel = window.getSelection();
+    if (savedRangeRef.current && sel) {
+      sel.removeAllRanges();
+      sel.addRange(savedRangeRef.current);
+    }
+
+    const sel2 = window.getSelection();
+    if (sel2 && sel2.rangeCount) {
+      const range = sel2.getRangeAt(0);
+      const node = range.startContainer;
+      // Remove trailing @
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || '';
+        const offset = range.startOffset;
+        if (offset > 0 && text[offset - 1] === '@') {
+          node.textContent = text.slice(0, offset - 1) + text.slice(offset);
+          range.setStart(node, offset - 1);
+          range.collapse(true);
+        }
+      }
+      // Insert thumbnail
+      const img = document.createElement('img');
+      img.src = asset.thumbnail;
+      img.alt = asset.name;
+      img.dataset.assetId = String(asset.id);
+      img.style.cssText = 'width:28px;height:28px;object-fit:cover;border-radius:6px;display:inline-block;vertical-align:middle;margin:0 2px;cursor:default;user-select:none;';
+      img.contentEditable = 'false';
+      img.draggable = false;
+      range.insertNode(img);
+      range.setStartAfter(img);
+      range.collapse(true);
+      sel2.removeAllRanges();
+      sel2.addRange(range);
+    } else {
+      // No cursor, append
+      const img = document.createElement('img');
+      img.src = asset.thumbnail;
+      img.alt = asset.name;
+      img.dataset.assetId = String(asset.id);
+      img.style.cssText = 'width:28px;height:28px;object-fit:cover;border-radius:6px;display:inline-block;vertical-align:middle;margin:0 2px;cursor:default;user-select:none;';
+      img.contentEditable = 'false';
+      img.draggable = false;
+      editorRef.current.appendChild(img);
+    }
+
+    setShowAssetPanel(false);
+    savedRangeRef.current = null;
+    syncReferencedAssets();
+    editorRef.current.focus();
   };
 
   const handleDeleteAsset = (assetId: number) => {
     setUploadedAssets(prev => prev.filter(a => a.id !== assetId));
     setReferencedAssets(prev => prev.filter(id => id !== assetId));
+    if (editorRef.current) {
+      editorRef.current.querySelectorAll(`img[data-asset-id="${assetId}"]`).forEach(el => el.remove());
+    }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Delete" || e.key === "Backspace") {
-      if (!inputText && referencedAssets.length > 0) {
-        e.preventDefault();
-        setReferencedAssets(prev => prev.slice(0, -1));
-      }
-    }
+  const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') setShowAssetPanel(false);
   };
 
   const handleCTA = () => {
@@ -469,41 +519,29 @@ const Home = () => {
                 </div>
 
                 {/* Middle scrollable: prompt area */}
-                <div className="flex-1 overflow-y-auto hide-scrollbar relative px-6" style={{ paddingTop: 8 }}>
-                  <span ref={mirrorRef} aria-hidden="true" style={{ position: "absolute", visibility: "hidden", whiteSpace: "pre", fontFamily: "Arial, sans-serif", fontSize: 16, letterSpacing: "0.015em", lineHeight: "28px", pointerEvents: "none", top: 0, left: 0 }} />
-                  <div className="flex items-center gap-1.5 flex-wrap" style={{ minHeight: 28 }}>
-                    {referencedAssets.map((assetId) => {
-                      const asset = uploadedAssets.find(a => a.id === assetId);
-                      if (!asset) return null;
-                      return (
-                        <img key={asset.id} src={asset.thumbnail} alt={asset.name} className="rounded-md flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity" style={{ width: 28, height: 28, objectFit: "cover" }} onClick={() => handleRemoveReference(asset.id)} />
-                      );
-                    })}
-                    <div className="relative flex-1 min-w-[200px]">
-                      {!inputText && referencedAssets.length === 0 && (
-                        <div className="absolute inset-0 pointer-events-none flex items-start">
-                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px", color: "hsl(var(--foreground) / 0.4)" }}>{config.placeholder}</span>
-                        </div>
-                      )}
-                      <textarea ref={textareaRef} value={inputText} onChange={(e) => { handleInputChange(e); const el = e.target; el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; }} onKeyDown={handleKeyDown} rows={1} className="w-full bg-transparent border-none outline-none resize-none text-foreground hide-scrollbar" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px", letterSpacing: "0.015em", minHeight: 28, height: "auto", color: "hsl(var(--foreground) / 0.9)" }} />
-                    </div>
-                  </div>
-                  {showAssetPanel && uploadedAssets.length > 0 && (
-                    <div ref={assetPanelRef} className="absolute rounded-xl overflow-hidden" style={{ left: atPosition.left + 24, top: atPosition.top + 8, zIndex: 99999, background: "rgba(20,20,22,0.98)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", animation: "assetPanelIn 0.2s ease-out", minWidth: 180 }}>
-                      <div style={{ padding: "10px 14px 6px" }}>
-                        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.4)" }}>Asset Reference</span>
-                      </div>
-                      {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).map((asset) => (
-                        <button key={asset.id} onClick={() => handleReferenceAsset(asset.id)} className="w-full flex items-center gap-3 px-3 py-2.5 transition-colors text-left" style={{ background: "transparent" }} onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }} onMouseDown={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.14)"; }} onMouseUp={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}>
-                          <img src={asset.thumbnail} alt={asset.name} className="rounded-md" style={{ width: 28, height: 28, objectFit: "cover", flexShrink: 0 }} />
-                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.85)", whiteSpace: "nowrap" }}>Image {asset.id}</span>
-                        </button>
-                      ))}
-                      {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).length === 0 && (
-                        <div style={{ padding: "8px 14px 12px" }}><span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>All assets referenced</span></div>
-                      )}
+                <div className="flex-1 overflow-y-auto hide-scrollbar relative px-6" style={{ paddingTop: 8, paddingBottom: 8 }}>
+                  {editorEmpty && (
+                    <div className="absolute pointer-events-none" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px", color: "hsl(var(--foreground) / 0.4)", top: 8, left: 24 }}>
+                      {config.placeholder}
                     </div>
                   )}
+                  <div
+                    ref={editorRef}
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={handleEditorInput}
+                    onKeyDown={handleEditorKeyDown}
+                    className="outline-none"
+                    style={{
+                      fontFamily: "Arial, sans-serif",
+                      fontSize: 16,
+                      lineHeight: "28px",
+                      letterSpacing: "0.015em",
+                      minHeight: 28,
+                      color: "hsl(var(--foreground) / 0.9)",
+                      wordBreak: "break-word",
+                    }}
+                  />
                 </div>
                 {agentThinking && (
                   <div className="flex-shrink-0 px-6 flex items-center gap-2 py-2">
@@ -525,6 +563,48 @@ const Home = () => {
                 </div>
               </div>
             </div>
+
+            {/* @ mention dropdown — fixed position, top layer */}
+            {showAssetPanel && uploadedAssets.length > 0 && (
+              <div
+                className="rounded-xl overflow-hidden"
+                style={{
+                  position: 'fixed',
+                  top: dropdownPos.top,
+                  left: dropdownPos.left,
+                  zIndex: 99999,
+                  background: "rgba(20,20,22,0.98)",
+                  backdropFilter: "blur(20px)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                  animation: "assetPanelIn 0.2s ease-out",
+                  minWidth: 180,
+                }}
+              >
+                <div style={{ padding: "10px 14px 6px" }}>
+                  <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.4)" }}>Asset Reference</span>
+                </div>
+                {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).map((asset) => (
+                  <button
+                    key={asset.id}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleReferenceAsset(asset.id)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 transition-colors text-left"
+                    style={{ background: "transparent" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <img src={asset.thumbnail} alt={asset.name} className="rounded-md" style={{ width: 28, height: 28, objectFit: "cover", flexShrink: 0 }} />
+                    <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.85)", whiteSpace: "nowrap" }}>Image {asset.id}</span>
+                  </button>
+                ))}
+                {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).length === 0 && (
+                  <div style={{ padding: "8px 14px 12px" }}>
+                    <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>All assets referenced</span>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* For You showcase */}
             <div style={{ marginTop: 32, width: "100%" }}>
@@ -857,31 +937,54 @@ const TopRightHeader = ({ onBellClick, notifCount }: { onBellClick: () => void; 
   );
 };
 
-/* ───── For‑You showcase – full-width, equal gap, manual nav, scale animation ───── */
+/* ───── For‑You showcase – container-based animation, cards move between slots ───── */
 const ForYouShowcase = () => {
-  const VISIBLE_COUNT = 5;
-  const [startIndex, setStartIndex] = useState(0);
+  const total = SHOWCASE_ITEMS.length;
+  const [centerIdx, setCenterIdx] = useState(2);
   const [isHovered, setIsHovered] = useState(false);
   const [justSwitched, setJustSwitched] = useState(false);
-  const total = SHOWCASE_ITEMS.length;
-
   const showDots = isHovered || justSwitched;
 
   const prev = () => {
-    setStartIndex((c) => ((c - 1) % total + total) % total);
+    setCenterIdx((c) => ((c - 1) + total) % total);
     setJustSwitched(true);
     setTimeout(() => setJustSwitched(false), 2000);
   };
   const next = () => {
-    setStartIndex((c) => (c + 1) % total);
+    setCenterIdx((c) => (c + 1) % total);
     setJustSwitched(true);
     setTimeout(() => setJustSwitched(false), 2000);
   };
 
-  // Get the 5 visible indices
-  const visibleIndices = Array.from({ length: VISIBLE_COUNT }, (_, i) =>
-    ((startIndex + i) % total + total) % total
-  );
+  // Slot configs: edge cards closer to mid, mid cards farther from center
+  const SLOTS: { left: number; width: number; height: number; opacity: number; rotateY: number; translateZ: number; zIndex: number }[] = [
+    { left: 0,    width: 17, height: 155, opacity: 0.55, rotateY: 35,  translateZ: -80, zIndex: 1 },
+    { left: 17.5, width: 19, height: 185, opacity: 0.78, rotateY: 15,  translateZ: -30, zIndex: 3 },
+    { left: 39,   width: 22, height: 220, opacity: 1,    rotateY: 0,   translateZ: 40,  zIndex: 5 },
+    { left: 63.5, width: 19, height: 185, opacity: 0.78, rotateY: -15, translateZ: -30, zIndex: 3 },
+    { left: 83,   width: 17, height: 155, opacity: 0.55, rotateY: -35, translateZ: -80, zIndex: 1 },
+  ];
+
+  const getItemStyle = (itemIdx: number) => {
+    const diff = ((itemIdx - centerIdx) % total + total) % total;
+    let slot = -1;
+    if (diff === 0) slot = 2;
+    else if (diff === 1) slot = 3;
+    else if (diff === 2) slot = 4;
+    else if (diff === total - 1) slot = 1;
+    else if (diff === total - 2) slot = 0;
+
+    if (slot !== -1) {
+      const s = SLOTS[slot];
+      return { left: `${s.left}%`, width: `${s.width}%`, height: s.height, opacity: s.opacity, rotateY: s.rotateY, translateZ: s.translateZ, zIndex: s.zIndex, visible: true, isCenter: slot === 2 };
+    }
+    // Off-screen
+    const isRight = diff <= Math.ceil(total / 2);
+    return {
+      left: isRight ? '105%' : '-22%', width: '17%', height: 155,
+      opacity: 0, rotateY: isRight ? -50 : 50, translateZ: -120, zIndex: 0, visible: false, isCenter: false,
+    };
+  };
 
   return (
     <div
@@ -891,7 +994,6 @@ const ForYouShowcase = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="flex items-center" style={{ width: "100%", padding: "0 8px" }}>
-        {/* Left arrow */}
         <button
           onClick={prev}
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
@@ -904,46 +1006,32 @@ const ForYouShowcase = () => {
           <ChevronLeft size={18} />
         </button>
 
-        {/* Cards container — 3D perspective */}
-        <div className="flex-1 flex items-center" style={{ gap: 12, padding: "0 16px", perspective: 1200 }}>
-          {visibleIndices.map((idx, slotPos) => {
-            const item = SHOWCASE_ITEMS[idx];
-            const isCenter = slotPos === 2;
-            const isMid = slotPos === 1 || slotPos === 3;
-            const cardHeight = isCenter ? 220 : isMid ? 185 : 155;
-            const cardScale = isCenter ? 1.08 : isMid ? 0.95 : 0.82;
-            const cardOpacity = isCenter ? 1 : isMid ? 0.78 : 0.55;
-            const rotateYValues = [35, 15, 0, -15, -35];
-            const translateZValues = [-80, -30, 40, -30, -80];
-            const zIndexValues = [1, 3, 5, 3, 1];
-
+        <div className="flex-1 relative" style={{ height: 240, margin: "0 16px", perspective: 1200 }}>
+          {SHOWCASE_ITEMS.map((item, idx) => {
+            const s = getItemStyle(idx);
             return (
               <div
-                key={slotPos}
-                className="flex-1 overflow-hidden rounded-[14px] cursor-pointer relative"
+                key={idx}
+                className="absolute overflow-hidden rounded-[14px] cursor-pointer"
                 style={{
-                  height: cardHeight,
-                  transform: `rotateY(${rotateYValues[slotPos]}deg) translateZ(${translateZValues[slotPos]}px) scale(${cardScale})`,
-                  opacity: cardOpacity,
+                  left: s.left,
+                  width: s.width,
+                  height: s.height,
+                  top: "50%",
+                  transform: `translateY(-50%) rotateY(${s.rotateY}deg) translateZ(${s.translateZ}px)`,
+                  opacity: s.opacity,
+                  zIndex: s.zIndex,
+                  pointerEvents: s.visible ? 'auto' : 'none',
                   transition: "all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)",
-                  zIndex: zIndexValues[slotPos],
                   transformStyle: "preserve-3d",
                 }}
               >
-                <img
-                  src={item.poster}
-                  alt={item.title}
-                  className="w-full h-full object-cover"
-                  draggable={false}
-                />
-                {isCenter && (
+                <img src={item.poster} alt={item.title} className="w-full h-full object-cover" draggable={false} />
+                {s.isCenter && (
                   <>
                     <div
                       className="absolute bottom-0 left-0 right-0"
-                      style={{
-                        background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
-                        padding: "20px 14px 14px",
-                      }}
+                      style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)", padding: "20px 14px 14px" }}
                     >
                       <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.9)", fontWeight: 600 }}>
                         {item.title}
@@ -951,32 +1039,14 @@ const ForYouShowcase = () => {
                     </div>
                     <div
                       className="absolute flex items-center justify-center transition-opacity duration-300"
-                      style={{
-                        bottom: 4,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        gap: 6,
-                        opacity: showDots ? 1 : 0,
-                        zIndex: 10,
-                      }}
+                      style={{ bottom: 4, left: "50%", transform: "translateX(-50%)", gap: 6, opacity: showDots ? 1 : 0, zIndex: 10 }}
                     >
                       {SHOWCASE_ITEMS.map((_, i) => (
                         <button
                           key={i}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setStartIndex(((i - 2) % total + total) % total);
-                            setJustSwitched(true);
-                            setTimeout(() => setJustSwitched(false), 2000);
-                          }}
+                          onClick={(e) => { e.stopPropagation(); setCenterIdx(i); setJustSwitched(true); setTimeout(() => setJustSwitched(false), 2000); }}
                           className="rounded-full transition-all duration-300"
-                          style={{
-                            width: 6,
-                            height: 6,
-                            background: visibleIndices[2] === i ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.3)",
-                            border: "none",
-                            cursor: "pointer",
-                          }}
+                          style={{ width: 6, height: 6, background: centerIdx === i ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.3)", border: "none", cursor: "pointer" }}
                         />
                       ))}
                     </div>
@@ -987,7 +1057,6 @@ const ForYouShowcase = () => {
           })}
         </div>
 
-        {/* Right arrow */}
         <button
           onClick={next}
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full

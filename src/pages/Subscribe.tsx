@@ -99,7 +99,7 @@ const Subscribe = () => {
                 color: "#71F0F6",
               }}
             >
-              The Road to 1 Million: Celebration Sale!
+              MovieFlow Epic Sale: Unlock Seedance 2.0 & Bonus Time!
             </span>
             <span
               style={{
@@ -110,7 +110,7 @@ const Subscribe = () => {
                 color: "#FFFFFF",
               }}
             >
-              We're approaching 1,000,000 creators. Lock in our biggest annual savings before we hit the milestone.
+              Level up: Upgrade to annual plans to unlock exclusive access to Seedance 2.0 (above Ultra Annual) and Kling 3.0 (above Pro Annual).
             </span>
             <span
               style={{
@@ -121,7 +121,7 @@ const Subscribe = () => {
                 color: "#FFFFFF",
               }}
             >
-              ⏳ Limited Time Offer. Deal ends when we reach 1M users.
+              ⏳ Claim your massive bonuses: Get +6 Free Ultra months with Creator 2-Year, +3 Free months with Ultra Annual, or +1 Free month with Pro Annual.
             </span>
           </div>
 
