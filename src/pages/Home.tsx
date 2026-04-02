@@ -361,21 +361,35 @@ const Home = () => {
                 <div
                   key={asset.id}
                   className="relative flex-shrink-0 rounded-lg overflow-hidden cursor-pointer group"
-                  style={{ width: 48, height: 48, border: referencedAssets.includes(asset.id) ? "2px solid #BA71F6" : "2px solid rgba(255,255,255,0.1)" }}
-                  onClick={() => {
-                    if (referencedAssets.includes(asset.id)) {
-                      handleRemoveReference(asset.id);
-                    } else {
-                      handleReferenceAsset(asset.id);
-                    }
-                  }}
+                  style={{ width: 48, height: 48, border: referencedAssets.includes(asset.id) ? "2px solid #71F0F6" : "2px solid rgba(255,255,255,0.1)" }}
+                  onClick={() => setPreviewAsset(asset)}
                 >
                   <img src={asset.thumbnail} alt={asset.name} className="w-full h-full object-cover" />
+                  {/* Default @ badge for referenced assets */}
                   {referencedAssets.includes(asset.id) && (
-                    <div className="absolute top-0 right-0 rounded-bl-md" style={{ background: "#BA71F6", padding: "1px 4px" }}>
-                      <span style={{ fontSize: 9, fontWeight: 700, color: "#fff" }}>@</span>
+                    <div className="absolute bottom-0 right-0 rounded-tl-md" style={{ background: "#71F0F6", padding: "1px 4px" }}>
+                      <span style={{ fontSize: 9, fontWeight: 700, color: "#000" }}>@</span>
                     </div>
                   )}
+                  {/* Hover overlay: delete (top-right) + @ (bottom-right) */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between items-end p-0.5">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeleteAsset(asset.id); }}
+                      className="flex items-center justify-center rounded-sm transition-opacity"
+                      style={{ width: 16, height: 16, background: "rgba(255,255,255,0.3)" }}
+                    >
+                      <X size={10} style={{ color: "#fff" }} />
+                    </button>
+                    {!referencedAssets.includes(asset.id) && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleReferenceAsset(asset.id); }}
+                        className="flex items-center justify-center rounded-sm transition-opacity"
+                        style={{ width: 16, height: 16, background: "#71F0F6" }}
+                      >
+                        <span style={{ fontSize: 9, fontWeight: 700, color: "#000" }}>@</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
               {uploadedAssets.length < 9 && (
@@ -406,99 +420,29 @@ const Home = () => {
                   WebkitBackdropFilter: "blur(12.6px)",
                 }}
               >
-                {/* Referenced assets tags */}
-                {referencedAssets.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 px-6 pt-3">
-                    {referencedAssets.map((assetId) => {
-                      const asset = uploadedAssets.find(a => a.id === assetId);
-                      if (!asset) return null;
-                      return (
-                        <div
-                          key={asset.id}
-                          className="flex items-center gap-1.5 rounded-full transition-all duration-200"
-                          style={{
-                            padding: "3px 8px 3px 3px",
-                            background: "rgba(186, 113, 246, 0.1)",
-                            border: "1px solid rgba(186, 113, 246, 0.25)",
-                          }}
-                        >
-                          <img src={asset.thumbnail} alt={asset.name} className="rounded-full" style={{ width: 20, height: 20, objectFit: "cover" }} />
-                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.8)" }}>{asset.name}</span>
-                          <span style={{ fontSize: 10, fontWeight: 700, color: "#BA71F6", padding: "0 3px", background: "rgba(186,113,246,0.15)", borderRadius: 4 }}>@</span>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleRemoveReference(asset.id); }}
-                            className="flex items-center justify-center hover:opacity-100 transition-opacity"
-                            style={{ opacity: 0.5, marginLeft: 2 }}
-                          >
-                            <X size={12} className="text-foreground" />
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Asset reference panel (@ trigger) */}
-                {showAssetPanel && uploadedAssets.length > 0 && (
-                  <div
-                    className="absolute left-6 right-6 z-50 rounded-2xl overflow-hidden"
-                    style={{
-                      top: -8,
-                      transform: "translateY(-100%)",
-                      background: "rgba(30, 32, 35, 0.95)",
-                      backdropFilter: "blur(20px)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                      animation: "assetPanelIn 0.2s ease-out",
-                    }}
-                  >
-                    <div style={{ padding: "12px 16px 8px" }}>
-                      <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)" }}>素材引用</span>
-                    </div>
-                    {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).map((asset) => (
-                      <button
+                {/* Textarea area with referenced thumbnails inline */}
+                <div className="flex flex-wrap items-center gap-1.5 px-6 pt-4">
+                  {/* Inline referenced asset thumbnails */}
+                  {referencedAssets.map((assetId) => {
+                    const asset = uploadedAssets.find(a => a.id === assetId);
+                    if (!asset) return null;
+                    return (
+                      <img
                         key={asset.id}
-                        onClick={() => handleReferenceAsset(asset.id)}
-                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[rgba(255,255,255,0.06)] transition-colors text-left"
-                      >
-                        <img src={asset.thumbnail} alt={asset.name} className="rounded-lg" style={{ width: 36, height: 36, objectFit: "cover", flexShrink: 0 }} />
-                        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, color: "rgba(255,255,255,0.85)" }}>{asset.name}</span>
-                      </button>
-                    ))}
-                    <div style={{ padding: "4px 16px 12px" }}>
-                      <button
-                        onClick={() => setShowAssetPanel(false)}
-                        className="w-full text-center py-2 rounded-lg hover:bg-[rgba(255,255,255,0.06)] transition-colors"
-                        style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.4)" }}
-                      >
-                        取消
-                      </button>
-                    </div>
-                  </div>
-                )}
+                        src={asset.thumbnail}
+                        alt={asset.name}
+                        className="rounded-md flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                        style={{ width: 28, height: 28, objectFit: "cover" }}
+                        onClick={() => handleRemoveReference(asset.id)}
+                      />
+                    );
+                  })}
+                </div>
 
-                <div className="flex items-start px-6 pt-4">
-                  {/* Upload button */}
-                  {!config.hideUpload && (
-                    <div
-                      onClick={handleUploadAsset}
-                      className="mr-3 flex h-[50px] w-10 flex-shrink-0 items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
-                      style={{
-                        background: "hsl(var(--foreground) / 0.05)",
-                        boxShadow:
-                          "inset 0px 0px 5.9px hsl(var(--foreground) / 0.25), inset 0px 5.9px 11.8px hsl(var(--primary) / 0.15), inset 0px 0.33px 0.39px hsl(var(--foreground) / 0.2), inset 0px 0px 0.73px hsl(var(--primary) / 0.12)",
-                        backdropFilter: "blur(10px)",
-                        borderRadius: 8,
-                        transform: "rotate(-5.76deg)",
-                      }}
-                    >
-                      <span className="text-2xl" style={{ color: "hsl(var(--foreground) / 0.37)" }}>+</span>
-                    </div>
-                  )}
-
-                  {/* Textarea */}
+                {/* Textarea — on next line, aligned with asset slots */}
+                <div className="px-6" style={{ paddingTop: referencedAssets.length > 0 ? 4 : 0 }}>
                   <div className="relative flex-1">
-                    {!inputText && (
+                    {!inputText && referencedAssets.length === 0 && (
                       <div className="absolute inset-0 pointer-events-none flex items-start" style={{ paddingTop: 8 }}>
                         <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "hsl(var(--foreground) / 0.4)" }}>
                           {config.placeholder}
@@ -509,6 +453,7 @@ const Home = () => {
                       ref={textareaRef}
                       value={inputText}
                       onChange={handleInputChange}
+                      onKeyDown={handleKeyDown}
                       className="w-full bg-transparent border-none outline-none resize-none text-foreground"
                       style={{
                         fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px",
@@ -518,6 +463,39 @@ const Home = () => {
                     />
                   </div>
                 </div>
+
+                {/* Asset reference panel (@ trigger) — below textarea */}
+                {showAssetPanel && uploadedAssets.length > 0 && (
+                  <div
+                    className="absolute z-50 rounded-xl overflow-hidden"
+                    style={{
+                      left: 24,
+                      top: "100%",
+                      marginTop: 8,
+                      background: "rgba(30, 32, 35, 0.95)",
+                      backdropFilter: "blur(20px)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                      animation: "assetPanelIn 0.2s ease-out",
+                      width: "auto",
+                      minWidth: 180,
+                    }}
+                  >
+                    <div style={{ padding: "10px 14px 6px" }}>
+                      <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.4)" }}>Asset Reference</span>
+                    </div>
+                    {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).map((asset) => (
+                      <button
+                        key={asset.id}
+                        onClick={() => handleReferenceAsset(asset.id)}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[rgba(255,255,255,0.06)] transition-colors text-left"
+                      >
+                        <img src={asset.thumbnail} alt={asset.name} className="rounded-md" style={{ width: 28, height: 28, objectFit: "cover", flexShrink: 0 }} />
+                        <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.85)", whiteSpace: "nowrap" }}>Image {asset.id}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Agent thinking indicator */}
                 {agentThinking && (
