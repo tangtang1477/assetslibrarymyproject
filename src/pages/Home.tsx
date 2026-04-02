@@ -931,22 +931,32 @@ const ForYouShowcase = () => {
           <ChevronLeft size={18} />
         </button>
 
-        {/* Cards container — flex with equal gap, 16px from arrows */}
-        <div className="flex-1 flex" style={{ gap: 12, padding: "0 16px" }}>
+        {/* Cards container — 3D perspective */}
+        <div className="flex-1 flex items-center" style={{ gap: 12, padding: "0 16px", perspective: 1200 }}>
           {visibleIndices.map((idx, slotPos) => {
             const item = SHOWCASE_ITEMS[idx];
             const isCenter = slotPos === 2;
+            const isMid = slotPos === 1 || slotPos === 3;
+            // 3-tier sizing
+            const cardHeight = isCenter ? 220 : isMid ? 200 : 180;
+            const cardScale = isCenter ? 1.08 : isMid ? 1.0 : 0.92;
+            const cardOpacity = isCenter ? 1 : isMid ? 0.85 : 0.65;
+            // 3D rotateY + translateZ
+            const rotateYValues = [35, 15, 0, -15, -35];
+            const translateZValues = [-80, -30, 40, -30, -80];
+            const zIndexValues = [1, 3, 5, 3, 1];
+
             return (
               <div
                 key={`${startIndex}-${slotPos}`}
                 className="flex-1 overflow-hidden rounded-[14px] cursor-pointer relative"
                 style={{
-                  height: isCenter ? 220 : 190,
-                  transform: isCenter ? "scale(1.04)" : "scale(0.96)",
-                  opacity: isCenter ? 1 : Math.abs(slotPos - 2) === 1 ? 0.85 : 0.65,
-                  transition: "all 0.5s cubic-bezier(0.33, 0, 0.2, 1)",
-                  zIndex: isCenter ? 5 : 1,
-                  alignSelf: "center",
+                  height: cardHeight,
+                  transform: `rotateY(${rotateYValues[slotPos]}deg) translateZ(${translateZValues[slotPos]}px) scale(${cardScale})`,
+                  opacity: cardOpacity,
+                  transition: "all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                  zIndex: zIndexValues[slotPos],
+                  transformStyle: "preserve-3d",
                 }}
               >
                 <img
@@ -955,19 +965,53 @@ const ForYouShowcase = () => {
                   className="w-full h-full object-cover"
                   draggable={false}
                 />
-                {/* Title overlay on center card */}
+                {/* Title overlay + dot indicators inside center card */}
                 {isCenter && (
-                  <div
-                    className="absolute bottom-0 left-0 right-0"
-                    style={{
-                      background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
-                      padding: "20px 14px 14px",
-                    }}
-                  >
-                    <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.9)", fontWeight: 600 }}>
-                      {item.title}
-                    </span>
-                  </div>
+                  <>
+                    <div
+                      className="absolute bottom-0 left-0 right-0"
+                      style={{
+                        background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
+                        padding: "20px 14px 14px",
+                      }}
+                    >
+                      <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.9)", fontWeight: 600 }}>
+                        {item.title}
+                      </span>
+                    </div>
+                    {/* Dot indicators inside center card */}
+                    <div
+                      className="absolute flex items-center justify-center transition-opacity duration-300"
+                      style={{
+                        bottom: 4,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        gap: 6,
+                        opacity: showDots ? 1 : 0,
+                        zIndex: 10,
+                      }}
+                    >
+                      {SHOWCASE_ITEMS.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setStartIndex(((i - 2) % total + total) % total);
+                            setJustSwitched(true);
+                            setTimeout(() => setJustSwitched(false), 2000);
+                          }}
+                          className="rounded-full transition-all duration-300"
+                          style={{
+                            width: 6,
+                            height: 6,
+                            background: visibleIndices[2] === i ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.3)",
+                            border: "none",
+                            cursor: "pointer",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </>
                 )}
               </div>
             );
@@ -986,31 +1030,6 @@ const ForYouShowcase = () => {
         >
           <ChevronRight size={18} />
         </button>
-      </div>
-
-      {/* Dot indicators — only visible on hover or after switching */}
-      <div
-        className="flex items-center justify-center transition-opacity duration-300"
-        style={{ marginTop: 12, gap: 6, opacity: showDots ? 1 : 0 }}
-      >
-        {SHOWCASE_ITEMS.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => {
-              setStartIndex(((i - 2) % total + total) % total);
-              setJustSwitched(true);
-              setTimeout(() => setJustSwitched(false), 2000);
-            }}
-            className="rounded-full transition-all duration-300"
-            style={{
-              width: 6,
-              height: 6,
-              background: visibleIndices[2] === i ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.3)",
-              border: "none",
-              cursor: "pointer",
-            }}
-          />
-        ))}
       </div>
     </div>
   );
