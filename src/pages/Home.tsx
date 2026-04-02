@@ -181,7 +181,6 @@ const Home = () => {
   const [selectedRatio, setSelectedRatio] = useState("16:9");
   const [activeQuickLink, setActiveQuickLink] = useState("all");
   const [showAnnouncement, setShowAnnouncement] = useState(true);
-  const [inputText, setInputText] = useState("");
   const [agentThinking, setAgentThinking] = useState(false);
   
   // Asset reference system
@@ -189,18 +188,18 @@ const Home = () => {
   const [referencedAssets, setReferencedAssets] = useState<number[]>([]);
   const [showAssetPanel, setShowAssetPanel] = useState(false);
   const [previewAsset, setPreviewAsset] = useState<{ id: number; name: string; thumbnail: string } | null>(null);
+  const [editorEmpty, setEditorEmpty] = useState(true);
   
   const [modelPillFlash, setModelPillFlash] = useState(false);
   const [quotaExhausted, setQuotaExhausted] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notifications, setNotifications] = useState<{ id: number; text: string; time: string }[]>([]);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const modelPillRef = useRef<HTMLButtonElement>(null);
-  const assetPanelRef = useRef<HTMLDivElement>(null);
-  const mirrorRef = useRef<HTMLSpanElement>(null);
-  const [atPosition, setAtPosition] = useState({ left: 0, top: 28 });
+  const savedRangeRef = useRef<Range | null>(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
 
   const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.standard;
 
