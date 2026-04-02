@@ -121,7 +121,7 @@ const Subscribe = () => {
                 color: "#FFFFFF",
               }}
             >
-              ⏳ Limited Time Offer. Deal ends when we reach 1M users.
+              ⏳ Claim your massive bonuses: Get +6 Free Ultra months with Creator 2-Year, +3 Free months with Ultra Annual, or +1 Free month with Pro Annual.
             </span>
           </div>
 

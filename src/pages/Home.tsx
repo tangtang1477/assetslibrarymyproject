@@ -937,31 +937,54 @@ const TopRightHeader = ({ onBellClick, notifCount }: { onBellClick: () => void; 
   );
 };
 
-/* ───── For‑You showcase – full-width, equal gap, manual nav, scale animation ───── */
+/* ───── For‑You showcase – container-based animation, cards move between slots ───── */
 const ForYouShowcase = () => {
-  const VISIBLE_COUNT = 5;
-  const [startIndex, setStartIndex] = useState(0);
+  const total = SHOWCASE_ITEMS.length;
+  const [centerIdx, setCenterIdx] = useState(2);
   const [isHovered, setIsHovered] = useState(false);
   const [justSwitched, setJustSwitched] = useState(false);
-  const total = SHOWCASE_ITEMS.length;
-
   const showDots = isHovered || justSwitched;
 
   const prev = () => {
-    setStartIndex((c) => ((c - 1) % total + total) % total);
+    setCenterIdx((c) => ((c - 1) + total) % total);
     setJustSwitched(true);
     setTimeout(() => setJustSwitched(false), 2000);
   };
   const next = () => {
-    setStartIndex((c) => (c + 1) % total);
+    setCenterIdx((c) => (c + 1) % total);
     setJustSwitched(true);
     setTimeout(() => setJustSwitched(false), 2000);
   };
 
-  // Get the 5 visible indices
-  const visibleIndices = Array.from({ length: VISIBLE_COUNT }, (_, i) =>
-    ((startIndex + i) % total + total) % total
-  );
+  // Slot configs: edge cards closer to mid, mid cards farther from center
+  const SLOTS: { left: number; width: number; height: number; opacity: number; rotateY: number; translateZ: number; zIndex: number }[] = [
+    { left: 0,    width: 17, height: 155, opacity: 0.55, rotateY: 35,  translateZ: -80, zIndex: 1 },
+    { left: 17.5, width: 19, height: 185, opacity: 0.78, rotateY: 15,  translateZ: -30, zIndex: 3 },
+    { left: 39,   width: 22, height: 220, opacity: 1,    rotateY: 0,   translateZ: 40,  zIndex: 5 },
+    { left: 63.5, width: 19, height: 185, opacity: 0.78, rotateY: -15, translateZ: -30, zIndex: 3 },
+    { left: 83,   width: 17, height: 155, opacity: 0.55, rotateY: -35, translateZ: -80, zIndex: 1 },
+  ];
+
+  const getItemStyle = (itemIdx: number) => {
+    const diff = ((itemIdx - centerIdx) % total + total) % total;
+    let slot = -1;
+    if (diff === 0) slot = 2;
+    else if (diff === 1) slot = 3;
+    else if (diff === 2) slot = 4;
+    else if (diff === total - 1) slot = 1;
+    else if (diff === total - 2) slot = 0;
+
+    if (slot !== -1) {
+      const s = SLOTS[slot];
+      return { left: `${s.left}%`, width: `${s.width}%`, height: s.height, opacity: s.opacity, rotateY: s.rotateY, translateZ: s.translateZ, zIndex: s.zIndex, visible: true, isCenter: slot === 2 };
+    }
+    // Off-screen
+    const isRight = diff <= Math.ceil(total / 2);
+    return {
+      left: isRight ? '105%' : '-22%', width: '17%', height: 155,
+      opacity: 0, rotateY: isRight ? -50 : 50, translateZ: -120, zIndex: 0, visible: false, isCenter: false,
+    };
+  };
 
   return (
     <div
@@ -971,7 +994,6 @@ const ForYouShowcase = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="flex items-center" style={{ width: "100%", padding: "0 8px" }}>
-        {/* Left arrow */}
         <button
           onClick={prev}
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full
@@ -984,46 +1006,32 @@ const ForYouShowcase = () => {
           <ChevronLeft size={18} />
         </button>
 
-        {/* Cards container — 3D perspective */}
-        <div className="flex-1 flex items-center" style={{ gap: 12, padding: "0 16px", perspective: 1200 }}>
-          {visibleIndices.map((idx, slotPos) => {
-            const item = SHOWCASE_ITEMS[idx];
-            const isCenter = slotPos === 2;
-            const isMid = slotPos === 1 || slotPos === 3;
-            const cardHeight = isCenter ? 220 : isMid ? 185 : 155;
-            const cardScale = isCenter ? 1.08 : isMid ? 0.95 : 0.82;
-            const cardOpacity = isCenter ? 1 : isMid ? 0.78 : 0.55;
-            const rotateYValues = [35, 15, 0, -15, -35];
-            const translateZValues = [-80, -30, 40, -30, -80];
-            const zIndexValues = [1, 3, 5, 3, 1];
-
+        <div className="flex-1 relative" style={{ height: 240, margin: "0 16px", perspective: 1200 }}>
+          {SHOWCASE_ITEMS.map((item, idx) => {
+            const s = getItemStyle(idx);
             return (
               <div
-                key={slotPos}
-                className="flex-1 overflow-hidden rounded-[14px] cursor-pointer relative"
+                key={idx}
+                className="absolute overflow-hidden rounded-[14px] cursor-pointer"
                 style={{
-                  height: cardHeight,
-                  transform: `rotateY(${rotateYValues[slotPos]}deg) translateZ(${translateZValues[slotPos]}px) scale(${cardScale})`,
-                  opacity: cardOpacity,
+                  left: s.left,
+                  width: s.width,
+                  height: s.height,
+                  top: "50%",
+                  transform: `translateY(-50%) rotateY(${s.rotateY}deg) translateZ(${s.translateZ}px)`,
+                  opacity: s.opacity,
+                  zIndex: s.zIndex,
+                  pointerEvents: s.visible ? 'auto' : 'none',
                   transition: "all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)",
-                  zIndex: zIndexValues[slotPos],
                   transformStyle: "preserve-3d",
                 }}
               >
-                <img
-                  src={item.poster}
-                  alt={item.title}
-                  className="w-full h-full object-cover"
-                  draggable={false}
-                />
-                {isCenter && (
+                <img src={item.poster} alt={item.title} className="w-full h-full object-cover" draggable={false} />
+                {s.isCenter && (
                   <>
                     <div
                       className="absolute bottom-0 left-0 right-0"
-                      style={{
-                        background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
-                        padding: "20px 14px 14px",
-                      }}
+                      style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)", padding: "20px 14px 14px" }}
                     >
                       <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.9)", fontWeight: 600 }}>
                         {item.title}
@@ -1031,32 +1039,14 @@ const ForYouShowcase = () => {
                     </div>
                     <div
                       className="absolute flex items-center justify-center transition-opacity duration-300"
-                      style={{
-                        bottom: 4,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        gap: 6,
-                        opacity: showDots ? 1 : 0,
-                        zIndex: 10,
-                      }}
+                      style={{ bottom: 4, left: "50%", transform: "translateX(-50%)", gap: 6, opacity: showDots ? 1 : 0, zIndex: 10 }}
                     >
                       {SHOWCASE_ITEMS.map((_, i) => (
                         <button
                           key={i}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setStartIndex(((i - 2) % total + total) % total);
-                            setJustSwitched(true);
-                            setTimeout(() => setJustSwitched(false), 2000);
-                          }}
+                          onClick={(e) => { e.stopPropagation(); setCenterIdx(i); setJustSwitched(true); setTimeout(() => setJustSwitched(false), 2000); }}
                           className="rounded-full transition-all duration-300"
-                          style={{
-                            width: 6,
-                            height: 6,
-                            background: visibleIndices[2] === i ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.3)",
-                            border: "none",
-                            cursor: "pointer",
-                          }}
+                          style={{ width: 6, height: 6, background: centerIdx === i ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.3)", border: "none", cursor: "pointer" }}
                         />
                       ))}
                     </div>
@@ -1067,7 +1057,6 @@ const ForYouShowcase = () => {
           })}
         </div>
 
-        {/* Right arrow */}
         <button
           onClick={next}
           className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full

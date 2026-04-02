@@ -121,18 +121,22 @@ const BuyCreditsModal = ({ onClose }: BuyCreditsModalProps) => {
         {/* Buy Now button */}
         <div style={{ padding: "20px 24px 24px" }}>
           <button
-            className="w-full flex items-center justify-center rounded-full font-bold transition-all hover:brightness-110 active:scale-[0.98]"
+            className="w-full flex items-center justify-center rounded-full font-bold transition-all duration-200"
             style={{
               height: 48,
-              background: "#000",
-              border: "1px solid rgba(255,255,255,0.12)",
+              background: "#71F0F6",
+              border: "none",
               fontFamily: "Arial, sans-serif",
               fontSize: 16,
-              color: "#fff",
+              color: "#000",
               gap: 8,
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "#8df4f9"; e.currentTarget.style.boxShadow = "0 0 20px rgba(113,240,246,0.4)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "#71F0F6"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "scale(1)"; }}
+            onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.97)"; }}
+            onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
           >
-            <Sparkles size={16} style={{ color: "#71F0F6" }} />
+            <Sparkles size={16} style={{ color: "#000" }} />
             Buy Now
           </button>
         </div>
