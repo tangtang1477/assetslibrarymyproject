@@ -1,68 +1,57 @@
-# 5项修改计划
+# 4项修改计划
 
-## 1. For You 轮播改造
+## 1. @ 下拉框层级 + 选中后交互修正 + 输入框自适应
 
-**当前问题**：5个视频gap不均匀、未铺满页面、小圆点是拉长形、默认自动轮播、无缩放滑动效果。
+**问题**：下拉框被 ForYou 遮挡；选中后 @ 符号残留；placeholder 和缩略图垂直错位；输入框高度固定。
 
-**改法** — `ForYouShowcase` 组件重写：
+**改法（`Home.tsx`）**：
 
-- 展示 5 个卡片，宽度铺满整个页面（减去左右箭头+16px间距），5个卡片之间 gap 相等
-- 首尾卡片距离左右箭头间距 16px
-- 删除 `setInterval` 自动轮播，仅点击左右箭头切换
-- 小圆点指示器改为：仅 hover 轮播区域或切换操作时显示（淡入淡出），所有圆点尺寸一致（6px圆形），当前位置圆点亮度更高（纯白），其他为半透明白
-- 点击箭头时做丝滑的缩小放大滑动动效（中心卡片放大、两侧卡片缩小，transition 0.5s cubic-bezier）
-- 存入记忆，锁定此行为
+- **z-index**：素材引用浮层 `z-[100]` → `z-[9999]`，确保最上层
+- **选中后逻辑**：`handleReferenceAsset` 中，选中素材后从 `inputText` 里移除末尾的 `@` 字符（`setInputText(prev => prev.replace(/@$/, ""))`）
+- **垂直居中**：Row 2 的 flex 容器加 `items-center`，引用缩略图和 placeholder/textarea 在同一行垂直居中对齐。检查 textarea 的 `lineHeight` 与缩略图 `height: 28px` 匹配
+- **输入框自适应高度**：去掉 textarea 固定 `height: 56`，改为 `minHeight: 28, height: "auto"`，textarea 用 `rows={1}` + JS 自动撑高。外层容器加 `maxHeight: 800, overflowY: "auto"` + `hide-scrollbar`
 
-## 2. 素材区移入输入框内部 + @ 交互修正
+## 2. 小圆点定位器移入中心卡片内部
 
-**当前问题**：素材区在输入框上方；@选中态有青色色块；placeholder和素材不在同一行；输入@不显示字符只显示下拉框；下拉框在上方且太大太透明。
+**问题**：圆点在轮播区域下方 `marginTop: 12` 位置。
 
 **改法**：
 
-- 素材位移到输入框内部第一行（`px-6 pt-4`区域），选中引用后（点击素材位右下角的@键和在placeholder后输入@下拉选择）会在下一行同一位置出现已引用素材缩略图
--  placeholder 和已引用素材缩略图在同一行内排列，这两者都在素材位的下一行
-- 点击素材右下角@后选中态：仅保留青色描边（`border: 2px solid #71F0F6`），去掉@键后面的青色色块（`background: "#71F0F6"` 的小块删除）
-- 输入@时：正确在输入框中显示@字符，同时在@字符下方弹出引用列表
-- 引用列表下拉框改造：出现在输入框内部@文字下方（而非输入框外），背景改为不透明深色（`rgba(20,20,22,0.98)`），z-index 提高，添加三态交互（normal / hover / active）
-- 在下拉框中点击素材也会在 placeholder 后出现该素材缩略图，键盘点击delete键就可以删除该素材
+- 将 dot 指示器从轮播容器下方移到中心卡片的 absolute 子元素内
+- `position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%)`
+- 移除外层 `marginTop: 12` 的 dot 容器
+- 存入记忆，以后无论如何不许修改这个小圆点定位器
 
-## 3. Make 按钮文案改为四角星 + "18/s"
+## 3. 卡片尺寸层级 — 首尾最小、二四中等、中心最大
 
-**当前问题**：`MakePill` 当前显示 "Make" + Sparkles icon。
+**问题**：当前只有 center vs non-center 两档（220 vs 190）。
 
-**改法**：
+**改法**：三档尺寸
 
-- 将 Make + Sparkles icon 放前面，后面添加文字`18/s`
-- 保持 `padding: 8px 16px`
+- `slotPos === 2`（中心）：height 220, scale 1.08
+- `slotPos === 1 || slotPos === 3`（二四）：height 200, scale 1.0
+- `slotPos === 0 || slotPos === 4`（首尾）：height 180, scale 0.92
+- opacity 也分三档：1 / 0.85 / 0.65
 
-## 4. Surprise → Seedance 2.0 文案替换
+## 4. 3D 透视 + 切换滑动效果
 
-**改法**：全局替换 `Home.tsx` 中所有 "Surprise" 文案：
-
-- `MODEL_OPTIONS[0].label`: "Surprise" → "Seedance 2.0"
-- 弹窗标题: "Meet Seedance 2.0 — The Most Powerful Video Model on MovieFlow"
-- 弹窗副标题： "MovieFlow now supports Seedance 2.0, with 50,000 free daily spots for 8s clip creation."
-- "Try Surprise" 按钮 → "Try Seedance 2.0"
-- `handleTrySurprise` 中 `setSelectedModel("surprise")` 保持不变（仅文案变）
-- `config.placeholder` 中 "Surprise" → "Seedance 2.0"
-
-## 5. 右上角消息通知
+**问题**：缺少 3D 立体感和丝滑切换。
 
 **改法**：
 
-- 添加状态 `showNotification`，点击 Make 按钮时设为 true
-- 通知面板出现在页面右上角（fixed定位，`top: 80px, right: 32px`），参考截图样式：
-  - 白色/浅色圆角卡片，标题 "Notification" + "New" 徽标
-  - 内容：Your video is in progress. We’ll notify you when it’s ready.
-  - 右上角有关闭按钮
-- 出现动效：从右侧丝滑滑入（`slideInRight` + `fadeIn`），200-300ms
-- 出现后固定在右上角，手动关闭
-- 点击右下角铃铛icon也会在icon右侧8px的位置出现一样的消息列表
+- 外层容器加 `perspective: 1200px`
+- 根据 slotPos 计算 `rotateY`：
+  - slot 0: `rotateY(35deg)` + `translateZ(-80px)`
+  - slot 1: `rotateY(15deg)` + `translateZ(-30px)`
+  - slot 2: `rotateY(0)` + `translateZ(40px)`（中心前凸）
+  - slot 3: `rotateY(-15deg)` + `translateZ(-30px)`
+  - slot 4: `rotateY(-35deg)` + `translateZ(-80px)`
+- transition: `all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)`
+- 切换时使用 `key={startIndex}` 保持动画连续性，不重新挂载
 
 ## 涉及文件
 
 
-| 文件                              | 操作                                                |
-| ------------------------------- | ------------------------------------------------- |
-| `src/pages/Home.tsx`            | 大改 — ForYou重写、素材区移入、Make文案、Surprise→Seedance、通知组件 |
-| `mem://design/for-you-carousel` | 新建 — 锁定 ForYou 行为规则                               |
+| 文件                   | 操作                                    |
+| -------------------- | ------------------------------------- |
+| `src/pages/Home.tsx` | ForYou 3D 透视改造、dot 移入卡片、@ 交互修正、输入框自适应 |
