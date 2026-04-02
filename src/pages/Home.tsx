@@ -199,6 +199,8 @@ const Home = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const modelPillRef = useRef<HTMLButtonElement>(null);
   const assetPanelRef = useRef<HTMLDivElement>(null);
+  const mirrorRef = useRef<HTMLSpanElement>(null);
+  const [atPosition, setAtPosition] = useState({ left: 0, top: 28 });
 
   const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.standard;
 
