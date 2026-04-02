@@ -1,114 +1,65 @@
-# 4项修改计划
+目标：只改你这次点名的4 处，其它区域不动。
 
-## 1. @ 下拉框修正 + 输入框滚动结构重组
+1. 输入框改成“图文混排的 prompt composer”
 
-**问题**：@ 下拉框被遮挡；位置固定不跟随 @ 字符；输入框整体滚动而非仅 prompt 部分滚动。
+- 现在的 `textarea + referencedAssets[]` 结构只能把素材缩略图固定渲染在一个位置，做不到“用户在任意位置输入 @，缩略图就插入到那个位置”。这一块需要从纯文本输入改成富文本/令牌化编辑区。
+- 在 `src/pages/Home.tsx` 中保留现有三段结构不变：
+  - 顶部素材位固定；
+  - 底部筛选项 + Make 固定；
+  - 只有中间 prompt 区滚动，`maxHeight: 1600px`，隐藏滚动条。
+- 中间 prompt 区改为 mixed-content 数据模型（text / asset-ref），不再用当前“整段文字 + 单独引用数组”的固定展示方式。
+- 用户在任意光标位置输入 `@` 时：
+  - `@` 本身先正常显示；
+  - 选中下拉素材后，删除这个 `@`；
+  - 在当前光标处插入对应的素材缩略图 token；
+  - 点击缩略图不取消引用。
+- 行内对齐统一重做：文字与缩略图按同一行基线对齐，统一 `line-height: 28px`，缩略图 token 用 inline-flex / baseline 对齐，避免现在的错位感。
+- 删除逻辑也改成“删除当前光标旁边的 token”，而不是现在这种只删最后一个引用。
 
-**改法（`src/pages/Home.tsx`）**：
+2. @ 下拉框改成“跟随光标的最上层浮层”
 
-### 下拉框跟随 @ 定位
+- 现在看不见的根因不只是 z-index，而是下拉框被渲染在中间 `overflow-y-auto` 区域里，已经被滚动容器裁切了。
+- 下拉框会从滚动层里移出来，改成挂在输入框外层或 portal 层，通过 caret / DOM Range 坐标定位到当前 `@` 的正下方，并且左边与 `@` 左对齐。
+- 保持深色不透明背景、内容宽度自适应、最高层级，不再被 For You 或输入区裁掉。
+- 只在当前光标仍处于 mention 上下文时显示；光标移走、选中素材、删除 `@` 后关闭。
 
-- 在 `handleInputChange` 中，当检测到 `@` 时，用 `textareaRef.current` 的 `selectionStart` 获取光标位置，结合 textarea 的位置计算 @ 字符的像素坐标
-- 简化方案：创建一个隐藏的 mirror `<span>` 元素，将 textarea 中 `@` 之前的文本放入其中，测量其宽度作为下拉框的 `left` 偏移
-- 下拉框 `position: absolute`，`top` 为当前行下方（约 `lineHeight + 4px`），`left` 与 @ 字符左对齐
-- `z-index: 99999` 确保不被任何元素遮挡
+3. 把订阅页的顶部三行文字的文案做修改，只修改文案内容，样式尺寸不修改。
+  The Road to 1 Million: Celebration Sale!修改为MovieFlow Epic Sale:Unlock Seedance 2.0 & Bonus Time!    
+  We're approaching 1,000,000 creators. Lock in our biggest annual savings before we hit the milestone.修改为Level up: Upgrade to annual plans to unlock exclusive access to Seedance 2.0 (above Ultra Annual) and Kling 3.0 (above Pro Annual).   
+  ⏳ Limited Time Offer. Deal ends when we reach 1M users. 修改为⏳ Claim your massive bonuses: Get +6 Free Ultra months with Creator 2-Year, +3 Free months with Ultra Annual, or +1 Free month with Pro Annual.
+4. For You 改成“卡片容器本身丝滑移动”，不是固定位置换内容
 
-### 输入框结构重组 — 固定顶部素材位和底部工具栏，中间 prompt 区可滚动
+- 现在的问题是槽位固定、内容直接替换，所以用户看到的是内容闪切，不是你要的“原来旁边那张卡真的滑到中心并放大”。
+- `src/pages/Home.tsx` 里的 `ForYouShowcase` 会改成：
+  - 5 张卡按真实卡片 key 渲染；
+  - 点击箭头后，已有卡片通过 transform / size / opacity / z-index 过渡到新槽位；
+  - 用户看到的是卡片容器移动和缩放，而不是中心容器里换图。
+- 三档尺寸继续拉开：
+  - 中心最大；
+  - 第 2 / 第 4 中等；
+  - 首尾最小；
+  - 最大卡尺寸保持不动。
+- 间距不再平均：第 2 与第 1、更第 4 与第 5 更近；第 2 / 第 4 与中心的距离相对更开。这里会改成显式 slot transform/translateX 控制，不再只靠 `flex gap`。
+- 保留 3D 透视和卡片内小圆点规则；修闪烁的关键是保持 DOM 复用，只让容器位置和尺寸动画，不做内容重挂载。
 
-- 外层容器去掉 `overflowY: auto`，改为 `display: flex; flexDirection: column`，`maxHeight: 1600px`
-- **顶部**（固定）：素材上传格子（Row 1），`flex-shrink: 0`
-- **中间**（可滚动）：引用缩略图 + textarea 区域，`flex: 1; overflowY: auto; hide-scrollbar`
-- **底部**（固定）：筛选项 + Make 按钮栏，改为 `position: relative`（从 `absolute bottom: 8` 改为 flex 布局底部），`flex-shrink: 0`
+4. Buy Credits 主按钮只改样式
 
-## 2. 弹窗的文案部分修改
+- `src/components/BuyCreditsModal.tsx`
+- `Buy Now` 改成主题色底色、白色文字。
+- 增加 3 态：
+  - default：主题色实底；
+  - hover：更亮、轻微发光；
+  - active：轻压下沉/缩放。
+- 不改积分档位、弹窗结构和文案。
 
-副标题：8s修改为15s
+涉及文件
 
-正文：for videos up to 1 minutes修改为 for making whole video
+- `src/pages/Home.tsx`：输入框 mixed-content 重构、@ 浮层重做、For You 容器动画重做
+- `src/components/BuyCreditsModal.tsx`：主按钮主题色 + 3态
+- `mem://design/for-you-carousel`：把旧的“equal gaps / 固定槽位换内容”约束更新为新的“容器位移动画 + 外侧更紧间距”锁定规则
 
-## 3. For You 轮播 — 尺寸梯度加大 + 间距统一 + 切换动效修复
+技术说明
 
-**问题**：中间尺寸和最小尺寸区别不明显；间距不一致；切换有闪烁。
-
-**改法（`src/pages/Home.tsx` — `ForYouShowcase`）**：
-
-### 尺寸梯度加大
-
-- 中心（slot 2）：`height: 220, scale: 1.08` — 不变
-- 中间（slot 1/3）：`height: 185, scale: 0.95`（原 200/1.0 → 185/0.95）
-- 首尾（slot 0/4）：`height: 155, scale: 0.82`（原 180/0.92 → 155/0.82）
-- opacity: `1 / 0.78 / 0.55`（原 0.85/0.65 → 差距加大）
-
-### 箭头距页面边缘更近
-
-- 去掉箭头外层 gap，箭头直接贴近页面左右（gap 改为 `padding: 0 8px`）
-
-### 修复切换闪烁
-
-- **关键**：去掉 `key={startIndex-slotPos}`，改为 `key={slotPos}`（固定 key），让 React 复用 DOM 节点而非重新挂载，这样 CSS transition 才能生效
-- 图片 src 的切换通过 `visibleIndices` 数据驱动，不触发 DOM 重建
-- 保持 `transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1)`
-
-### 间距统一
-
-- `gap: 12` 保持不变，但确保 `flex-1` 让 5 张卡片均分宽度
-
-## 4. 右上角功能区重组 + 积分详情 + 购买弹窗
-
-**问题**：左下角4个icon需要转移到右上角，需要积分详情下拉框和购买弹窗。
-
-### 删除 Sidebar 底部 icon
-
-- `src/components/Sidebar.tsx`：删除 `bottom-6` 的4个 icon（Subscribe、Profile、Notice、More）
-
-### 右上角布局重组（`TopRightHeader` 组件）
-
-从左到右排列：
-
-1. **Free Credit** — 礼物 icon + 文字，pill 样式（已有）无需改变
-2. **当前积分** — 四角星 icon + 数字 `427` + 下拉箭头 `ChevronUp/Down`，点击展开积分详情
-3. **通知** — 铃铛 icon（已有）
-4. **更多** — `iconMore` icon
-5. **Subscribe Now** — glass button（已有）
-6. **个人头像** — `iconProfile` icon，圆形
-
-### 积分详情下拉框（新组件 `CreditPanel`）
-
-参考图一，从积分按钮下方弹出：
-
-- **头部**：`Available Credits` + 大号数字 `427` + `Buy Credits` 按钮（右侧）
-- **分割线**
-- **Credit History** 标题
-- **列表项**：每项包含左侧（名称 + 日期 + 可选标签），右侧（正负积分，绿色正/红色负）
-  - 示例数据：Seedance2.0Fast -75, +68 Daily Free Credits 等
-- 样式：白色圆角卡片，`width: 380px`，`border-radius: 16px`，深色主题适配（暗色背景 `rgba(28,30,34,0.98)`）
-- 三态：点击箭头展开/收起，hover 列表项高亮
-
-### 购买积分弹窗（新组件 `BuyCreditsModal`）
-
-参考图二，居中弹窗：
-
-- 标题：`Buy Credits` + 右上角关闭 X
-- **3×3 网格**（实际 3行，前两行3个，第三行左侧1个输入框）：
-  - Row 1：100/$1, 500/$5, 1000/$10
-  - Row 2：2000/$20, 5000/$50, 10000/$100
-  - Row 3 左侧：Custom 输入框（用户自填数量）
-- 每个选项卡片：四角星 icon + 大号积分数 + 小号价格
-- 选中态：青色描边 + 浅青色背景（参考图二第一个选中的 500）
-- 三态交互：normal（浅灰背景）/ hover（轻微亮度提升）/ selected（青色描边+浅青bg）
-- 底部：全宽黑色 `Buy Now` 大按钮
-- 弹窗 `width: 520px`，`border-radius: 20px`，暗色背景
-
-### 交互链路
-
-- 点击积分区的箭头 → 展开/收起 `CreditPanel`
-- 在 `CreditPanel` 点击 `Buy Credits` → 打开 `BuyCreditsModal`
-- 在 `BuyCreditsModal` 选择档位 → 点击 Buy Now（模拟交互）
-
-## 涉及文件
-
-
-| 文件                           | 操作                                                    |
-| ---------------------------- | ----------------------------------------------------- |
-| `src/pages/Home.tsx`         | 大改 — 输入框结构重组、@ 定位、ForYou 修复、TopRightHeader 重组、积分/购买组件 |
-| `src/components/Sidebar.tsx` | 小改 — 删除底部4个 icon                                      |
+- 这次输入框不能再继续沿用 `textarea` 补丁方案，因为 `textarea` 无法把图片真正插入到用户输入的任意位置；如果继续修补，会反复出现“位置固定、对不齐、下拉框错位、被裁切”这些问题。
+- 最稳的方案是：中间 prompt 区改为富文本式编辑层，素材引用作为 inline token；下拉框根据当前 caret 坐标定位到 `@` 下方；For You 改为“稳定 key + 槽位 transform 变化”的动画模型。
+- 其余区域不动：顶部素材位、底部筛选项、Make 按钮、订阅页、Asset Library 锁定位置都不碰。
