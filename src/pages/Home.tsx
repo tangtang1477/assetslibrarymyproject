@@ -403,11 +403,12 @@ const Home = () => {
             {/* Input box */}
             <div className="mt-6 flex w-full justify-center">
               <div
-                className="relative w-[990px] rounded-[25px] hide-scrollbar"
+                className="relative w-[990px] rounded-[25px]"
                 style={{
                   minHeight: 159,
-                  maxHeight: 800,
-                  overflowY: "auto",
+                  maxHeight: 1600,
+                  display: "flex",
+                  flexDirection: "column",
                   background: "hsl(var(--background) / 0.05)",
                   boxShadow:
                     "inset 0px 0px 7.3px hsl(var(--foreground) / 0.25), inset 0px 7.3px 14.6px hsl(var(--foreground) / 0.15), inset 0px 0.4px 0.49px hsl(var(--foreground) / 0.2), inset 0px 0px 0.9px hsl(var(--foreground) / 0.12)",
@@ -415,8 +416,8 @@ const Home = () => {
                   WebkitBackdropFilter: "blur(12.6px)",
                 }}
               >
-                {/* Row 1: Asset upload slots INSIDE input box */}
-                <div className="flex items-center px-6 pt-4" style={{ gap: 10 }}>
+                {/* Top fixed: Asset upload slots */}
+                <div className="flex-shrink-0 flex items-center px-6 pt-4" style={{ gap: 10 }}>
                   {uploadedAssets.map((asset) => (
                     <div
                       key={asset.id}
