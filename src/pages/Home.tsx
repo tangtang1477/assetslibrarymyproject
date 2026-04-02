@@ -365,24 +365,7 @@ const Home = () => {
               ))}
             </div>
 
-            {/* Surprise unlocked banner */}
-            {surpriseBanner && (
-              <div
-                className="mt-4 w-[990px] rounded-xl px-5 py-3"
-                style={{
-                  background: "rgba(113,240,246,0.08)",
-                  border: "1px solid rgba(113,240,246,0.25)",
-                  animation: "fadeIn 0.3s ease",
-                }}
-              >
-                <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14, color: "#71F0F6", fontWeight: 700 }}>
-                  You've unlocked Surprise for today — create an 8s storyboard free.
-                </p>
-                <p style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "hsl(var(--foreground) / 0.6)", marginTop: 2 }}>
-                  Use text, images, video, and audio together, or type @ to reference assets.
-                </p>
-              </div>
-            )}
+            {/* (surprise banner removed) */}
 
             {/* Input box */}
             <div className="mt-6 flex w-full justify-center">
