@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ChevronDown, X, Check, Sparkles, Lock, Film, Zap } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, X, Check, Sparkles, Film, Zap, Plus } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import bannerBg from "@/assets/banner-bg.jpg";
 import project1 from "@/assets/project-1.jpg";
