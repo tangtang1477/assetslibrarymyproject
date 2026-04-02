@@ -907,7 +907,7 @@ const SectionHeader = ({ title }: { title: string }) => (
 
 /* ───── Reusable dropdown pill ───── */
 const OptionPillDropdown = ({
-  label, options, value, onChange, scrollable, narrow, highlightSelected,
+  icon, label, options, value, onChange, scrollable, narrow, highlightSelected,
 }: {
   icon?: string;
   label: string;
@@ -927,6 +927,7 @@ const OptionPillDropdown = ({
           className="flex h-[31px] items-center justify-center rounded-full transition-colors hover:bg-foreground/10"
           style={{ padding: narrow ? "0 12px" : "0 16px", border: "0.7px solid hsl(var(--foreground) / 0.25)", gap: 6 }}
         >
+          {icon && <img src={icon} alt="" style={{ width: 14, height: 14, opacity: 0.7 }} />}
           <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, lineHeight: "22px", color: "hsl(var(--foreground) / 0.8)" }}>
             {label}
           </span>
