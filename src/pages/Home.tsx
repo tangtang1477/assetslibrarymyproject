@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ChevronDown, X, Check, Sparkles, Film, Zap, Plus, Bell } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X, Check, Sparkles, Film, Zap, Plus, Bell } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import bannerBg from "@/assets/banner-bg.jpg";
 import project1 from "@/assets/project-1.jpg";
@@ -29,6 +29,10 @@ import iconNewBadge from "@/assets/icon-new-badge.svg";
 import iconGift from "@/assets/icon-gift.svg";
 import iconCredit from "@/assets/icon-credit.svg";
 import iconNotice from "@/assets/icon-notice.svg";
+import iconMore from "@/assets/icon-more.svg";
+import iconProfile from "@/assets/icon-profile.svg";
+import CreditPanel from "@/components/CreditPanel";
+import BuyCreditsModal from "@/components/BuyCreditsModal";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 /* ───── Quick‑link data ───── */
@@ -195,6 +199,8 @@ const Home = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const modelPillRef = useRef<HTMLButtonElement>(null);
   const assetPanelRef = useRef<HTMLDivElement>(null);
+  const mirrorRef = useRef<HTMLSpanElement>(null);
+  const [atPosition, setAtPosition] = useState({ left: 0, top: 28 });
 
   const config = MODEL_CONFIG[selectedModel] || MODEL_CONFIG.standard;
 
@@ -222,9 +228,20 @@ const Home = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
     setInputText(val);
-    // Show @ panel when user types @, but keep the @ character visible
     if (val.endsWith("@") && uploadedAssets.length > 0) {
       setShowAssetPanel(true);
+      requestAnimationFrame(() => {
+        if (mirrorRef.current && textareaRef.current) {
+          const atIdx = val.lastIndexOf("@");
+          const textBefore = val.substring(0, atIdx);
+          const lastLine = textBefore.split("\n").pop() || "";
+          mirrorRef.current.textContent = lastLine;
+          const left = Math.min(mirrorRef.current.offsetWidth, textareaRef.current.clientWidth - 200);
+          const linesBefore = (textBefore.match(/\n/g) || []).length;
+          const top = (linesBefore + 1) * 28 + 4;
+          setAtPosition({ left: Math.max(0, left), top });
+        }
+      });
     } else if (!val.includes("@")) {
       setShowAssetPanel(false);
     }
@@ -386,11 +403,12 @@ const Home = () => {
             {/* Input box */}
             <div className="mt-6 flex w-full justify-center">
               <div
-                className="relative w-[990px] rounded-[25px] hide-scrollbar"
+                className="relative w-[990px] rounded-[25px]"
                 style={{
                   minHeight: 159,
-                  maxHeight: 800,
-                  overflowY: "auto",
+                  maxHeight: 1600,
+                  display: "flex",
+                  flexDirection: "column",
                   background: "hsl(var(--background) / 0.05)",
                   boxShadow:
                     "inset 0px 0px 7.3px hsl(var(--foreground) / 0.25), inset 0px 7.3px 14.6px hsl(var(--foreground) / 0.15), inset 0px 0.4px 0.49px hsl(var(--foreground) / 0.2), inset 0px 0px 0.9px hsl(var(--foreground) / 0.12)",
@@ -398,8 +416,8 @@ const Home = () => {
                   WebkitBackdropFilter: "blur(12.6px)",
                 }}
               >
-                {/* Row 1: Asset upload slots INSIDE input box */}
-                <div className="flex items-center px-6 pt-4" style={{ gap: 10 }}>
+                {/* Top fixed: Asset upload slots */}
+                <div className="flex-shrink-0 flex items-center px-6 pt-4" style={{ gap: 10 }}>
                   {uploadedAssets.map((asset) => (
                     <div
                       key={asset.id}
@@ -450,148 +468,60 @@ const Home = () => {
                   )}
                 </div>
 
-                {/* Row 2: Referenced thumbnails + placeholder + textarea on same line */}
-                <div className="px-6 relative" style={{ paddingTop: 8 }}>
+                {/* Middle scrollable: prompt area */}
+                <div className="flex-1 overflow-y-auto hide-scrollbar relative px-6" style={{ paddingTop: 8 }}>
+                  <span ref={mirrorRef} aria-hidden="true" style={{ position: "absolute", visibility: "hidden", whiteSpace: "pre", fontFamily: "Arial, sans-serif", fontSize: 16, letterSpacing: "0.015em", lineHeight: "28px", pointerEvents: "none", top: 0, left: 0 }} />
                   <div className="flex items-center gap-1.5 flex-wrap" style={{ minHeight: 28 }}>
-                    {/* Inline referenced asset thumbnails */}
                     {referencedAssets.map((assetId) => {
                       const asset = uploadedAssets.find(a => a.id === assetId);
                       if (!asset) return null;
                       return (
-                        <img
-                          key={asset.id}
-                          src={asset.thumbnail}
-                          alt={asset.name}
-                          className="rounded-md flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                          style={{ width: 28, height: 28, objectFit: "cover" }}
-                          onClick={() => handleRemoveReference(asset.id)}
-                        />
+                        <img key={asset.id} src={asset.thumbnail} alt={asset.name} className="rounded-md flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity" style={{ width: 28, height: 28, objectFit: "cover" }} onClick={() => handleRemoveReference(asset.id)} />
                       );
                     })}
                     <div className="relative flex-1 min-w-[200px]">
                       {!inputText && referencedAssets.length === 0 && (
-                        <div className="absolute inset-0 pointer-events-none flex items-start" style={{ paddingTop: 0 }}>
-                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px", color: "hsl(var(--foreground) / 0.4)" }}>
-                            {config.placeholder}
-                          </span>
+                        <div className="absolute inset-0 pointer-events-none flex items-start">
+                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px", color: "hsl(var(--foreground) / 0.4)" }}>{config.placeholder}</span>
                         </div>
                       )}
-                      <textarea
-                        ref={textareaRef}
-                        value={inputText}
-                        onChange={(e) => {
-                          handleInputChange(e);
-                          // Auto-resize
-                          const el = e.target;
-                          el.style.height = "auto";
-                          el.style.height = el.scrollHeight + "px";
-                        }}
-                        onKeyDown={handleKeyDown}
-                        rows={1}
-                        className="w-full bg-transparent border-none outline-none resize-none text-foreground hide-scrollbar"
-                        style={{
-                          fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px",
-                          letterSpacing: "0.015em", minHeight: 28, height: "auto",
-                          color: "hsl(var(--foreground) / 0.9)",
-                          maxHeight: 400,
-                          overflowY: "auto",
-                        }}
-                      />
+                      <textarea ref={textareaRef} value={inputText} onChange={(e) => { handleInputChange(e); const el = e.target; el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; }} onKeyDown={handleKeyDown} rows={1} className="w-full bg-transparent border-none outline-none resize-none text-foreground hide-scrollbar" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px", letterSpacing: "0.015em", minHeight: 28, height: "auto", color: "hsl(var(--foreground) / 0.9)" }} />
                     </div>
                   </div>
-
-                  {/* Asset reference panel (@ trigger) — below @ text, inside input */}
                   {showAssetPanel && uploadedAssets.length > 0 && (
-                    <div
-                      ref={assetPanelRef}
-                      className="absolute z-[9999] rounded-xl overflow-hidden"
-                      style={{
-                        left: 24,
-                        top: 48,
-                        background: "rgba(20,20,22,0.98)",
-                        backdropFilter: "blur(20px)",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-                        animation: "assetPanelIn 0.2s ease-out",
-                        width: "auto",
-                        minWidth: 180,
-                      }}
-                    >
+                    <div ref={assetPanelRef} className="absolute rounded-xl overflow-hidden" style={{ left: atPosition.left + 24, top: atPosition.top + 8, zIndex: 99999, background: "rgba(20,20,22,0.98)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", animation: "assetPanelIn 0.2s ease-out", minWidth: 180 }}>
                       <div style={{ padding: "10px 14px 6px" }}>
                         <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.4)" }}>Asset Reference</span>
                       </div>
                       {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).map((asset) => (
-                        <button
-                          key={asset.id}
-                          onClick={() => handleReferenceAsset(asset.id)}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 transition-colors text-left"
-                          style={{ background: "transparent" }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
-                          onMouseDown={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.14)"; }}
-                          onMouseUp={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-                        >
+                        <button key={asset.id} onClick={() => handleReferenceAsset(asset.id)} className="w-full flex items-center gap-3 px-3 py-2.5 transition-colors text-left" style={{ background: "transparent" }} onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }} onMouseDown={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.14)"; }} onMouseUp={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}>
                           <img src={asset.thumbnail} alt={asset.name} className="rounded-md" style={{ width: 28, height: 28, objectFit: "cover", flexShrink: 0 }} />
                           <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.85)", whiteSpace: "nowrap" }}>Image {asset.id}</span>
                         </button>
                       ))}
                       {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).length === 0 && (
-                        <div style={{ padding: "8px 14px 12px" }}>
-                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>All assets referenced</span>
-                        </div>
+                        <div style={{ padding: "8px 14px 12px" }}><span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>All assets referenced</span></div>
                       )}
                     </div>
                   )}
                 </div>
-
-                {/* Agent thinking indicator */}
                 {agentThinking && (
-                  <div className="absolute left-6 right-6 top-16 flex items-center gap-2" style={{ zIndex: 30 }}>
+                  <div className="flex-shrink-0 px-6 flex items-center gap-2 py-2">
                     <div className="flex gap-1">
                       <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#71F0F6", animationDelay: "0ms" }} />
                       <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#71F0F6", animationDelay: "300ms" }} />
                       <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#71F0F6", animationDelay: "600ms" }} />
                     </div>
-                    <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "#71F0F6" }}>
-                      Agent is analyzing your script...
-                    </span>
+                    <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "#71F0F6" }}>Agent is analyzing your script...</span>
                   </div>
                 )}
-
-                {/* Input options bar */}
-                <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8, zIndex: 60 }}>
+                <div className="flex-shrink-0 flex items-center" style={{ padding: "8px 16px", gap: 8 }}>
                   <ModelPillDropdown ref={modelPillRef} value={selectedModel} onChange={setSelectedModel} flash={modelPillFlash} />
-                  <OptionPillDropdown
-                    icon={iconLanguage}
-                    label={LANGUAGE_OPTIONS.find(o => o.value === selectedLang)?.label || "EN"}
-                    options={LANGUAGE_OPTIONS}
-                    value={selectedLang}
-                    onChange={setSelectedLang}
-                    scrollable
-                    narrow
-                  />
-                  <OptionPillDropdown
-                    icon={iconEnhance}
-                    label={ENHANCE_OPTIONS.find(o => o.value === selectedEnhance)?.label || "Enhance on"}
-                    options={ENHANCE_OPTIONS}
-                    value={selectedEnhance}
-                    onChange={setSelectedEnhance}
-                    highlightSelected
-                  />
-                  <OptionPillDropdown
-                    icon={iconTime}
-                    label={config.timeOptions.find(o => o.value === selectedTime)?.label || config.timeOptions[0].label}
-                    options={config.timeOptions}
-                    value={selectedTime}
-                    onChange={setSelectedTime}
-                    narrow
-                  />
+                  <OptionPillDropdown icon={iconLanguage} label={LANGUAGE_OPTIONS.find(o => o.value === selectedLang)?.label || "EN"} options={LANGUAGE_OPTIONS} value={selectedLang} onChange={setSelectedLang} scrollable narrow />
+                  <OptionPillDropdown icon={iconEnhance} label={ENHANCE_OPTIONS.find(o => o.value === selectedEnhance)?.label || "Enhance on"} options={ENHANCE_OPTIONS} value={selectedEnhance} onChange={setSelectedEnhance} highlightSelected />
+                  <OptionPillDropdown icon={iconTime} label={config.timeOptions.find(o => o.value === selectedTime)?.label || config.timeOptions[0].label} options={config.timeOptions} value={selectedTime} onChange={setSelectedTime} narrow />
                   <RatioToggle value={selectedRatio} onChange={setSelectedRatio} />
-                  <MakePill
-                    ctaText={selectedModel === "kling" ? "Subscribe Now" : "Make"}
-                    onClick={handleCTA}
-                    showCredits={selectedModel !== "kling"}
-                  />
+                  <MakePill ctaText={selectedModel === "kling" ? "Subscribe Now" : "Make"} onClick={handleCTA} showCredits={selectedModel !== "kling"} />
                 </div>
               </div>
             </div>
@@ -858,31 +788,74 @@ const NotificationPanel = ({ notifications, onClose, style, animate }: {
 );
 
 /* ───── Top‑right header ───── */
-const TopRightHeader = ({ onBellClick, notifCount }: { onBellClick: () => void; notifCount: number }) => (
-  <div className="fixed right-0 top-0 z-50 flex items-center gap-4" style={{ padding: "24px 32px" }}>
-    <button className="flex items-center gap-2 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
-      <img src={iconGift} alt="gift" style={{ width: 18, height: 18 }} />
-      <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
-    </button>
-    <div className="flex items-center gap-1.5">
-      <img src={iconCredit} alt="credit" style={{ width: 16, height: 16 }} />
-      <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>0</span>
-    </div>
-    <button
-      onClick={onBellClick}
-      className="relative flex items-center justify-center rounded-full transition-all hover:bg-foreground/10"
-      style={{ width: 36, height: 36 }}
-    >
-      <img src={iconNotice} alt="notifications" style={{ width: 20, height: 20 }} />
-      {notifCount > 0 && (
-        <div className="absolute" style={{ top: 4, right: 4, width: 8, height: 8, borderRadius: 4, background: "#71F0F6" }} />
-      )}
-    </button>
-    <GlassButton style={{ width: 180, height: 40 }}>
-      Subscribe Now
-    </GlassButton>
-  </div>
-);
+const TopRightHeader = ({ onBellClick, notifCount }: { onBellClick: () => void; notifCount: number }) => {
+  const navigate = useNavigate();
+  const [showCreditPanel, setShowCreditPanel] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const credits = 427;
+
+  return (
+    <>
+      <div className="fixed right-0 top-0 z-50 flex items-center gap-4" style={{ padding: "24px 32px" }}>
+        {/* Free Credit */}
+        <button className="flex items-center gap-2 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
+          <img src={iconGift} alt="gift" style={{ width: 18, height: 18 }} />
+          <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
+        </button>
+
+        {/* Credits with dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowCreditPanel(!showCreditPanel)}
+            className="flex items-center gap-1.5 transition-all hover:opacity-80"
+          >
+            <img src={iconCredit} alt="credit" style={{ width: 16, height: 16 }} />
+            <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>{credits}</span>
+            {showCreditPanel
+              ? <ChevronUp size={14} style={{ color: "#71F0F6" }} />
+              : <ChevronDown size={14} style={{ color: "#71F0F6" }} />}
+          </button>
+          {showCreditPanel && (
+            <CreditPanel
+              credits={credits}
+              onBuyCredits={() => { setShowCreditPanel(false); setShowBuyModal(true); }}
+              onClose={() => setShowCreditPanel(false)}
+            />
+          )}
+        </div>
+
+        {/* Bell */}
+        <button
+          onClick={onBellClick}
+          className="relative flex items-center justify-center rounded-full transition-all hover:bg-foreground/10"
+          style={{ width: 36, height: 36 }}
+        >
+          <img src={iconNotice} alt="notifications" style={{ width: 20, height: 20 }} />
+          {notifCount > 0 && (
+            <div className="absolute" style={{ top: 4, right: 4, width: 8, height: 8, borderRadius: 4, background: "#71F0F6" }} />
+          )}
+        </button>
+
+        {/* More */}
+        <button className="flex items-center justify-center rounded-full transition-all hover:bg-foreground/10" style={{ width: 36, height: 36 }}>
+          <img src={iconMore} alt="more" style={{ width: 20, height: 20 }} />
+        </button>
+
+        {/* Subscribe Now */}
+        <GlassButton onClick={() => navigate("/subscribe")} style={{ width: 180, height: 40 }}>
+          Subscribe Now
+        </GlassButton>
+
+        {/* Profile */}
+        <button className="flex items-center justify-center rounded-full transition-all hover:bg-foreground/10 overflow-hidden" style={{ width: 36, height: 36, border: "2px solid rgba(255,255,255,0.15)" }}>
+          <img src={iconProfile} alt="profile" style={{ width: 20, height: 20 }} />
+        </button>
+      </div>
+
+      {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} />}
+    </>
+  );
+};
 
 /* ───── For‑You showcase – full-width, equal gap, manual nav, scale animation ───── */
 const ForYouShowcase = () => {
@@ -917,7 +890,7 @@ const ForYouShowcase = () => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex items-center" style={{ width: "100%", gap: 0 }}>
+      <div className="flex items-center" style={{ width: "100%", padding: "0 8px" }}>
         {/* Left arrow */}
         <button
           onClick={prev}
@@ -937,18 +910,16 @@ const ForYouShowcase = () => {
             const item = SHOWCASE_ITEMS[idx];
             const isCenter = slotPos === 2;
             const isMid = slotPos === 1 || slotPos === 3;
-            // 3-tier sizing
-            const cardHeight = isCenter ? 220 : isMid ? 200 : 180;
-            const cardScale = isCenter ? 1.08 : isMid ? 1.0 : 0.92;
-            const cardOpacity = isCenter ? 1 : isMid ? 0.85 : 0.65;
-            // 3D rotateY + translateZ
+            const cardHeight = isCenter ? 220 : isMid ? 185 : 155;
+            const cardScale = isCenter ? 1.08 : isMid ? 0.95 : 0.82;
+            const cardOpacity = isCenter ? 1 : isMid ? 0.78 : 0.55;
             const rotateYValues = [35, 15, 0, -15, -35];
             const translateZValues = [-80, -30, 40, -30, -80];
             const zIndexValues = [1, 3, 5, 3, 1];
 
             return (
               <div
-                key={`${startIndex}-${slotPos}`}
+                key={slotPos}
                 className="flex-1 overflow-hidden rounded-[14px] cursor-pointer relative"
                 style={{
                   height: cardHeight,
@@ -965,7 +936,6 @@ const ForYouShowcase = () => {
                   className="w-full h-full object-cover"
                   draggable={false}
                 />
-                {/* Title overlay + dot indicators inside center card */}
                 {isCenter && (
                   <>
                     <div
@@ -979,7 +949,6 @@ const ForYouShowcase = () => {
                         {item.title}
                       </span>
                     </div>
-                    {/* Dot indicators inside center card */}
                     <div
                       className="absolute flex items-center justify-center transition-opacity duration-300"
                       style={{
@@ -1354,7 +1323,7 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
     { text: "Use text, images, video, and audio together", tag: "UNLIMITED" },
     { text: "Edit, extend, or connect clips with AI", tag: "FREE" },
     { text: "Turn ideas into storyboards in seconds", tag: null },
-    { text: "Subscribe to unlock Seedance 2.0 for videos up to 1 minute", tag: "PRO" },
+    { text: "Subscribe to unlock Seedance 2.0 for making whole video", tag: "PRO" },
   ];
 
   const handlePrimaryClick = () => {
@@ -1447,7 +1416,7 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
           <p style={{ marginTop: 6, fontFamily: "Arial, sans-serif", fontSize: 15, lineHeight: "22px", color: "rgba(255,255,255,0.7)" }}>
             {quotaExhausted
               ? "Today's free spots are gone. Come back tomorrow or subscribe for longer access."
-              : "MovieFlow now supports Seedance 2.0, with 50,000 free daily spots for 8s clip creation."}
+              : "MovieFlow now supports Seedance 2.0, with 50,000 free daily spots for 15s clip creation."}
           </p>
 
           <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
