@@ -224,26 +224,36 @@ const Home = () => {
     }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setInputText(val);
-    if (val.endsWith("@") && uploadedAssets.length > 0) {
-      setShowAssetPanel(true);
-      requestAnimationFrame(() => {
-        if (mirrorRef.current && textareaRef.current) {
-          const atIdx = val.lastIndexOf("@");
-          const textBefore = val.substring(0, atIdx);
-          const lastLine = textBefore.split("\n").pop() || "";
-          mirrorRef.current.textContent = lastLine;
-          const left = Math.min(mirrorRef.current.offsetWidth, textareaRef.current.clientWidth - 200);
-          const linesBefore = (textBefore.match(/\n/g) || []).length;
-          const top = (linesBefore + 1) * 28 + 4;
-          setAtPosition({ left: Math.max(0, left), top });
-        }
-      });
-    } else if (!val.includes("@")) {
-      setShowAssetPanel(false);
+  const syncReferencedAssets = () => {
+    if (!editorRef.current) return;
+    const imgs = editorRef.current.querySelectorAll('img[data-asset-id]');
+    const currentIds = Array.from(imgs).map(img => Number((img as HTMLImageElement).dataset.assetId));
+    setReferencedAssets(currentIds);
+    const isEmpty = !editorRef.current.textContent?.trim() && !editorRef.current.querySelector('img');
+    setEditorEmpty(isEmpty);
+  };
+
+  const handleEditorInput = () => {
+    syncReferencedAssets();
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount || !editorRef.current) return;
+    const range = sel.getRangeAt(0);
+    const node = range.startContainer;
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent || '';
+      const offset = range.startOffset;
+      if (offset > 0 && text[offset - 1] === '@' && uploadedAssets.length > 0) {
+        const tempRange = document.createRange();
+        tempRange.setStart(node, offset - 1);
+        tempRange.setEnd(node, offset);
+        const rect = tempRange.getBoundingClientRect();
+        setDropdownPos({ top: rect.bottom + 4, left: rect.left });
+        savedRangeRef.current = range.cloneRange();
+        setShowAssetPanel(true);
+        return;
+      }
     }
+    setShowAssetPanel(false);
   };
 
   const handleUploadAsset = () => {
@@ -257,30 +267,71 @@ const Home = () => {
   };
 
   const handleReferenceAsset = (assetId: number) => {
-    if (!referencedAssets.includes(assetId)) {
-      setReferencedAssets(prev => [...prev, assetId]);
-    }
-    // Remove trailing @ from input text
-    setInputText(prev => prev.replace(/@$/, ""));
-    setShowAssetPanel(false);
-  };
+    const asset = uploadedAssets.find(a => a.id === assetId);
+    if (!asset || !editorRef.current) { setShowAssetPanel(false); return; }
 
-  const handleRemoveReference = (assetId: number) => {
-    setReferencedAssets(prev => prev.filter(id => id !== assetId));
+    // Restore saved selection
+    const sel = window.getSelection();
+    if (savedRangeRef.current && sel) {
+      sel.removeAllRanges();
+      sel.addRange(savedRangeRef.current);
+    }
+
+    const sel2 = window.getSelection();
+    if (sel2 && sel2.rangeCount) {
+      const range = sel2.getRangeAt(0);
+      const node = range.startContainer;
+      // Remove trailing @
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || '';
+        const offset = range.startOffset;
+        if (offset > 0 && text[offset - 1] === '@') {
+          node.textContent = text.slice(0, offset - 1) + text.slice(offset);
+          range.setStart(node, offset - 1);
+          range.collapse(true);
+        }
+      }
+      // Insert thumbnail
+      const img = document.createElement('img');
+      img.src = asset.thumbnail;
+      img.alt = asset.name;
+      img.dataset.assetId = String(asset.id);
+      img.style.cssText = 'width:28px;height:28px;object-fit:cover;border-radius:6px;display:inline-block;vertical-align:middle;margin:0 2px;cursor:default;user-select:none;';
+      img.contentEditable = 'false';
+      img.draggable = false;
+      range.insertNode(img);
+      range.setStartAfter(img);
+      range.collapse(true);
+      sel2.removeAllRanges();
+      sel2.addRange(range);
+    } else {
+      // No cursor, append
+      const img = document.createElement('img');
+      img.src = asset.thumbnail;
+      img.alt = asset.name;
+      img.dataset.assetId = String(asset.id);
+      img.style.cssText = 'width:28px;height:28px;object-fit:cover;border-radius:6px;display:inline-block;vertical-align:middle;margin:0 2px;cursor:default;user-select:none;';
+      img.contentEditable = 'false';
+      img.draggable = false;
+      editorRef.current.appendChild(img);
+    }
+
+    setShowAssetPanel(false);
+    savedRangeRef.current = null;
+    syncReferencedAssets();
+    editorRef.current.focus();
   };
 
   const handleDeleteAsset = (assetId: number) => {
     setUploadedAssets(prev => prev.filter(a => a.id !== assetId));
     setReferencedAssets(prev => prev.filter(id => id !== assetId));
+    if (editorRef.current) {
+      editorRef.current.querySelectorAll(`img[data-asset-id="${assetId}"]`).forEach(el => el.remove());
+    }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Delete" || e.key === "Backspace") {
-      if (!inputText && referencedAssets.length > 0) {
-        e.preventDefault();
-        setReferencedAssets(prev => prev.slice(0, -1));
-      }
-    }
+  const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') setShowAssetPanel(false);
   };
 
   const handleCTA = () => {
