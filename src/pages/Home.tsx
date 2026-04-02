@@ -183,6 +183,7 @@ const Home = () => {
   const [uploadedAssets, setUploadedAssets] = useState<{ id: number; name: string; thumbnail: string }[]>([]);
   const [referencedAssets, setReferencedAssets] = useState<number[]>([]);
   const [showAssetPanel, setShowAssetPanel] = useState(false);
+  const [previewAsset, setPreviewAsset] = useState<{ id: number; name: string; thumbnail: string } | null>(null);
   
   const [modelPillFlash, setModelPillFlash] = useState(false);
   const [quotaExhausted, setQuotaExhausted] = useState(false);
