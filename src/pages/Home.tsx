@@ -1174,7 +1174,7 @@ const GlassButton = forwardRef<
 GlassButton.displayName = "GlassButton";
 
 /* ───── Make pill button ───── */
-const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ctaIcon?: string; onClick?: () => void }) => (
+const MakePill = ({ ctaText = "Make", onClick }: { ctaText?: string; onClick?: () => void }) => (
   <button
     onClick={onClick}
     className="glass-btn-v2 ml-auto flex h-[29px] items-center justify-center px-[10px] focus-visible:outline-none"
@@ -1184,14 +1184,10 @@ const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ct
     }}
   >
     <span className="font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", position: "relative", zIndex: 2 }}>
-      {ctaIcon && <span className="mr-1">{ctaIcon}</span>}
       {ctaText}
     </span>
     <span className="ml-1" style={{ position: "relative", zIndex: 2 }}>
       <Sparkles size={10} style={{ color: "white" }} />
-    </span>
-    <span className="ml-1 font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", position: "relative", zIndex: 2 }}>
-      10/s
     </span>
   </button>
 );
