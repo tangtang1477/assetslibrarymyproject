@@ -977,7 +977,7 @@ const ForYouShowcase = () => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex items-center" style={{ width: "100%", gap: 0 }}>
+      <div className="flex items-center" style={{ width: "100%", padding: "0 8px" }}>
         {/* Left arrow */}
         <button
           onClick={prev}
@@ -997,18 +997,16 @@ const ForYouShowcase = () => {
             const item = SHOWCASE_ITEMS[idx];
             const isCenter = slotPos === 2;
             const isMid = slotPos === 1 || slotPos === 3;
-            // 3-tier sizing
-            const cardHeight = isCenter ? 220 : isMid ? 200 : 180;
-            const cardScale = isCenter ? 1.08 : isMid ? 1.0 : 0.92;
-            const cardOpacity = isCenter ? 1 : isMid ? 0.85 : 0.65;
-            // 3D rotateY + translateZ
+            const cardHeight = isCenter ? 220 : isMid ? 185 : 155;
+            const cardScale = isCenter ? 1.08 : isMid ? 0.95 : 0.82;
+            const cardOpacity = isCenter ? 1 : isMid ? 0.78 : 0.55;
             const rotateYValues = [35, 15, 0, -15, -35];
             const translateZValues = [-80, -30, 40, -30, -80];
             const zIndexValues = [1, 3, 5, 3, 1];
 
             return (
               <div
-                key={`${startIndex}-${slotPos}`}
+                key={slotPos}
                 className="flex-1 overflow-hidden rounded-[14px] cursor-pointer relative"
                 style={{
                   height: cardHeight,
@@ -1025,7 +1023,6 @@ const ForYouShowcase = () => {
                   className="w-full h-full object-cover"
                   draggable={false}
                 />
-                {/* Title overlay + dot indicators inside center card */}
                 {isCenter && (
                   <>
                     <div
@@ -1039,7 +1036,6 @@ const ForYouShowcase = () => {
                         {item.title}
                       </span>
                     </div>
-                    {/* Dot indicators inside center card */}
                     <div
                       className="absolute flex items-center justify-center transition-opacity duration-300"
                       style={{
