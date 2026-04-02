@@ -1193,6 +1193,7 @@ const MakePill = ({ ctaText = "Make", onClick }: { ctaText?: string; onClick?: (
 
 /* ───── Announcement Modal — Surprise Campaign ───── */
 const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExhausted, flyOut, flyTarget }: { onClose: () => void; onTrySurprise: () => void; quotaExhausted?: boolean; flyOut?: boolean; flyTarget?: { x: number; y: number } | null }) => {
+  const navigate = useNavigate();
   const [shaking, setShaking] = useState(false);
   const [localExhausted, setLocalExhausted] = useState(initialExhausted ?? false);
   const quotaExhausted = localExhausted;
