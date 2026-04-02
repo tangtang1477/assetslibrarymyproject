@@ -493,7 +493,7 @@ const Home = () => {
                   {showAssetPanel && uploadedAssets.length > 0 && (
                     <div
                       ref={assetPanelRef}
-                      className="absolute z-[100] rounded-xl overflow-hidden"
+                      className="absolute z-[9999] rounded-xl overflow-hidden"
                       style={{
                         left: 24,
                         top: 48,
