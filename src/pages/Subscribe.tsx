@@ -179,138 +179,135 @@ const Subscribe = () => {
               $0.01 per credit｜Instant delivery｜Never expires
             </span>
 
-            {/* Credit amount buttons */}
+            {/* Credit amount buttons + Custom + Buy — aligned in one column */}
             <div
-              className="absolute flex items-center"
+              className="absolute flex flex-col"
               style={{
                 right: 64,
                 top: 32,
                 gap: 16,
               }}
             >
-              {CREDIT_OPTIONS.map((opt) => (
+              <div className="flex items-center" style={{ gap: 16 }}>
+                {CREDIT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSelectedCredit(selectedCredit === opt.value ? null : opt.value)}
+                    className="flex items-center justify-center transition-all duration-150 hover:brightness-125 active:scale-95"
+                    style={{
+                      height: 38,
+                      padding: "8px 16px",
+                      background: selectedCredit === opt.value ? "rgba(113, 240, 246, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                      border: selectedCredit === opt.value ? "1px solid rgba(113, 240, 246, 0.4)" : "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: 8,
+                      fontFamily: "'DIN Alternate', Arial, sans-serif",
+                      fontWeight: 700,
+                      fontSize: 14,
+                      lineHeight: "22px",
+                      color: selectedCredit === opt.value ? "#71F0F6" : "#FFFFFF",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center" style={{ gap: 16 }}>
+                <div className="relative" style={{ width: 197, height: 38 }}>
+                  <input
+                    type="text"
+                    value={customAmount}
+                    onChange={(e) => setCustomAmount(e.target.value)}
+                    className="w-full h-full bg-transparent outline-none"
+                    style={{
+                      background: "rgba(255, 255, 255, 0.05)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: 8,
+                      padding: "0 16px",
+                      fontFamily: "'SF Pro', Arial, sans-serif",
+                      fontWeight: 400,
+                      fontSize: 14,
+                      lineHeight: "22px",
+                      color: "#FFFFFF",
+                    }}
+                    placeholder="Custom Amount"
+                  />
+                </div>
                 <button
-                  key={opt.value}
-                  onClick={() => setSelectedCredit(selectedCredit === opt.value ? null : opt.value)}
-                  className="flex items-center justify-center transition-all duration-150 hover:brightness-125 active:scale-95"
+                  className="flex items-center justify-center transition-all duration-150 hover:brightness-110 active:scale-95"
                   style={{
+                    width: 89,
                     height: 38,
-                    padding: "8px 16px",
-                    background: selectedCredit === opt.value ? "rgba(113, 240, 246, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                    border: selectedCredit === opt.value ? "1px solid rgba(113, 240, 246, 0.4)" : "1px solid rgba(255, 255, 255, 0.1)",
+                    padding: "8px 32px",
+                    background: "#71F0F6",
+                    border: "1px solid rgba(113, 240, 246, 0.2)",
                     borderRadius: 8,
-                    fontFamily: "'DIN Alternate', Arial, sans-serif",
-                    fontWeight: 700,
-                    fontSize: 14,
-                    lineHeight: "22px",
-                    color: selectedCredit === opt.value ? "#71F0F6" : "#FFFFFF",
-                  }}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Custom + Buy */}
-            <div
-              className="absolute flex items-center"
-              style={{
-                right: 64,
-                top: 88,
-                gap: 16,
-              }}
-            >
-              <div className="relative" style={{ width: 197, height: 38 }}>
-                <input
-                  type="text"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                  className="w-full h-full bg-transparent outline-none"
-                  style={{
-                    background: "rgba(255, 255, 255, 0.05)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    borderRadius: 8,
-                    padding: "0 16px",
                     fontFamily: "'SF Pro', Arial, sans-serif",
                     fontWeight: 400,
                     fontSize: 14,
                     lineHeight: "22px",
-                    color: "#FFFFFF",
+                    color: "#000000",
+                    textShadow: "0px 0px 2.5px rgba(0, 0, 0, 0.15)",
                   }}
-                  placeholder="Custom Amount"
-                />
+                >
+                  Buy
+                </button>
               </div>
-              <button
-                className="flex items-center justify-center transition-all duration-150 hover:brightness-110 active:scale-95"
-                style={{
-                  width: 89,
-                  height: 38,
-                  padding: "8px 32px",
-                  background: "#71F0F6",
-                  border: "1px solid rgba(113, 240, 246, 0.2)",
-                  borderRadius: 8,
-                  fontFamily: "'SF Pro', Arial, sans-serif",
-                  fontWeight: 400,
-                  fontSize: 14,
-                  lineHeight: "22px",
-                  color: "#000000",
-                  textShadow: "0px 0px 2.5px rgba(0, 0, 0, 0.15)",
-                }}
-              >
-                Buy
-              </button>
             </div>
           </div>
 
           {/* Period toggle */}
           <div className="flex justify-center" style={{ marginTop: 48 }}>
             <div
-              className="flex items-center"
+              className="relative flex items-center"
               style={{
-                padding: "4px 4px 4px 20px",
-                gap: 16,
+                padding: 4,
+                gap: 0,
                 background: "#000000",
                 border: "1px solid rgba(255, 255, 255, 0.2)",
                 borderRadius: 100,
                 height: 46,
+                width: 172,
               }}
             >
+              {/* Sliding white pill */}
+              <div
+                className="absolute"
+                style={{
+                  width: period === "monthly" ? 78 : 78,
+                  height: 38,
+                  top: 4,
+                  left: period === "monthly" ? 4 : 90,
+                  background: "#FFFFFF",
+                  borderRadius: 100,
+                  transition: "left 0.3s ease",
+                }}
+              />
               <button
                 onClick={() => setPeriod("monthly")}
-                className="transition-all"
+                className="relative z-10 flex items-center justify-center transition-colors"
                 style={{
                   fontFamily: "'SF Pro', Arial, sans-serif",
                   fontWeight: 400,
                   fontSize: 14,
                   lineHeight: "22px",
                   color: period === "monthly" ? "#000" : "#FFFFFF",
-                  background: period === "monthly" ? "#FFFFFF" : "transparent",
-                  borderRadius: 100,
-                  padding: period === "monthly" ? "8px 16px" : "0",
-                  height: period === "monthly" ? 38 : "auto",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  width: 86,
+                  height: 38,
                 }}
               >
                 Monthly
               </button>
               <button
                 onClick={() => setPeriod("annual")}
-                className="transition-all"
+                className="relative z-10 flex items-center justify-center transition-colors"
                 style={{
                   fontFamily: "'SF Pro', Arial, sans-serif",
                   fontWeight: 400,
                   fontSize: 14,
                   lineHeight: "22px",
                   color: period === "annual" ? "#000" : "#FFFFFF",
-                  background: period === "annual" ? "#FFFFFF" : "transparent",
-                  borderRadius: 100,
-                  padding: "8px 16px",
+                  width: 78,
                   height: 38,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
                 }}
               >
                 Annual
@@ -359,32 +356,6 @@ const Subscribe = () => {
               borderRadius: 17.68,
             }}
           >
-            {/* Decorative accent bars behind cards 3 & 4 */}
-            <div
-              className="absolute"
-              style={{
-                width: 292.66,
-                height: 532.28,
-                left: 656.06,
-                top: -27.41,
-                background: "#71F0F6",
-                borderRadius: 13.26,
-                zIndex: 0,
-              }}
-            />
-            <div
-              className="absolute"
-              style={{
-                width: 292.66,
-                height: 532.28,
-                left: 987.63,
-                top: -27.41,
-                background: "#BA71F6",
-                borderRadius: 13.26,
-                zIndex: 0,
-              }}
-            />
-
             {/* Cards row */}
             <div
               className="absolute"
@@ -396,6 +367,31 @@ const Subscribe = () => {
                 transform: "translateX(-50%)",
               }}
             >
+              {/* Decorative accent bars behind cards 3 & 4 */}
+              <div
+                className="absolute"
+                style={{
+                  width: 292.66,
+                  height: 532.28,
+                  left: 663.14 + (278.52 - 292.66) / 2,
+                  top: -27.41,
+                  background: "#71F0F6",
+                  borderRadius: 13.26,
+                  zIndex: 0,
+                }}
+              />
+              <div
+                className="absolute"
+                style={{
+                  width: 292.66,
+                  height: 532.28,
+                  left: 994.7 + (278.52 - 292.66) / 2,
+                  top: -27.41,
+                  background: "#BA71F6",
+                  borderRadius: 13.26,
+                  zIndex: 0,
+                }}
+              />
               {TIERS.map((tier, i) => {
                 const isSelected = selectedTier === i;
                 const isHovered = hoveredTier === i;
