@@ -709,6 +709,7 @@ const Home = () => {
           onTrySurprise={handleTrySurprise}
           quotaExhausted={quotaExhausted}
           flyOut={popupFlyOut}
+          flyTarget={flyTarget}
         />
       )}
     </div>
