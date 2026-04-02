@@ -450,7 +450,7 @@ const Home = () => {
 
                 {/* Row 2: Referenced thumbnails + placeholder + textarea on same line */}
                 <div className="px-6 relative" style={{ paddingTop: 8 }}>
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                  <div className="flex items-center gap-1.5 flex-wrap" style={{ minHeight: 28 }}>
                     {/* Inline referenced asset thumbnails */}
                     {referencedAssets.map((assetId) => {
                       const asset = uploadedAssets.find(a => a.id === assetId);
