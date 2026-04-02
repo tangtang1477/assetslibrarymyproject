@@ -468,148 +468,60 @@ const Home = () => {
                   )}
                 </div>
 
-                {/* Row 2: Referenced thumbnails + placeholder + textarea on same line */}
-                <div className="px-6 relative" style={{ paddingTop: 8 }}>
+                {/* Middle scrollable: prompt area */}
+                <div className="flex-1 overflow-y-auto hide-scrollbar relative px-6" style={{ paddingTop: 8 }}>
+                  <span ref={mirrorRef} aria-hidden="true" style={{ position: "absolute", visibility: "hidden", whiteSpace: "pre", fontFamily: "Arial, sans-serif", fontSize: 16, letterSpacing: "0.015em", lineHeight: "28px", pointerEvents: "none", top: 0, left: 0 }} />
                   <div className="flex items-center gap-1.5 flex-wrap" style={{ minHeight: 28 }}>
-                    {/* Inline referenced asset thumbnails */}
                     {referencedAssets.map((assetId) => {
                       const asset = uploadedAssets.find(a => a.id === assetId);
                       if (!asset) return null;
                       return (
-                        <img
-                          key={asset.id}
-                          src={asset.thumbnail}
-                          alt={asset.name}
-                          className="rounded-md flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                          style={{ width: 28, height: 28, objectFit: "cover" }}
-                          onClick={() => handleRemoveReference(asset.id)}
-                        />
+                        <img key={asset.id} src={asset.thumbnail} alt={asset.name} className="rounded-md flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity" style={{ width: 28, height: 28, objectFit: "cover" }} onClick={() => handleRemoveReference(asset.id)} />
                       );
                     })}
                     <div className="relative flex-1 min-w-[200px]">
                       {!inputText && referencedAssets.length === 0 && (
-                        <div className="absolute inset-0 pointer-events-none flex items-start" style={{ paddingTop: 0 }}>
-                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px", color: "hsl(var(--foreground) / 0.4)" }}>
-                            {config.placeholder}
-                          </span>
+                        <div className="absolute inset-0 pointer-events-none flex items-start">
+                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px", color: "hsl(var(--foreground) / 0.4)" }}>{config.placeholder}</span>
                         </div>
                       )}
-                      <textarea
-                        ref={textareaRef}
-                        value={inputText}
-                        onChange={(e) => {
-                          handleInputChange(e);
-                          // Auto-resize
-                          const el = e.target;
-                          el.style.height = "auto";
-                          el.style.height = el.scrollHeight + "px";
-                        }}
-                        onKeyDown={handleKeyDown}
-                        rows={1}
-                        className="w-full bg-transparent border-none outline-none resize-none text-foreground hide-scrollbar"
-                        style={{
-                          fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px",
-                          letterSpacing: "0.015em", minHeight: 28, height: "auto",
-                          color: "hsl(var(--foreground) / 0.9)",
-                          maxHeight: 400,
-                          overflowY: "auto",
-                        }}
-                      />
+                      <textarea ref={textareaRef} value={inputText} onChange={(e) => { handleInputChange(e); const el = e.target; el.style.height = "auto"; el.style.height = el.scrollHeight + "px"; }} onKeyDown={handleKeyDown} rows={1} className="w-full bg-transparent border-none outline-none resize-none text-foreground hide-scrollbar" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "28px", letterSpacing: "0.015em", minHeight: 28, height: "auto", color: "hsl(var(--foreground) / 0.9)" }} />
                     </div>
                   </div>
-
-                  {/* Asset reference panel (@ trigger) — below @ text, inside input */}
                   {showAssetPanel && uploadedAssets.length > 0 && (
-                    <div
-                      ref={assetPanelRef}
-                      className="absolute z-[9999] rounded-xl overflow-hidden"
-                      style={{
-                        left: 24,
-                        top: 48,
-                        background: "rgba(20,20,22,0.98)",
-                        backdropFilter: "blur(20px)",
-                        border: "1px solid rgba(255,255,255,0.12)",
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-                        animation: "assetPanelIn 0.2s ease-out",
-                        width: "auto",
-                        minWidth: 180,
-                      }}
-                    >
+                    <div ref={assetPanelRef} className="absolute rounded-xl overflow-hidden" style={{ left: atPosition.left + 24, top: atPosition.top + 8, zIndex: 99999, background: "rgba(20,20,22,0.98)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", animation: "assetPanelIn 0.2s ease-out", minWidth: 180 }}>
                       <div style={{ padding: "10px 14px 6px" }}>
                         <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.4)" }}>Asset Reference</span>
                       </div>
                       {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).map((asset) => (
-                        <button
-                          key={asset.id}
-                          onClick={() => handleReferenceAsset(asset.id)}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 transition-colors text-left"
-                          style={{ background: "transparent" }}
-                          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
-                          onMouseDown={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.14)"; }}
-                          onMouseUp={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-                        >
+                        <button key={asset.id} onClick={() => handleReferenceAsset(asset.id)} className="w-full flex items-center gap-3 px-3 py-2.5 transition-colors text-left" style={{ background: "transparent" }} onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }} onMouseDown={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.14)"; }} onMouseUp={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}>
                           <img src={asset.thumbnail} alt={asset.name} className="rounded-md" style={{ width: 28, height: 28, objectFit: "cover", flexShrink: 0 }} />
                           <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.85)", whiteSpace: "nowrap" }}>Image {asset.id}</span>
                         </button>
                       ))}
                       {uploadedAssets.filter(a => !referencedAssets.includes(a.id)).length === 0 && (
-                        <div style={{ padding: "8px 14px 12px" }}>
-                          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>All assets referenced</span>
-                        </div>
+                        <div style={{ padding: "8px 14px 12px" }}><span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)" }}>All assets referenced</span></div>
                       )}
                     </div>
                   )}
                 </div>
-
-                {/* Agent thinking indicator */}
                 {agentThinking && (
-                  <div className="absolute left-6 right-6 top-16 flex items-center gap-2" style={{ zIndex: 30 }}>
+                  <div className="flex-shrink-0 px-6 flex items-center gap-2 py-2">
                     <div className="flex gap-1">
                       <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#71F0F6", animationDelay: "0ms" }} />
                       <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#71F0F6", animationDelay: "300ms" }} />
                       <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#71F0F6", animationDelay: "600ms" }} />
                     </div>
-                    <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "#71F0F6" }}>
-                      Agent is analyzing your script...
-                    </span>
+                    <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "#71F0F6" }}>Agent is analyzing your script...</span>
                   </div>
                 )}
-
-                {/* Input options bar */}
-                <div className="absolute left-4 right-4 flex items-center" style={{ bottom: 8, gap: 8, zIndex: 60 }}>
+                <div className="flex-shrink-0 flex items-center" style={{ padding: "8px 16px", gap: 8 }}>
                   <ModelPillDropdown ref={modelPillRef} value={selectedModel} onChange={setSelectedModel} flash={modelPillFlash} />
-                  <OptionPillDropdown
-                    icon={iconLanguage}
-                    label={LANGUAGE_OPTIONS.find(o => o.value === selectedLang)?.label || "EN"}
-                    options={LANGUAGE_OPTIONS}
-                    value={selectedLang}
-                    onChange={setSelectedLang}
-                    scrollable
-                    narrow
-                  />
-                  <OptionPillDropdown
-                    icon={iconEnhance}
-                    label={ENHANCE_OPTIONS.find(o => o.value === selectedEnhance)?.label || "Enhance on"}
-                    options={ENHANCE_OPTIONS}
-                    value={selectedEnhance}
-                    onChange={setSelectedEnhance}
-                    highlightSelected
-                  />
-                  <OptionPillDropdown
-                    icon={iconTime}
-                    label={config.timeOptions.find(o => o.value === selectedTime)?.label || config.timeOptions[0].label}
-                    options={config.timeOptions}
-                    value={selectedTime}
-                    onChange={setSelectedTime}
-                    narrow
-                  />
+                  <OptionPillDropdown icon={iconLanguage} label={LANGUAGE_OPTIONS.find(o => o.value === selectedLang)?.label || "EN"} options={LANGUAGE_OPTIONS} value={selectedLang} onChange={setSelectedLang} scrollable narrow />
+                  <OptionPillDropdown icon={iconEnhance} label={ENHANCE_OPTIONS.find(o => o.value === selectedEnhance)?.label || "Enhance on"} options={ENHANCE_OPTIONS} value={selectedEnhance} onChange={setSelectedEnhance} highlightSelected />
+                  <OptionPillDropdown icon={iconTime} label={config.timeOptions.find(o => o.value === selectedTime)?.label || config.timeOptions[0].label} options={config.timeOptions} value={selectedTime} onChange={setSelectedTime} narrow />
                   <RatioToggle value={selectedRatio} onChange={setSelectedRatio} />
-                  <MakePill
-                    ctaText={selectedModel === "kling" ? "Subscribe Now" : "Make"}
-                    onClick={handleCTA}
-                    showCredits={selectedModel !== "kling"}
-                  />
+                  <MakePill ctaText={selectedModel === "kling" ? "Subscribe Now" : "Make"} onClick={handleCTA} showCredits={selectedModel !== "kling"} />
                 </div>
               </div>
             </div>
