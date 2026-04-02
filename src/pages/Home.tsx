@@ -708,6 +708,31 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Asset Preview Modal */}
+      {previewAsset && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.7)" }}
+          onClick={() => setPreviewAsset(null)}
+        >
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={previewAsset.thumbnail}
+              alt={previewAsset.name}
+              className="rounded-xl"
+              style={{ maxWidth: 500, maxHeight: 500, objectFit: "contain" }}
+            />
+            <button
+              onClick={() => setPreviewAsset(null)}
+              className="absolute flex items-center justify-center rounded-full transition-opacity hover:opacity-100"
+              style={{ top: -12, right: -12, width: 28, height: 28, background: "rgba(255,255,255,0.2)", opacity: 0.7 }}
+            >
+              <X size={14} style={{ color: "#fff" }} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Announcement Modal */}
       {showAnnouncement && (
         <AnnouncementModal
