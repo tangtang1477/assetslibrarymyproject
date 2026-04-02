@@ -1181,10 +1181,11 @@ const MakePill = ({ ctaText = "Make", ctaIcon, onClick }: { ctaText?: string; ct
 );
 
 /* ───── Announcement Modal — Surprise Campaign ───── */
-const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExhausted, flyOut }: { onClose: () => void; onTrySurprise: () => void; quotaExhausted?: boolean; flyOut?: boolean }) => {
+const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExhausted, flyOut, flyTarget }: { onClose: () => void; onTrySurprise: () => void; quotaExhausted?: boolean; flyOut?: boolean; flyTarget?: { x: number; y: number } | null }) => {
   const [shaking, setShaking] = useState(false);
   const [localExhausted, setLocalExhausted] = useState(initialExhausted ?? false);
   const quotaExhausted = localExhausted;
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const benefits = [
     { text: "Use text, images, video, and audio together", tag: "UNLIMITED" },
@@ -1202,10 +1203,22 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
     }
   };
 
-  /* fly-out: popup shrinks and moves toward bottom-left (model selector area) then fades */
+  /* fly-out: popup shrinks and flies precisely into the model selector pill */
+  const getFlyOutTransform = () => {
+    if (!flyTarget || !modalRef.current) return "scale(0.05) translate(-300px, 300px)";
+    const modalRect = modalRef.current.getBoundingClientRect();
+    const modalCenterX = modalRect.left + modalRect.width / 2;
+    const modalCenterY = modalRect.top + modalRect.height / 2;
+    // When scale is 0.05, the visual center stays at (modalCenterX, modalCenterY)
+    // We need translate to move the scaled center to flyTarget
+    const dx = (flyTarget.x - modalCenterX) / 0.05;
+    const dy = (flyTarget.y - modalCenterY) / 0.05;
+    return `scale(0.05) translate(${dx}px, ${dy}px)`;
+  };
+
   const flyOutStyle: React.CSSProperties = flyOut
     ? {
-        transform: "scale(0.08) translate(-320px, 340px)",
+        transform: getFlyOutTransform(),
         opacity: 0,
         transition: "transform 0.65s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.55s ease 0.15s",
         pointerEvents: "none",
