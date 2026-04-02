@@ -875,31 +875,74 @@ const NotificationPanel = ({ notifications, onClose, style, animate }: {
 );
 
 /* ───── Top‑right header ───── */
-const TopRightHeader = ({ onBellClick, notifCount }: { onBellClick: () => void; notifCount: number }) => (
-  <div className="fixed right-0 top-0 z-50 flex items-center gap-4" style={{ padding: "24px 32px" }}>
-    <button className="flex items-center gap-2 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
-      <img src={iconGift} alt="gift" style={{ width: 18, height: 18 }} />
-      <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
-    </button>
-    <div className="flex items-center gap-1.5">
-      <img src={iconCredit} alt="credit" style={{ width: 16, height: 16 }} />
-      <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>0</span>
-    </div>
-    <button
-      onClick={onBellClick}
-      className="relative flex items-center justify-center rounded-full transition-all hover:bg-foreground/10"
-      style={{ width: 36, height: 36 }}
-    >
-      <img src={iconNotice} alt="notifications" style={{ width: 20, height: 20 }} />
-      {notifCount > 0 && (
-        <div className="absolute" style={{ top: 4, right: 4, width: 8, height: 8, borderRadius: 4, background: "#71F0F6" }} />
-      )}
-    </button>
-    <GlassButton style={{ width: 180, height: 40 }}>
-      Subscribe Now
-    </GlassButton>
-  </div>
-);
+const TopRightHeader = ({ onBellClick, notifCount }: { onBellClick: () => void; notifCount: number }) => {
+  const navigate = useNavigate();
+  const [showCreditPanel, setShowCreditPanel] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const credits = 427;
+
+  return (
+    <>
+      <div className="fixed right-0 top-0 z-50 flex items-center gap-4" style={{ padding: "24px 32px" }}>
+        {/* Free Credit */}
+        <button className="flex items-center gap-2 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
+          <img src={iconGift} alt="gift" style={{ width: 18, height: 18 }} />
+          <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
+        </button>
+
+        {/* Credits with dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowCreditPanel(!showCreditPanel)}
+            className="flex items-center gap-1.5 transition-all hover:opacity-80"
+          >
+            <img src={iconCredit} alt="credit" style={{ width: 16, height: 16 }} />
+            <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>{credits}</span>
+            {showCreditPanel
+              ? <ChevronUp size={14} style={{ color: "#71F0F6" }} />
+              : <ChevronDown size={14} style={{ color: "#71F0F6" }} />}
+          </button>
+          {showCreditPanel && (
+            <CreditPanel
+              credits={credits}
+              onBuyCredits={() => { setShowCreditPanel(false); setShowBuyModal(true); }}
+              onClose={() => setShowCreditPanel(false)}
+            />
+          )}
+        </div>
+
+        {/* Bell */}
+        <button
+          onClick={onBellClick}
+          className="relative flex items-center justify-center rounded-full transition-all hover:bg-foreground/10"
+          style={{ width: 36, height: 36 }}
+        >
+          <img src={iconNotice} alt="notifications" style={{ width: 20, height: 20 }} />
+          {notifCount > 0 && (
+            <div className="absolute" style={{ top: 4, right: 4, width: 8, height: 8, borderRadius: 4, background: "#71F0F6" }} />
+          )}
+        </button>
+
+        {/* More */}
+        <button className="flex items-center justify-center rounded-full transition-all hover:bg-foreground/10" style={{ width: 36, height: 36 }}>
+          <img src={iconMore} alt="more" style={{ width: 20, height: 20 }} />
+        </button>
+
+        {/* Subscribe Now */}
+        <GlassButton onClick={() => navigate("/subscribe")} style={{ width: 180, height: 40 }}>
+          Subscribe Now
+        </GlassButton>
+
+        {/* Profile */}
+        <button className="flex items-center justify-center rounded-full transition-all hover:bg-foreground/10 overflow-hidden" style={{ width: 36, height: 36, border: "2px solid rgba(255,255,255,0.15)" }}>
+          <img src={iconProfile} alt="profile" style={{ width: 20, height: 20 }} />
+        </button>
+      </div>
+
+      {showBuyModal && <BuyCreditsModal onClose={() => setShowBuyModal(false)} />}
+    </>
+  );
+};
 
 /* ───── For‑You showcase – full-width, equal gap, manual nav, scale animation ───── */
 const ForYouShowcase = () => {
