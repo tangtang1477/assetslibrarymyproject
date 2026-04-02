@@ -696,6 +696,7 @@ const Home = () => {
           onClose={() => setShowAnnouncement(false)}
           onTrySurprise={handleTrySurprise}
           quotaExhausted={quotaExhausted}
+          flyOut={popupFlyOut}
         />
       )}
     </div>
