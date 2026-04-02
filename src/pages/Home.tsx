@@ -1175,10 +1175,11 @@ GlassButton.displayName = "GlassButton";
 const MakePill = ({ ctaText = "Make", onClick }: { ctaText?: string; onClick?: () => void }) => (
   <button
     onClick={onClick}
-    className="glass-btn-v2 ml-auto flex h-[29px] items-center justify-center px-[10px] focus-visible:outline-none"
+    className="glass-btn-v2 ml-auto flex items-center justify-center focus-visible:outline-none"
     style={{
       borderRadius: 20.45,
       color: "white",
+      padding: "8px 16px",
     }}
   >
     <span className="font-bold" style={{ fontFamily: "Arial, sans-serif", fontSize: 10.9, lineHeight: "16px", position: "relative", zIndex: 2 }}>
