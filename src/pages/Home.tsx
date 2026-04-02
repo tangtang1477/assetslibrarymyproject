@@ -1209,11 +1209,9 @@ const AnnouncementModal = ({ onClose, onTrySurprise, quotaExhausted: initialExha
     const modalRect = modalRef.current.getBoundingClientRect();
     const modalCenterX = modalRect.left + modalRect.width / 2;
     const modalCenterY = modalRect.top + modalRect.height / 2;
-    // When scale is 0.05, the visual center stays at (modalCenterX, modalCenterY)
-    // We need translate to move the scaled center to flyTarget
-    const dx = (flyTarget.x - modalCenterX) / 0.05;
-    const dy = (flyTarget.y - modalCenterY) / 0.05;
-    return `scale(0.05) translate(${dx}px, ${dy}px)`;
+    const dx = flyTarget.x - modalCenterX;
+    const dy = flyTarget.y - modalCenterY;
+    return `translate(${dx}px, ${dy}px) scale(0.05)`;
   };
 
   const flyOutStyle: React.CSSProperties = flyOut
