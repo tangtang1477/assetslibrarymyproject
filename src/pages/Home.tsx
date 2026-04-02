@@ -386,9 +386,11 @@ const Home = () => {
             {/* Input box */}
             <div className="mt-6 flex w-full justify-center">
               <div
-                className="relative w-[990px] rounded-[25px]"
+                className="relative w-[990px] rounded-[25px] hide-scrollbar"
                 style={{
                   minHeight: 159,
+                  maxHeight: 800,
+                  overflowY: "auto",
                   background: "hsl(var(--background) / 0.05)",
                   boxShadow:
                     "inset 0px 0px 7.3px hsl(var(--foreground) / 0.25), inset 0px 7.3px 14.6px hsl(var(--foreground) / 0.15), inset 0px 0.4px 0.49px hsl(var(--foreground) / 0.2), inset 0px 0px 0.9px hsl(var(--foreground) / 0.12)",
