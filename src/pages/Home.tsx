@@ -824,9 +824,18 @@ const FAQ_ITEMS = [
   "Can I extend or edit generated videos?",
 ];
 
-const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
+const HELP_COLLECTIONS = [
+  { title: "Getting Started", desc: "Learn the basics of MovieFlow", articles: 6 },
+  { title: "Subscription, Refund and Payment", desc: "Billing and account management", articles: 8 },
+  { title: "Topview Popular Tools", desc: "Explore our most-used features", articles: 12 },
+  { title: "Editing Your Video", desc: "Tips for post-production", articles: 9 },
+  { title: "Basic Trouble Shooting Guide", desc: "Common issues and fixes", articles: 5 },
+];
+
+const NotificationDropdown = ({ onClose, notifications }: { onClose: () => void; notifications: { id: number; text: string; time: string }[] }) => {
   const [activeTab, setActiveTab] = useState<"home" | "messages" | "help">("home");
   const [searchQuery, setSearchQuery] = useState("");
+  const [helpSearch, setHelpSearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -849,7 +858,7 @@ const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
     <div
       ref={dropdownRef}
       style={{
-        position: "absolute", top: "calc(100% + 8px)", right: 0, width: 370, zIndex: 999,
+        position: "fixed", top: 80, right: 32, width: 370, height: 520, zIndex: 999,
         background: "rgba(24, 26, 30, 0.98)", borderRadius: 16,
         border: "1px solid rgba(255,255,255,0.08)",
         boxShadow: "0 16px 64px rgba(0,0,0,0.6)",
@@ -857,11 +866,10 @@ const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
         overflow: "hidden",
         animation: "notifDropIn 0.2s ease-out",
         display: "flex", flexDirection: "column",
-        maxHeight: 520,
       }}
     >
       {/* ── Header ── */}
-      <div className="flex items-center justify-between" style={{ padding: "14px 18px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="flex items-center justify-between flex-shrink-0" style={{ padding: "14px 18px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex items-center gap-2">
           <div style={{
             width: 28, height: 28, borderRadius: 8,
@@ -979,44 +987,137 @@ const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
         )}
 
         {activeTab === "messages" && (
-          <div className="flex flex-col items-center justify-center" style={{ padding: "56px 20px" }}>
-            <div style={{
-              width: 56, height: 56, borderRadius: 16,
-              background: "rgba(113,240,246,0.06)",
-              display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16,
-            }}>
-              <MessageSquare size={24} style={{ color: "rgba(113,240,246,0.35)" }} />
+          <div className="flex flex-col" style={{ height: "100%" }}>
+            {notifications.length > 0 ? (
+              <div style={{ flex: 1, padding: "8px 0" }}>
+                {notifications.map(n => (
+                  <div
+                    key={n.id}
+                    className="flex items-start gap-3 transition-all"
+                    style={{ padding: "12px 18px", cursor: "pointer" }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                      background: "rgba(113,240,246,0.08)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                    }}>
+                      <MessageSquare size={14} style={{ color: "#71F0F6" }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.85)", margin: 0, lineHeight: "18px" }}>
+                        {n.text}
+                      </p>
+                      <p style={{ fontFamily: "Arial, sans-serif", fontSize: 11, color: "rgba(255,255,255,0.3)", margin: "4px 0 0" }}>
+                        {n.time}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center" style={{ flex: 1, padding: "56px 20px" }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: 16,
+                  background: "rgba(113,240,246,0.06)",
+                  display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16,
+                }}>
+                  <MessageSquare size={24} style={{ color: "rgba(113,240,246,0.35)" }} />
+                </div>
+                <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.5)", margin: 0, marginBottom: 4 }}>
+                  No messages yet
+                </p>
+                <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0, textAlign: "center" }}>
+                  Messages from the system will appear here
+                </p>
+              </div>
+            )}
+            {/* Bottom send message button */}
+            <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 }}>
+              <button
+                className="w-full flex items-center justify-center gap-2 transition-all"
+                style={{
+                  height: 40, borderRadius: 10,
+                  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.12)")}
+                onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
+                onMouseDown={e => (e.currentTarget.style.transform = "scale(0.97)")}
+                onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
+              >
+                <Send size={14} style={{ color: "#71F0F6" }} />
+                <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>
+                  Send us a message
+                </span>
+              </button>
             </div>
-            <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.5)", margin: 0, marginBottom: 4 }}>
-              No messages yet
-            </p>
-            <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0, textAlign: "center" }}>
-              Messages from the team will appear here
-            </p>
           </div>
         )}
 
         {activeTab === "help" && (
-          <div className="flex flex-col items-center justify-center" style={{ padding: "56px 20px" }}>
-            <div style={{
-              width: 56, height: 56, borderRadius: 16,
-              background: "rgba(113,240,246,0.06)",
-              display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16,
-            }}>
-              <HelpCircle size={24} style={{ color: "rgba(113,240,246,0.35)" }} />
+          <div>
+            {/* Search */}
+            <div style={{ padding: "12px 16px" }}>
+              <div className="flex items-center" style={{
+                background: "rgba(255,255,255,0.05)", borderRadius: 10,
+                border: "1px solid rgba(255,255,255,0.08)", padding: "0 12px", height: 40,
+              }}>
+                <Search size={15} style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }} />
+                <input
+                  value={helpSearch}
+                  onChange={e => setHelpSearch(e.target.value)}
+                  placeholder="Search for help"
+                  style={{
+                    flex: 1, background: "transparent", border: "none", outline: "none",
+                    fontFamily: "Arial, sans-serif", fontSize: 13, color: "#fff",
+                    padding: "0 10px", height: "100%",
+                  }}
+                />
+              </div>
             </div>
-            <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.5)", margin: 0, marginBottom: 4 }}>
-              Help Center
-            </p>
-            <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0, textAlign: "center" }}>
-              Browse articles and guides to get started
-            </p>
+
+            {/* Collections header */}
+            <div style={{ padding: "4px 18px 8px" }}>
+              <span style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", fontWeight: 600 }}>
+                {HELP_COLLECTIONS.filter(c => !helpSearch || c.title.toLowerCase().includes(helpSearch.toLowerCase())).length} collections
+              </span>
+            </div>
+
+            {/* Collection list */}
+            <div style={{ padding: "0 8px 12px" }}>
+              {HELP_COLLECTIONS.filter(c => !helpSearch || c.title.toLowerCase().includes(helpSearch.toLowerCase())).map((col, i) => (
+                <button
+                  key={i}
+                  className="w-full flex items-center justify-between transition-all"
+                  style={{
+                    padding: "12px 12px", borderRadius: 10, background: "transparent",
+                    border: "none", cursor: "pointer", textAlign: "left",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  onMouseDown={e => (e.currentTarget.style.transform = "scale(0.97)")}
+                  onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontFamily: "Arial, sans-serif", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.85)", margin: 0, lineHeight: "18px" }}>
+                      {col.title}
+                    </p>
+                    <p style={{ fontFamily: "Arial, sans-serif", fontSize: 11, color: "rgba(255,255,255,0.35)", margin: "3px 0 0" }}>
+                      {col.articles} articles
+                    </p>
+                  </div>
+                  <ChevronRight size={14} style={{ color: "rgba(255,255,255,0.2)", flexShrink: 0 }} />
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
       {/* ── Bottom Tab Bar ── */}
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "6px 0 8px", display: "flex" }}>
+      <div className="flex-shrink-0" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "6px 0 8px", display: "flex" }}>
         {tabs.map(t => {
           const isActive = activeTab === t.key;
           const Icon = t.icon;
