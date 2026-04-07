@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X, Check, Sparkles, Film, Zap, Plus, Bell } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X, Check, Sparkles, Film, Zap, Plus, Bell, Home as HomeIcon, MessageSquare, HelpCircle, Search, Send } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import bannerBg from "@/assets/banner-bg.jpg";
 import project1 from "@/assets/project-1.jpg";
