@@ -780,12 +780,26 @@ const Home = () => {
 
       {/* Notification toast — slides in from right */}
       {showNotification && notifications.length > 0 && (
-        <NotificationPanel
-          notifications={[notifications[0]]}
-          onClose={() => setShowNotification(false)}
-          style={{ position: "fixed", top: 80, right: 32, zIndex: 300 }}
-          animate
-        />
+        <div
+          style={{
+            position: "fixed", top: 80, right: 32, zIndex: 300, width: 320,
+            background: "rgba(28,30,34,0.98)", borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 12px 48px rgba(0,0,0,0.5)",
+            padding: "14px 16px",
+            animation: "slideInRight 0.3s ease-out",
+          }}
+        >
+          <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.9)", fontFamily: "Arial, sans-serif" }}>New Notification</span>
+            <button onClick={() => setShowNotification(false)} className="transition-opacity hover:opacity-100" style={{ opacity: 0.5 }}>
+              <X size={14} style={{ color: "#fff" }} />
+            </button>
+          </div>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", margin: 0, fontFamily: "Arial, sans-serif" }}>
+            {notifications[0].text}
+          </p>
+        </div>
       )}
 
       {/* Announcement Modal */}
