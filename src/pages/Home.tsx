@@ -816,9 +816,17 @@ const Home = () => {
   );
 };
 
-/* ───── Notification Dropdown ───── */
+/* ───── Notification Dropdown (Help Center Panel) ───── */
+const FAQ_ITEMS = [
+  "How do I create my first AI video?",
+  "What are credits and how do they work?",
+  "How to use image references in prompts?",
+  "Can I extend or edit generated videos?",
+];
+
 const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
-  const [tab, setTab] = useState<"all" | "unread">("all");
+  const [activeTab, setActiveTab] = useState<"home" | "messages" | "help">("home");
+  const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -831,128 +839,217 @@ const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
     return () => document.removeEventListener("mousedown", handler);
   }, [onClose]);
 
-  const notifications: { id: number; title: string; desc: string; time: string; read: boolean }[] = [];
-
-  const filtered = tab === "unread" ? notifications.filter(n => !n.read) : notifications;
+  const tabs = [
+    { key: "home" as const, label: "Home", icon: HomeIcon },
+    { key: "messages" as const, label: "Messages", icon: MessageSquare },
+    { key: "help" as const, label: "Help", icon: HelpCircle },
+  ];
 
   return (
     <div
       ref={dropdownRef}
       style={{
-        position: "absolute", top: "calc(100% + 8px)", right: 0, width: 360, zIndex: 999,
+        position: "absolute", top: "calc(100% + 8px)", right: 0, width: 370, zIndex: 999,
         background: "rgba(24, 26, 30, 0.98)", borderRadius: 16,
         border: "1px solid rgba(255,255,255,0.08)",
         boxShadow: "0 16px 64px rgba(0,0,0,0.6)",
         backdropFilter: "blur(24px)",
         overflow: "hidden",
         animation: "notifDropIn 0.2s ease-out",
+        display: "flex", flexDirection: "column",
+        maxHeight: 520,
       }}
     >
-      {/* Header */}
-      <div style={{ padding: "16px 20px 0" }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 14 }}>
-          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, fontWeight: 700, color: "#fff" }}>
-            Notifications
-          </span>
-          <button
-            onClick={onClose}
-            className="flex items-center justify-center rounded-full transition-colors"
-            style={{ width: 28, height: 28, background: "rgba(255,255,255,0.06)" }}
-            onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.12)")}
-            onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
-          >
-            <X size={14} style={{ color: "rgba(255,255,255,0.6)" }} />
-          </button>
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between" style={{ padding: "14px 18px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex items-center gap-2">
+          <div style={{
+            width: 28, height: 28, borderRadius: 8,
+            background: "linear-gradient(135deg, #71F0F6, #3B82F6)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Sparkles size={14} color="#fff" />
+          </div>
+          <span style={{ fontFamily: "Arial, sans-serif", fontSize: 14, fontWeight: 700, color: "#fff" }}>MovieFlow</span>
         </div>
-        {/* Tabs */}
-        <div className="flex gap-1" style={{ marginBottom: 0 }}>
-          {(["all", "unread"] as const).map(t => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className="transition-colors"
-              style={{
-                padding: "6px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600,
-                fontFamily: "Arial, sans-serif",
-                background: tab === t ? "rgba(113,240,246,0.12)" : "transparent",
-                color: tab === t ? "#71F0F6" : "rgba(255,255,255,0.45)",
-                border: "none", cursor: "pointer",
-              }}
-              onMouseEnter={e => { if (tab !== t) e.currentTarget.style.background = "rgba(255,255,255,0.06)"; }}
-              onMouseLeave={e => { if (tab !== t) e.currentTarget.style.background = "transparent"; }}
-            >
-              {t === "all" ? "All" : "Unread"}
-            </button>
-          ))}
-        </div>
+        <button
+          onClick={onClose}
+          className="flex items-center justify-center rounded-full transition-all"
+          style={{ width: 28, height: 28, background: "rgba(255,255,255,0.06)", border: "none", cursor: "pointer" }}
+          onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.14)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
+          onMouseDown={e => (e.currentTarget.style.transform = "scale(0.92)")}
+          onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
+        >
+          <X size={14} style={{ color: "rgba(255,255,255,0.6)" }} />
+        </button>
       </div>
 
-      {/* Divider */}
-      <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "0" }} />
+      {/* ── Content ── */}
+      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }} className="hide-scrollbar">
+        {activeTab === "home" && (
+          <div>
+            {/* Gradient hero */}
+            <div style={{
+              background: "linear-gradient(135deg, rgba(113,240,246,0.15) 0%, rgba(59,130,246,0.12) 100%)",
+              padding: "28px 20px 22px",
+            }}>
+              <p style={{ fontFamily: "Arial, sans-serif", fontSize: 18, fontWeight: 700, color: "#fff", margin: 0, lineHeight: "24px" }}>
+                Hi Dear 👋
+              </p>
+              <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14, color: "rgba(255,255,255,0.6)", margin: "6px 0 0", lineHeight: "20px" }}>
+                How can we help?
+              </p>
+            </div>
 
-      {/* Content */}
-      <div style={{ padding: "8px 0", maxHeight: 340, overflowY: "auto" }}>
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center" style={{ padding: "48px 20px" }}>
+            {/* Send message card */}
+            <div style={{ padding: "12px 16px 0" }}>
+              <button
+                className="w-full flex items-center justify-between transition-all"
+                style={{
+                  padding: "14px 16px", borderRadius: 12,
+                  background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.09)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+                onMouseDown={e => { e.currentTarget.style.transform = "scale(0.97)"; }}
+                onMouseUp={e => { e.currentTarget.style.transform = "scale(1)"; }}
+              >
+                <div className="flex items-center gap-3">
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    background: "rgba(113,240,246,0.1)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <Send size={16} style={{ color: "#71F0F6" }} />
+                  </div>
+                  <div className="text-left">
+                    <p style={{ fontFamily: "Arial, sans-serif", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.9)", margin: 0 }}>Send us a message</p>
+                    <p style={{ fontFamily: "Arial, sans-serif", fontSize: 11, color: "rgba(255,255,255,0.35)", margin: "2px 0 0" }}>We typically reply in a few hours</p>
+                  </div>
+                </div>
+                <ChevronRight size={16} style={{ color: "rgba(255,255,255,0.3)" }} />
+              </button>
+            </div>
+
+            {/* Search */}
+            <div style={{ padding: "12px 16px" }}>
+              <div className="flex items-center" style={{
+                background: "rgba(255,255,255,0.05)", borderRadius: 10,
+                border: "1px solid rgba(255,255,255,0.08)", padding: "0 12px", height: 40,
+              }}>
+                <Search size={15} style={{ color: "rgba(255,255,255,0.3)", flexShrink: 0 }} />
+                <input
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search for help"
+                  style={{
+                    flex: 1, background: "transparent", border: "none", outline: "none",
+                    fontFamily: "Arial, sans-serif", fontSize: 13, color: "#fff",
+                    padding: "0 10px", height: "100%",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* FAQ */}
+            <div style={{ padding: "0 8px 12px" }}>
+              {FAQ_ITEMS.filter(q => !searchQuery || q.toLowerCase().includes(searchQuery.toLowerCase())).map((q, i) => (
+                <button
+                  key={i}
+                  className="w-full flex items-center justify-between transition-all"
+                  style={{
+                    padding: "11px 12px", borderRadius: 10, background: "transparent",
+                    border: "none", cursor: "pointer", textAlign: "left",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  onMouseDown={e => (e.currentTarget.style.transform = "scale(0.97)")}
+                  onMouseUp={e => (e.currentTarget.style.transform = "scale(1)")}
+                >
+                  <span style={{ fontFamily: "Arial, sans-serif", fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: "18px", paddingRight: 8 }}>
+                    {q}
+                  </span>
+                  <ChevronRight size={14} style={{ color: "rgba(255,255,255,0.2)", flexShrink: 0 }} />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "messages" && (
+          <div className="flex flex-col items-center justify-center" style={{ padding: "56px 20px" }}>
             <div style={{
               width: 56, height: 56, borderRadius: 16,
-              background: "rgba(255,255,255,0.04)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              marginBottom: 16,
+              background: "rgba(113,240,246,0.06)",
+              display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16,
             }}>
-              <Bell size={24} style={{ color: "rgba(255,255,255,0.2)" }} />
+              <MessageSquare size={24} style={{ color: "rgba(113,240,246,0.35)" }} />
             </div>
             <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.5)", margin: 0, marginBottom: 4 }}>
-              No notifications yet
+              No messages yet
             </p>
-            <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0 }}>
-              We'll notify you when something arrives
+            <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0, textAlign: "center" }}>
+              Messages from the team will appear here
             </p>
           </div>
-        ) : (
-          filtered.map(notif => (
+        )}
+
+        {activeTab === "help" && (
+          <div className="flex flex-col items-center justify-center" style={{ padding: "56px 20px" }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: 16,
+              background: "rgba(113,240,246,0.06)",
+              display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16,
+            }}>
+              <HelpCircle size={24} style={{ color: "rgba(113,240,246,0.35)" }} />
+            </div>
+            <p style={{ fontFamily: "Arial, sans-serif", fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.5)", margin: 0, marginBottom: 4 }}>
+              Help Center
+            </p>
+            <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0, textAlign: "center" }}>
+              Browse articles and guides to get started
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* ── Bottom Tab Bar ── */}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "6px 0 8px", display: "flex" }}>
+        {tabs.map(t => {
+          const isActive = activeTab === t.key;
+          const Icon = t.icon;
+          return (
             <button
-              key={notif.id}
-              className="w-full text-left transition-colors"
+              key={t.key}
+              onClick={() => setActiveTab(t.key)}
+              className="flex-1 flex flex-col items-center gap-1 transition-all"
               style={{
-                padding: "12px 20px", display: "flex", gap: 12, alignItems: "flex-start",
                 background: "transparent", border: "none", cursor: "pointer",
+                padding: "6px 0 2px", position: "relative",
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-              onMouseDown={e => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
-              onMouseUp={e => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.opacity = "0.8"; } }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+              onMouseDown={e => { e.currentTarget.style.transform = "scale(0.93)"; }}
+              onMouseUp={e => { e.currentTarget.style.transform = "scale(1)"; }}
             >
-              <div style={{
-                width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-                background: notif.read ? "rgba(255,255,255,0.04)" : "rgba(113,240,246,0.1)",
-                display: "flex", alignItems: "center", justifyContent: "center",
+              <Icon size={20} style={{ color: isActive ? "#71F0F6" : "rgba(255,255,255,0.4)" }} />
+              <span style={{
+                fontFamily: "Arial, sans-serif", fontSize: 10, fontWeight: 600,
+                color: isActive ? "#71F0F6" : "rgba(255,255,255,0.4)",
               }}>
-                <Sparkles size={16} style={{ color: notif.read ? "rgba(255,255,255,0.3)" : "#71F0F6" }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p style={{
-                  fontFamily: "Arial, sans-serif", fontSize: 13, fontWeight: notif.read ? 400 : 600,
-                  lineHeight: "18px", color: notif.read ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.9)",
-                  margin: 0,
-                }}>
-                  {notif.title}
-                </p>
-                {notif.desc && (
-                  <p style={{ fontFamily: "Arial, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.35)", margin: "4px 0 0", lineHeight: "16px" }}>
-                    {notif.desc}
-                  </p>
-                )}
-                <span style={{ fontFamily: "Arial, sans-serif", fontSize: 11, color: "rgba(255,255,255,0.2)", marginTop: 4, display: "block" }}>
-                  {notif.time}
-                </span>
-              </div>
-              {!notif.read && (
-                <div style={{ width: 8, height: 8, borderRadius: 4, background: "#71F0F6", flexShrink: 0, marginTop: 6 }} />
+                {t.label}
+              </span>
+              {isActive && (
+                <div style={{
+                  position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)",
+                  width: 20, height: 2, borderRadius: 1, background: "#71F0F6",
+                }} />
               )}
             </button>
-          ))
-        )}
+          );
+        })}
       </div>
     </div>
   );
