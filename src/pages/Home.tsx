@@ -421,6 +421,7 @@ const Home = () => {
 
           <TopRightHeader
             notifCount={notifications.length}
+            notifications={notifications}
           />
 
           <div className="relative z-10 flex flex-col items-center" style={{ paddingTop: 64 }}>
