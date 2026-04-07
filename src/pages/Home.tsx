@@ -420,36 +420,8 @@ const Home = () => {
           />
 
           <TopRightHeader
-            onBellClick={() => setShowNotifPanel(!showNotifPanel)}
             notifCount={notifications.length}
           />
-
-          {/* Notification panel from bell */}
-          {showNotifPanel && (
-            notifications.length > 0 ? (
-              <NotificationPanel
-                notifications={notifications}
-                onClose={() => setShowNotifPanel(false)}
-                style={{ position: "fixed", top: 64, right: 32, zIndex: 200 }}
-              />
-            ) : (
-              <div
-                style={{
-                  position: "fixed", top: 64, right: 32, zIndex: 200,
-                  background: "rgba(30,30,30,0.95)", borderRadius: 12,
-                  padding: "24px 32px", minWidth: 220,
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  backdropFilter: "blur(16px)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
-                }}
-                onClick={() => setShowNotifPanel(false)}
-              >
-                <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 14, textAlign: "center", margin: 0 }}>
-                  No new notifications
-                </p>
-              </div>
-            )
-          )}
 
           <div className="relative z-10 flex flex-col items-center" style={{ paddingTop: 64 }}>
             {/* Title */}
