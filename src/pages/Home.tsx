@@ -194,7 +194,7 @@ const Home = () => {
   const [quotaExhausted, setQuotaExhausted] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notifications, setNotifications] = useState<{ id: number; text: string; time: string }[]>([]);
-  const [showNotifPanel, setShowNotifPanel] = useState(false);
+  
   const editorRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const modelPillRef = useRef<HTMLButtonElement>(null);
