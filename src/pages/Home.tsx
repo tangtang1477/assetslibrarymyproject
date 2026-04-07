@@ -1157,7 +1157,7 @@ const NotificationDropdown = ({ onClose, notifications }: { onClose: () => void;
 };
 
 /* ───── Top‑right header ───── */
-const TopRightHeader = ({ notifCount }: { notifCount: number }) => {
+const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; notifications: { id: number; text: string; time: string }[] }) => {
   const navigate = useNavigate();
   const [showCreditPanel, setShowCreditPanel] = useState(false);
   const [showBuyModal, setShowBuyModal] = useState(false);
