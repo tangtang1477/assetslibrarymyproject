@@ -1207,7 +1207,7 @@ const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; not
             )}
           </button>
           {showNotifDropdown && (
-            <NotificationDropdown onClose={() => setShowNotifDropdown(false)} />
+            <NotificationDropdown onClose={() => setShowNotifDropdown(false)} notifications={notifications} />
           )}
         </div>
 
