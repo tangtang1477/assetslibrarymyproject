@@ -959,10 +959,11 @@ const NotificationDropdown = ({ onClose }: { onClose: () => void }) => {
 };
 
 /* ───── Top‑right header ───── */
-const TopRightHeader = ({ onBellClick, notifCount }: { onBellClick: () => void; notifCount: number }) => {
+const TopRightHeader = ({ notifCount }: { notifCount: number }) => {
   const navigate = useNavigate();
   const [showCreditPanel, setShowCreditPanel] = useState(false);
   const [showBuyModal, setShowBuyModal] = useState(false);
+  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const credits = 427;
 
   return (
@@ -995,17 +996,22 @@ const TopRightHeader = ({ onBellClick, notifCount }: { onBellClick: () => void; 
           )}
         </div>
 
-        {/* Bell */}
-        <button
-          onClick={onBellClick}
-          className="relative flex items-center justify-center rounded-full transition-all hover:bg-foreground/10"
-          style={{ width: 36, height: 36 }}
-        >
-          <img src={iconNotice} alt="notifications" style={{ width: 20, height: 20 }} />
-          {notifCount > 0 && (
-            <div className="absolute" style={{ top: 4, right: 4, width: 8, height: 8, borderRadius: 4, background: "#71F0F6" }} />
+        {/* Bell with notification dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowNotifDropdown(!showNotifDropdown)}
+            className="relative flex items-center justify-center rounded-full transition-all hover:bg-foreground/10"
+            style={{ width: 36, height: 36 }}
+          >
+            <img src={iconNotice} alt="notifications" style={{ width: 20, height: 20 }} />
+            {notifCount > 0 && (
+              <div className="absolute" style={{ top: 4, right: 4, width: 8, height: 8, borderRadius: 4, background: "#71F0F6" }} />
+            )}
+          </button>
+          {showNotifDropdown && (
+            <NotificationDropdown onClose={() => setShowNotifDropdown(false)} />
           )}
-        </button>
+        </div>
 
         {/* More */}
         <button className="flex items-center justify-center rounded-full transition-all hover:bg-foreground/10" style={{ width: 36, height: 36 }}>
