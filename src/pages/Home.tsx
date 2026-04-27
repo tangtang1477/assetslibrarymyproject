@@ -1167,21 +1167,9 @@ const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; not
 
   return (
     <>
-      <div
-        className="fixed right-0 top-0 z-50 flex items-center gap-4"
-        style={{
-          margin: "16px 24px",
-          padding: "8px 12px",
-          borderRadius: 999,
-          background: "rgba(0, 0, 0, 0.38)",
-          backdropFilter: "blur(16px) saturate(160%)",
-          WebkitBackdropFilter: "blur(16px) saturate(160%)",
-          border: "1px solid rgba(255, 255, 255, 0.08)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
-        }}
-      >
+      <div className="fixed right-0 top-0 z-50 flex items-center gap-4" style={{ padding: "24px 32px" }}>
         {/* Free Credit */}
-        <button className="flex items-center gap-2 rounded-full transition-colors hover:bg-white/10" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
+        <button className="flex items-center gap-2 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
           <img src={iconGift} alt="gift" style={{ width: 18, height: 18 }} />
           <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
         </button>
