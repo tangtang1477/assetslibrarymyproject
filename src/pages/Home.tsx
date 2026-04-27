@@ -1642,10 +1642,11 @@ const GlassButton = forwardRef<
       letterSpacing: "0.01em",
       color: "white",
       padding: "6px 18px",
+      textShadow: "0 1px 3px rgba(0,0,0,0.5)",
       ...style,
     }}
   >
-    <span style={{ position: "relative", zIndex: 2 }}>{children}</span>
+    <span style={{ position: "relative", zIndex: 2, textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}>{children}</span>
   </button>
 ));
 GlassButton.displayName = "GlassButton";
