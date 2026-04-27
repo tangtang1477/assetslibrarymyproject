@@ -1167,39 +1167,11 @@ const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; not
 
   return (
     <>
-      {/* Top-right header with enhanced backdrop for visibility against white videos */}
-      <div 
-        className="fixed right-0 top-0 z-50 flex items-center gap-4" 
-        style={{ 
-          padding: "24px 32px",
-          background: "rgba(0,0,0,0.25)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          borderRadius: "0 0 0 24px",
-          boxShadow: "0 4px 30px rgba(0,0,0,0.15)"
-        }}
-      >
+      <div className="fixed right-0 top-0 z-50 flex items-center gap-4" style={{ padding: "24px 32px" }}>
         {/* Free Credit */}
-        <button 
-          className="flex items-center gap-2 rounded-full transition-all hover:bg-foreground/15" 
-          style={{ 
-            background: "rgba(255,255,255,0.12)", 
-            padding: "8px 16px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
-          }}
-        >
-          <img src={iconGift} alt="gift" style={{ width: 18, height: 18, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }} />
-          <span 
-            className="text-foreground" 
-            style={{ 
-              fontFamily: "Arial, sans-serif", 
-              fontSize: 16, 
-              lineHeight: "24px",
-              textShadow: "0 1px 2px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.4)"
-            }}
-          >
-            Free Credit
-          </span>
+        <button className="flex items-center gap-2 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
+          <img src={iconGift} alt="gift" style={{ width: 18, height: 18 }} />
+          <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
         </button>
 
         {/* Credits with dropdown */}
@@ -1207,23 +1179,12 @@ const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; not
           <button
             onClick={() => setShowCreditPanel(!showCreditPanel)}
             className="flex items-center gap-1.5 transition-all hover:opacity-80"
-            style={{ 
-              textShadow: "0 1px 2px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.4)"
-            }}
           >
-            <img src={iconCredit} alt="credit" style={{ width: 16, height: 16, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }} />
-            <span style={{ 
-              fontFamily: "Arial, sans-serif", 
-              fontSize: 16, 
-              lineHeight: "24px", 
-              color: "#71F0F6",
-              textShadow: "0 1px 2px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.4)"
-            }}>
-              {credits}
-            </span>
+            <img src={iconCredit} alt="credit" style={{ width: 16, height: 16 }} />
+            <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>{credits}</span>
             {showCreditPanel
-              ? <ChevronUp size={14} style={{ color: "#71F0F6", filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }} />
-              : <ChevronDown size={14} style={{ color: "#71F0F6", filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }} />}
+              ? <ChevronUp size={14} style={{ color: "#71F0F6" }} />
+              : <ChevronDown size={14} style={{ color: "#71F0F6" }} />}
           </button>
           {showCreditPanel && (
             <CreditPanel
@@ -1238,17 +1199,12 @@ const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; not
         <div className="relative">
           <button
             onClick={() => setShowNotifDropdown(!showNotifDropdown)}
-            className="relative flex items-center justify-center rounded-full transition-all"
-            style={{ 
-              width: 36, 
-              height: 36,
-              background: "rgba(255,255,255,0.08)",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
-            }}
+            className="relative flex items-center justify-center rounded-full transition-all hover:bg-foreground/10"
+            style={{ width: 36, height: 36 }}
           >
-            <img src={iconNotice} alt="notifications" style={{ width: 20, height: 20, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }} />
+            <img src={iconNotice} alt="notifications" style={{ width: 20, height: 20 }} />
             {notifCount > 0 && (
-              <div className="absolute" style={{ top: 4, right: 4, width: 8, height: 8, borderRadius: 4, background: "#71F0F6", boxShadow: "0 1px 3px rgba(0,0,0,0.4)" }} />
+              <div className="absolute" style={{ top: 4, right: 4, width: 8, height: 8, borderRadius: 4, background: "#71F0F6" }} />
             )}
           </button>
           {showNotifDropdown && (
@@ -1257,37 +1213,18 @@ const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; not
         </div>
 
         {/* More */}
-        <button 
-          className="flex items-center justify-center rounded-full transition-all" 
-          style={{ 
-            width: 36, 
-            height: 36,
-            background: "rgba(255,255,255,0.08)",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
-          }}
-        >
-          <img src={iconMore} alt="more" style={{ width: 20, height: 20, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }} />
+        <button className="flex items-center justify-center rounded-full transition-all hover:bg-foreground/10" style={{ width: 36, height: 36 }}>
+          <img src={iconMore} alt="more" style={{ width: 20, height: 20 }} />
         </button>
 
         {/* Subscribe Now */}
-        <div style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.3))" }}>
-          <GlassButton onClick={() => navigate("/subscribe")} style={{ width: 180, height: 40 }}>
-            Subscribe Now
-          </GlassButton>
-        </div>
+        <GlassButton onClick={() => navigate("/subscribe")} style={{ width: 180, height: 40 }}>
+          Subscribe Now
+        </GlassButton>
 
         {/* Profile */}
-        <button 
-          className="flex items-center justify-center rounded-full transition-all overflow-hidden" 
-          style={{ 
-            width: 36, 
-            height: 36, 
-            border: "2px solid rgba(255,255,255,0.25)",
-            background: "rgba(255,255,255,0.08)",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
-          }}
-        >
-          <img src={iconProfile} alt="profile" style={{ width: 20, height: 20, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }} />
+        <button className="flex items-center justify-center rounded-full transition-all hover:bg-foreground/10 overflow-hidden" style={{ width: 36, height: 36, border: "2px solid rgba(255,255,255,0.15)" }}>
+          <img src={iconProfile} alt="profile" style={{ width: 20, height: 20 }} />
         </button>
       </div>
 
