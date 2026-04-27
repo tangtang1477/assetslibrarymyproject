@@ -1167,11 +1167,30 @@ const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; not
 
   return (
     <>
-      <div className="fixed right-0 top-0 z-50 flex items-center gap-4" style={{ padding: "24px 32px" }}>
+      <div 
+        className="fixed right-0 top-0 z-50 flex items-center gap-4" 
+        style={{ 
+          padding: "24px 32px",
+          background: "rgba(0, 0, 0, 0.25)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderRadius: "0 0 0 24px",
+        }}
+      >
         {/* Free Credit */}
         <button className="flex items-center gap-2 rounded-full" style={{ background: "hsl(var(--foreground) / 0.08)", padding: "8px 16px" }}>
           <img src={iconGift} alt="gift" style={{ width: 18, height: 18 }} />
-          <span className="text-foreground" style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px" }}>Free Credit</span>
+          <span 
+            className="text-foreground" 
+            style={{ 
+              fontFamily: "Arial, sans-serif", 
+              fontSize: 16, 
+              lineHeight: "24px",
+              textShadow: "0 1px 2px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.5)",
+            }}
+          >
+            Free Credit
+          </span>
         </button>
 
         {/* Credits with dropdown */}
@@ -1181,10 +1200,20 @@ const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; not
             className="flex items-center gap-1.5 transition-all hover:opacity-80"
           >
             <img src={iconCredit} alt="credit" style={{ width: 16, height: 16 }} />
-            <span style={{ fontFamily: "Arial, sans-serif", fontSize: 16, lineHeight: "24px", color: "#71F0F6" }}>{credits}</span>
+            <span 
+              style={{ 
+                fontFamily: "Arial, sans-serif", 
+                fontSize: 16, 
+                lineHeight: "24px", 
+                color: "#71F0F6",
+                textShadow: "0 1px 2px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.5)",
+              }}
+            >
+              {credits}
+            </span>
             {showCreditPanel
-              ? <ChevronUp size={14} style={{ color: "#71F0F6" }} />
-              : <ChevronDown size={14} style={{ color: "#71F0F6" }} />}
+              ? <ChevronUp size={14} style={{ color: "#71F0F6", filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))" }} />
+              : <ChevronDown size={14} style={{ color: "#71F0F6", filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))" }} />}
           </button>
           {showCreditPanel && (
             <CreditPanel
@@ -1200,7 +1229,7 @@ const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; not
           <button
             onClick={() => setShowNotifDropdown(!showNotifDropdown)}
             className="relative flex items-center justify-center rounded-full transition-all hover:bg-foreground/10"
-            style={{ width: 36, height: 36 }}
+            style={{ width: 36, height: 36, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }}
           >
             <img src={iconNotice} alt="notifications" style={{ width: 20, height: 20 }} />
             {notifCount > 0 && (
@@ -1213,7 +1242,10 @@ const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; not
         </div>
 
         {/* More */}
-        <button className="flex items-center justify-center rounded-full transition-all hover:bg-foreground/10" style={{ width: 36, height: 36 }}>
+        <button 
+          className="flex items-center justify-center rounded-full transition-all hover:bg-foreground/10" 
+          style={{ width: 36, height: 36, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }}
+        >
           <img src={iconMore} alt="more" style={{ width: 20, height: 20 }} />
         </button>
 
@@ -1223,7 +1255,10 @@ const TopRightHeader = ({ notifCount, notifications }: { notifCount: number; not
         </GlassButton>
 
         {/* Profile */}
-        <button className="flex items-center justify-center rounded-full transition-all hover:bg-foreground/10 overflow-hidden" style={{ width: 36, height: 36, border: "2px solid rgba(255,255,255,0.15)" }}>
+        <button 
+          className="flex items-center justify-center rounded-full transition-all hover:bg-foreground/10 overflow-hidden" 
+          style={{ width: 36, height: 36, border: "2px solid rgba(255,255,255,0.15)", filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }}
+        >
           <img src={iconProfile} alt="profile" style={{ width: 20, height: 20 }} />
         </button>
       </div>
