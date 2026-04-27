@@ -384,11 +384,13 @@ const Home = () => {
       <div ref={scrollRef} className="flex-1 ml-[88px] overflow-y-auto hide-scrollbar">
         {/* ── Hero section with video banner behind input ── */}
         <div className="relative px-9 pt-6" style={{ minHeight: 800 }}>
-          {/* Video banner background */}
+          {/* White banner background for testing visibility */}
           <div
             className="absolute left-0 right-0 top-0 overflow-hidden"
-            style={{ height: 400, borderRadius: 0 }}
+            style={{ height: 400, borderRadius: 0, background: "#ffffff" }}
           >
+            {/* Video temporarily replaced with white background for visibility testing */}
+            {/*
             <video
               src="/banner-video.mp4"
               autoPlay
@@ -401,6 +403,7 @@ const Home = () => {
               className="absolute left-0 right-0 bottom-0 pointer-events-none"
               style={{ height: 160, background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.7) 60%, #000 100%)" }}
             />
+            */}
           </div>
 
           {/* Blue glow layers */}
